@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{X\PYGZus{}train\PYGZus{}small}\PYG{p}{,} \PYG{n}{X\PYGZus{}test\PYGZus{}small}\PYG{p}{,} \PYG{n}{Y\PYGZus{}train\PYGZus{}small}\PYG{p}{,} \PYG{n}{Y\PYGZus{}test\PYGZus{}small} \PYG{o}{=}
+\PYG{n}{train\PYGZus{}test\PYGZus{}split}\PYG{p}{(}\PYG{n}{X\PYGZus{}train}\PYG{p}{,} \PYG{n}{Y\PYGZus{}train}\PYG{p}{,} \PYG{n}{train\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mi}{20000}\PYG{p}{,} \PYG{n}{test\PYGZus{}size}\PYG{o}{=}\PYG{l+m+mi}{6000}\PYG{p}{,}
+\PYG{n}{random\PYGZus{}state}\PYG{o}{=}\PYG{l+m+mi}{42}\PYG{p}{,} \PYG{n}{stratify}\PYG{o}{=}\PYG{n}{Y\PYGZus{}train}\PYG{p}{)}
+\end{Verbatim}

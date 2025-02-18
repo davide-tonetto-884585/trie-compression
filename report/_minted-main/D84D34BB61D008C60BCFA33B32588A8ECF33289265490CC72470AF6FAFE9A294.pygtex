@@ -1,0 +1,17 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def} \PYG{n+nf}{fit}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{X}\PYG{p}{,} \PYG{n}{y}\PYG{p}{):}
+    \PYG{c+c1}{\PYGZsh{} Check that X and y have the correct shape}
+    \PYG{n}{X}\PYG{p}{,} \PYG{n}{y} \PYG{o}{=} \PYG{n}{check\PYGZus{}X\PYGZus{}y}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{y}\PYG{p}{)}
+    \PYG{n}{check\PYGZus{}classification\PYGZus{}targets}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Store the classes seen during fit}
+    \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{classes\PYGZus{}} \PYG{o}{=} \PYG{n}{unique\PYGZus{}labels}\PYG{p}{(}\PYG{n}{y}\PYG{p}{)}
+
+    \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X\PYGZus{}} \PYG{o}{=} \PYG{n}{X}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{()} \PYG{k}{if} \PYG{n+nb}{isinstance}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{)} \PYG{k}{else} \PYG{n}{X}
+    \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{y\PYGZus{}} \PYG{o}{=} \PYG{n}{y}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{()} \PYG{k}{if} \PYG{n+nb}{isinstance}\PYG{p}{(}\PYG{n}{y}\PYG{p}{,} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{)} \PYG{k}{else} \PYG{n}{y}
+
+    \PYG{c+c1}{\PYGZsh{} n features in}
+    \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{n\PYGZus{}features\PYGZus{}in\PYGZus{}} \PYG{o}{=} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{X\PYGZus{}}\PYG{o}{.}\PYG{n}{shape}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}
+
+    \PYG{k}{return} \PYG{n+nb+bp}{self}
+\end{Verbatim}

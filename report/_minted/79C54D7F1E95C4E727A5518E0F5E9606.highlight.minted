@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n}{X}\PYG{p}{,} \PYG{n}{y} \PYG{o}{=} \PYG{n}{fetch\PYGZus{}openml}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{mnist\PYGZus{}784}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{version}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{return\PYGZus{}X\PYGZus{}y}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,}
+                                            \PYG{n}{parser}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{auto}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\PYG{n}{y} \PYG{o}{=} \PYG{n}{y}\PYG{o}{.}\PYG{n}{astype}\PYG{p}{(}\PYG{n+nb}{int}\PYG{p}{)}
+\PYG{n}{X} \PYG{o}{=} \PYG{n}{X} \PYG{o}{/} \PYG{l+m+mi}{255}
+
+\PYG{c+c1}{\PYGZsh{} transform y to DataFrame with only one column}
+\PYG{n}{y} \PYG{o}{=} \PYG{n}{y}\PYG{o}{.}\PYG{n}{to\PYGZus{}frame}\PYG{p}{(}\PYG{p}{)}
+\end{MintedVerbatim}

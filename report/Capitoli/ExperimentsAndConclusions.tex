@@ -1,0 +1,81 @@
+\chapter{Experiments and Conclusions}
+
+The experiments have been run on a machine with an AMD Ryzen 9 5600Hs CPU with 24 GB of RAM. The results are shown in Table \ref{tab:experiments} and Table \ref{tab:experiments_2}. The source code for the experiments can be found in the \texttt{experiments.cpp} file.
+
+\section{Experiments}
+\subsection{Construction Performance of the XBWT}
+To evaluate the performance of the implemented algorithms, we conducted a series of experiments on randomly generated trees created using the Python library \texttt{networkx}. The trees were generated with sizes ranging from 100 to 900,000 nodes. For each tree, we executed the construction algorithms 10 times, measuring the average execution time for both the linear \emph{PathSort} (P.S.) algorithm and the naive \emph{UpwardStableSort} (N.S.) algorithm used for constructing the XBWT. This approach allowed us to compare their performance across different tree sizes and assess their scalability.
+
+
+The results are shown in Table \ref{tab:experiments}.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Nodes} & \textbf{Depth} & \textbf{P.S. Time (s)} & \textbf{N.S. Time (s)} \\
+        \hline
+        100 & 22 & 0.002 & 0.001 \\
+        500 & 45 & 0.004 & 0.002  \\
+        1000 & 74 & 0.006 & 0.003  \\
+        5000 & 175 & 0.028 & 0.015 \\
+        10000 & 288 & 0.056 & 0.053 \\
+        50000 & 486 & 0.31 & 0.35 \\
+        100000 & 754 & 0.69 & 1.25\\
+        500000 & 2246 & 4.7 & 16.46 \\
+        900000 & 2658 & 8.51 & 34.2 \\
+        \hline
+    \end{tabular}
+    \caption{Performance comparison between PathSort and Naive Sort algorithms.}
+    \label{tab:experiments}
+\end{table}
+
+\subsection{Space Analysis of the XBWT}
+To evaluate the space savings achieved through XBWT compression, we conducted experiments on the same set of randomly generated trees used for the construction performance tests. For each tree, we compared the memory usage (in bytes) of three representations: the plain tree, the uncompressed XBWT, and the compressed XBWT.
+
+The plain tree representation consists of the simple balanced parenthesis encoding of the tree structure combined with the edge labels. For example for tree in Figure \ref{fig:XBWT_example}, the plain tree representation would be:
+
+\texttt{(A(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b))))}.
+
+By \emph{uncompressed XBWT}, we refer to the XBWT arrays $S_{\text{last}}$ and $S_{\alpha}$ (including the additional bit) stored without any compression. Specifically, $S_{\text{last}}$ is represented as a plain bitvector (\texttt{sdsl::bit\_vector}), and $S_{\alpha}$ is stored as a wavelet tree (\texttt{sdsl::wt\_int}) with plain bitvectors (\texttt{sdsl::bit\_vector}). In contrast, the \emph{compressed XBWT} representation stores $S_{\text{last}}$ and $S_{A}$ as compressed RRR bitvectors (\texttt{sdsl::rrr\_vector}), and $S_{\alpha}$ as a wavelet tree with RRR bitvectors, as described in the previous chapter.
+
+Table~\ref{tab:experiments_2} reports the sizes (in bytes) for each representation of the trees across different sizes. The last column highlights the space savings achieved by the compressed XBWT compared to the plain tree representation, expressed as a percentage. These results illustrate the substantial space reductions achieved through compression, especially as the tree size increases.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Nodes} & \textbf{Plain tree (B)} & \textbf{U. XBWT (B)} & \textbf{C. XBWT (B)} & \textbf{Saving (\%)} \\
+        \hline
+        100 & 390 & 424 & 496 & -27.18 \\
+        500 & 2390 & 1112 & 1136 & 52.47 \\
+        1000 & 4890 & 2242 & 2056 & 57.96 \\
+        5000 & 28890 & 12911 & 10400 & 64 \\
+        10000 & 58890 & 45625 & 21848 & 62.90 \\
+        50000 & 338890 & 175146 & 123216 & 63.64 \\
+        100000 & 688890 & 349478 & 259376 & 62.35 \\
+        500000 & 3888890 & 1850850 & 1451570 & 62.67 \\
+        900000 & 7088890 & 3480190 & 2718570 & 61.65 \\
+        \hline
+    \end{tabular}
+    \caption{Space analysis of the XBWT. Plain tree is the size in bytes of the tree in the simple balanced parenthesis representation plus the edge labels, U. XBWT is the size in bytes of the tree in the uncompressed XBWT, and C. XBWT is the size in bytes of the tree in the compressed XBWT. The last column shows the space-saving percentage between plain tree and compressed XBWT.}
+    \label{tab:experiments_2}
+\end{table}
+
+\section{Conclusions}
+From the results shown in Table \ref{tab:experiments}, we can draw several conclusions about the performance of the PathSort (P.S.) algorithm compared to the Naive Sort (N.S.) algorithm and the space savings achieved by compressing the XBWT.
+
+Firstly, the PathSort algorithm consistently outperforms the Naive Sort algorithm in terms of execution time, especially as the number of nodes increases. For smaller trees, the difference in execution time between the two algorithms is minimal. However, as the number of nodes grows, the PathSort algorithm demonstrates significantly better scalability. For instance, with 900,000 nodes, the PathSort algorithm takes 8.51 seconds, whereas the Naive Sort algorithm takes 34.2 seconds.
+
+Secondly, the depth of the tree appears to increase with the number of nodes, which is expected in randomly generated trees. This increase in depth does not seem to adversely affect the performance of the PathSort algorithm as much as it does the Naive Sort algorithm.
+
+For small trees, the compressed XBWT does not always provide immediate savings due to the overhead of succinct data structures. For instance, for 100 nodes, the compressed representation is larger than the plain tree, showing a \(-27.18\%\) increase in space. However, as the number of nodes increases, the compression becomes more effective, achieving savings of over 60\% for large trees.
+
+The space reduction becomes particularly evident for trees with more than 500 nodes. These results confirm that the compressed XBWT provides a scalable and space-efficient alternative for storing and indexing labeled trees. The efficiency gains are particularly beneficial for applications requiring large-scale tree processing, such as bioinformatics and text indexing.
+
+In conclusion, the PathSort algorithm is a more efficient choice for constructing the XBWT, especially for larger trees, and the compression method provides significant space savings, making the overall process more efficient in terms of both time and space.
+
+\subsection{Future Work}
+There are several directions for future work that could be explored to further improve the performance of the algorithm. One possible avenue is to investigate the impact of different tree structures on the performance of the algorithm. For instance, it would be interesting to see how the algorithm performs on trees with different branching factors or depths.
+
+Also, the algorithm could be parallelized in order to take advantage of multicore processors and further improve the scalability of the algorithm. This could potentially reduce the execution time even further, especially for very large trees.

@@ -1,0 +1,28 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def} \PYG{n+nf}{predict}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{X}\PYG{p}{):}
+    \PYG{c+c1}{\PYGZsh{} check is fit had been called}
+    \PYG{n}{check\PYGZus{}is\PYGZus{}fitted}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} Input validation}
+    \PYG{n}{check\PYGZus{}array}\PYG{p}{(}\PYG{n}{X}\PYG{p}{)}
+
+    \PYG{c+c1}{\PYGZsh{} transform X into numpy array}
+    \PYG{n}{X} \PYG{o}{=} \PYG{n}{X}\PYG{o}{.}\PYG{n}{to\PYGZus{}numpy}\PYG{p}{()} \PYG{k}{if} \PYG{n+nb}{isinstance}\PYG{p}{(}\PYG{n}{X}\PYG{p}{,} \PYG{n}{pd}\PYG{o}{.}\PYG{n}{DataFrame}\PYG{p}{)} \PYG{k}{else} \PYG{n}{X}
+
+    \PYG{c+c1}{\PYGZsh{} compute the probability of each class for each sample}
+    \PYG{n}{y\PYGZus{}pred} \PYG{o}{=} \PYG{p}{[]}
+    \PYG{k}{for} \PYG{n}{x} \PYG{o+ow}{in} \PYG{n}{X}\PYG{p}{:}
+        \PYG{n}{prob} \PYG{o}{=} \PYG{p}{[]}
+        \PYG{k}{for} \PYG{n}{i}\PYG{p}{,} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n+nb}{enumerate}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{classes\PYGZus{}}\PYG{p}{):}
+            \PYG{n}{probs} \PYG{o}{=}
+            \PYG{n}{beta}\PYG{o}{.}\PYG{n}{cdf}\PYG{p}{(}\PYG{n}{x} \PYG{o}{+} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{epsilon}\PYG{p}{,} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+            \PYG{o}{\PYGZhy{}} \PYG{n}{beta}\PYG{o}{.}\PYG{n}{cdf}\PYG{p}{(}\PYG{n}{x} \PYG{o}{\PYGZhy{}} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{epsilon}\PYG{p}{,} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{alpha\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{],} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{beta\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+
+            \PYG{n}{np}\PYG{o}{.}\PYG{n}{nan\PYGZus{}to\PYGZus{}num}\PYG{p}{(}\PYG{n}{probs}\PYG{p}{,} \PYG{n}{copy}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{nan}\PYG{o}{=}\PYG{l+m+mf}{1.0}\PYG{p}{)}
+            \PYG{n}{prob}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{prod}\PYG{p}{(}\PYG{n}{probs}\PYG{p}{)} \PYG{o}{*} \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{prior\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+
+        \PYG{c+c1}{\PYGZsh{} get the class with the highest probability}
+        \PYG{n}{y\PYGZus{}pred}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{np}\PYG{o}{.}\PYG{n}{argmax}\PYG{p}{(}\PYG{n}{prob}\PYG{p}{,} \PYG{n}{axis}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{))}
+
+    \PYG{k}{return} \PYG{n}{y\PYGZus{}pred}
+\end{Verbatim}

@@ -1,0 +1,67 @@
+\chapter{Theoretical Background on Labeled Trees}
+
+\section{Labeled Trees}
+A \textbf{labeled tree} is a rooted, ordered, hierarchical data structure in which every node is assigned a label from a predefined alphabet $\Sigma$. The structure consists of nodes connected by edges, forming a directed acyclic graph. Formally, a labeled tree $T$ with $t$ nodes can be defined as $T = (V, E, \ell)$, where:
+\begin{itemize}
+    \item $V$ is the set of nodes,
+    \item $E \subseteq V \times V$ is the set of directed edges, and
+    \item $\ell: V \to \Sigma$ is a labeling function that assigns a label $\ell(u) \in \Sigma$ to each node $u$.
+\end{itemize}
+
+In the case of ordered labeled tree, the children of a node in the tree are ordered, meaning their positions relative to each other matter. A labeled tree can have arbitrary degrees and shapes, and the alphabet $\Sigma$ used for labels can be of arbitrary size.
+
+\subsection{Applications of Labeled Trees}
+Labeled trees are widely used in computer science and data representation due to their hierarchical structure and flexibility in modeling relationships. Prominent applications include:
+\begin{enumerate}
+    \item \textbf{XML Data Representation:} XML documents are often modeled as labeled trees, where each element is a node labeled by its tag, and hierarchical nesting represents parent-child relationships.
+    \item \textbf{JSON Data Representation:} JSON objects can be viewed as labeled trees, with keys as labels and values as children.
+    \item \textbf{Bioinformatics:} Labeled trees are used to represent phylogenetic trees, genome annotations, and hierarchical clustering.
+    \item \textbf{Compiler Design:} Abstract Syntax Trees (ASTs) for programming languages are labeled trees that capture the structure of code.
+    \item \textbf{File Systems:} The directory structure of file systems can be viewed as labeled trees.
+\end{enumerate}
+
+Efficient representation, navigation, and querying of labeled trees are essential for many applications, motivating the development of specialized data structures and algorithms.
+
+\section{Compressing and Indexing Labeled Trees} \label{compandindexinglabtree}
+The goal of compressing and indexing labeled trees is to design a compressed storage scheme for a labeled tree $T$ with $t$ nodes that allows for efficient navigation operations in $T$, as well as fast search and retrieval of subtrees or paths within $T$. To be effective, the compressed representation should minimize the space required to store the tree while supporting a wide range of operations in (near-)optimal time.
+
+Let $u$ be a node in the labeled tree $T$ and let $c \in \Sigma$. We define the following navigation operations on $T$:
+\begin{itemize}
+    \item \textbf{Navigational queries:} ask for the parent of $u$, the $i$-th child of $u$, or the label of $u$. The last two operations might be restricted to the children of $u$ with a specific label $c$.
+    \item \textbf{Path queries:} retrieve the nodes in the subtree rooted at $u$ (any possible order should be implemented).
+    \item \textbf{Subpath queries:} ask for the (number of occurrences of) nodes of $T$ that descend from a labeled subpath $P$. Which may be anchored anywhere in the tree (i.e., not necessarily in its root). 
+\end{itemize}
+
+A naive solution to index labeled trees is to store the tree in a straightforward manner, such as a list of nodes with their labels and parent-child relationships using pointer in $O(t log t)$. However, this representation is not space-efficient and does not support fast navigation or query operations. 
+
+Many data structures have been proposed to compress and index labeled trees, each with its trade-offs in terms of space usage, query performance, and supported operations. One of the most successful approaches is the Extended Burrows-Wheeler Transform (XBWT), which extends the classical Burrows-Wheeler Transform (BWT) to handle labeled trees efficiently. 
+
+Before the advent of XBWT, Kosaraju \cite{kosaraju1989efficient} proposed a method to index labeled trees by extending the concept of prefix sorting, which is commonly applied to strings, to work with labeled trees by leveraging the structure of tries (prefix trees). To achieve this, he introduced the idea of constructing a suffix tree for a reversed trie allowing subpath queries in $O(|P|\log|\Sigma|+ occ)$ time, where $occ$ is the number of occurrences of $P$ in $T$ but still requiring $O(t \log t)$ space and so not being compressed.
+
+\section{Succinct Data Structures for Trees}
+In order to compress the index of labeled trees, we need to avoid the use of pointers and store the tree in a space-efficient manner. Succinct data structures are a class of compressed data structures that support efficient navigation and query operations on the compressed data. These structures are designed to use close to the information-theoretic lower bound on space while providing fast access to the original data. They were first introduced by Jacobson \cite{jacobson1989space} and have been applied to various problems in string processing, graph theory, and data compression.
+
+\subsection{Information-Theoretic Lower Bound for Trees}
+The information-theoretic lower bound for storing an unlabeled tree with $t$ nodes is given by:
+
+\begin{itemize}
+    \item The number of binary unlabeled trees with $t$ nodes is given by the Catalan number $C_t = \frac{1}{t+1} \binom{2t}{t}$ that can can be approximated as $C_t \approx \frac{4^t}{t^{3/2}\sqrt{\pi}}$ using Stirling's approximation.
+    \item The entropy (or the information-theoretic minimum number of bits to encode the structure of the tree) is the logarithm (base 2) of the total number of trees, which is $-\log_2 C_t \approx 2t - \frac{1}{2} \log_2 \pi t^3$.
+    \item The correction term $\frac{1}{2} \log_2 \pi t^3$ grows slower that the linear term $2t$, we can say that $-\frac{1}{2} \log_2 \pi t^3 = -\Theta(\log t)$.
+    \item The information-theoretic lower bound for storing an unlabeled tree with $t$ nodes is $2t - \Theta(\log t)$ bits.
+\end{itemize}
+
+Then for labeled trees, the labels assigned to each node must be stored, which requires an additional space:
+
+\begin{itemize}
+    \item Let $\Sigma$ denote the alphabet of labels, and let $|\Sigma|$ be the size of the alphabet.
+    \item Each node in the tree requires $\log_2 |\Sigma|$ bits to store its label.
+    \item Therefore, for $t$ nodes, the total space required to store the labels is $t \log_2 |\Sigma|$ bits.
+\end{itemize}
+
+Combining the structural representation and the labeling, the information-theoretic lower bound for storing a labeled tree is:
+
+$$
+    2t - \Theta(\log t) + t \log_2 |\Sigma| \text{ bits}
+$$
+

@@ -1,0 +1,1 @@
+{"rule":"ADJECTIVE_IN_ATTRIBUTE","sentence":"^\\QThese closely spaced labels are expected to be few in number, resulting in \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q exhibiting local homogeneity.\\E$"}
