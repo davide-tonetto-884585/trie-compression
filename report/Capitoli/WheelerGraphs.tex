@@ -124,11 +124,11 @@ The following is a list of some properties of Wheeler graphs that can be derived
 \end{proof}
 
 \begin{lemma} \label{property_4}
-    Consider a total Wheeler order. Let $V_k$ be the set containing all nodes with the same label $k$. Let $V_k^1$ and $V_k^2$ be two partitions of $V_k$, where $V_k^1$ contains all nodes $v_1$ with incoming edges from nodes preceding $v_1$ in the total order, while $V_k^2$ contains all nodes $v_2$ with incoming edges from nodes following $v_2$ in the total order. Consequently, the intersection of $V_k^1$ and $V_k^2$ contains at most one vertex $u$, and all vertices in $V_k^1 \setminus \{u\}$ precede those in $V_k^2$ in the ordering. Moreover, given a vertex $v \in V_k^1$, there cannot exist an edge $(v, z, k)$ with $z<v$, and similarly, given a vertex $v \in V_k^2$, there cannot exist an edge $(v, z, k)$ with $z>v$ (see \cite{15}).
+    Consider a total Wheeler order. Let $V_k$ be the set containing all nodes with the same label $k$. Let $V_k^1$ and $V_k^2$ be two partitions of $V_k$, where $V_k^1$ contains all nodes $v_1$ with incoming edges from nodes preceding $v_1$ in the total order, while $V_k^2$ contains all nodes $v_2$ with incoming edges from nodes following $v_2$ in the total order. Consequently, the intersection of $V_k^1$ and $V_k^2$ contains at most one vertex $u$, and all vertices in $V_k^1 \setminus \{u\}$ precede those in $V_k^2$ in the ordering. Moreover, given a vertex $v \in V_k^1$, there cannot exist an edge $(v, z, k)$ with $z<v$, and similarly, given a vertex $v \in V_k^2$, there cannot exist an edge $(v, z, k)$ with $z>v$ (see \cite{inapproximabilityWheelerGraphs}).
 \end{lemma}
 
 \subsection{Path Coherence}
-The following defines \textit{path coherence} and a related property of Wheeler graphs introduced and proven in \cite{1}.
+The following defines \textit{path coherence} and a related property of Wheeler graphs introduced and proven in \cite{wheelerGrpahs}.
 
 \begin{definition}[Path Coherence]
     A labeled directed graph $G$ is said to be \textit{path coherent} if there exists a total order of nodes such that, for every consecutive interval $[i, j]$ of nodes and a string $\alpha$, the nodes reachable from those in $[i, j]$ in $|\alpha |$ steps, following edges whose labels form $\alpha$ when concatenated, themselves form an interval in the total order.
@@ -138,20 +138,20 @@ The following defines \textit{path coherence} and a related property of Wheeler 
     A Wheeler graph is path coherent with respect to any possible Wheeler order of the nodes.
 \end{lemma}
 
-Thanks to this crucial property, it was proven in \cite{1} that if the state diagram of a finite-state automaton is a Wheeler graph, then, due to Lemma \ref{property_5}, the nodes can be ordered so that for any string, the nodes reachable from the initial state(s) by processing that string are consecutive. This means that even if the automaton is non-deterministic, it can still be stored compactly and used to process strings efficiently.
+Thanks to this crucial property, it was proven in \cite{wheelerGrpahs} that if the state diagram of a finite-state automaton is a Wheeler graph, then, due to Lemma \ref{property_5}, the nodes can be ordered so that for any string, the nodes reachable from the initial state(s) by processing that string are consecutive. This means that even if the automaton is non-deterministic, it can still be stored compactly and used to process strings efficiently.
 
 \subsection{Topological Ordering for \texorpdfstring{$\sigma=1$}{Lg}}
-The following defines \textit{topological ordering} and a related property of Wheeler graphs introduced and proven in \cite{15}.
+The following defines \textit{topological ordering} and a related property of Wheeler graphs introduced and proven in \cite{inapproximabilityWheelerGraphs}.
 
 \begin{definition}[Topological Ordering]
-    A topological ordering is a linear ordering of all vertices of a directed graph. The nodes of a graph are said to be topologically ordered if they are arranged such that each node precedes all nodes connected to its outgoing edges. The topological ordering of a graph may not be unique. In the worst case, there can be $n!$ different topological orderings corresponding to all possible permutations of the $n$ nodes. A topological ordering is possible if and only if the graph has no directed cycles, meaning it is a directed acyclic graph (DAG) \cite{16}.
+    A topological ordering is a linear ordering of all vertices of a directed graph. The nodes of a graph are said to be topologically ordered if they are arranged such that each node precedes all nodes connected to its outgoing edges. The topological ordering of a graph may not be unique. In the worst case, there can be $n!$ different topological orderings corresponding to all possible permutations of the $n$ nodes. A topological ordering is possible if and only if the graph has no directed cycles, meaning it is a directed acyclic graph (DAG) \cite{topol16ogicalOrdering}.
 \end{definition}
 
 \begin{lemma} \label{property_6}
     For $\sigma=1$, every Wheeler order also represents a topological ordering, except for vertices with self-loops, which must be placed at the end of the order since a cyclic graph cannot have a valid topological ordering.
 \end{lemma}
 
-This property follows from Lemma \ref{proprietà_4} and the first axiom (Definition \ref{def_wheeler_graphs}). Finally, it is important to highlight that this result is used in \cite{15} to prove that the Wheeler graph recognition problem can be solved in linear time when $\sigma=1$.
+This property follows from Lemma \ref{property_4} and the first axiom (Definition \ref{def_wheeler_graphs}). Finally, it is important to highlight that this result is used in \cite{inapproximabilityWheelerGraphs} to prove that the Wheeler graph recognition problem can be solved in linear time when $\sigma=1$.
 
 \begingroup
 \sloppy
@@ -161,7 +161,7 @@ This property follows from Lemma \ref{proprietà_4} and the first axiom (Definit
 The following section explains a simple and intuitive technique used to graphically check whether a directed labeled graph, along with its total node ordering, satisfies the three Wheeler axioms (Definition \ref{def_wheeler_graphs}). More specifically, the technique involves representing the graph as a bipartite graph with useful properties related to the three Wheeler axioms. Additionally, later in the text, we will see how this idea is also useful for the Wheelerization problem of a graph.
 
 \subsection{Construction of the Bipartite Graph}
-Consider a directed labeled graph on the edges $G=(V,E)$ where $V=\{x_1,\dots,x_n\}$ and a total ordering of $V$ (in the example, consider $x_1<x_2<\dots<x_n$). The bipartite graph (Section \ref{def_bipartito}) $B=(V_1,V_2,E_B)$ is constructed as follows:
+Consider a directed labeled graph on the edges $G=(V,E)$ where $V=\{x_1,\dots,x_n\}$ and a total ordering of $V$ (in the example, consider $x_1<x_2<\dots<x_n$). The bipartite graph $B=(V_1,V_2,E_B)$ is constructed as follows:
 
 \begin{itemize}
     \item $V_1=\{x_i^s : i \in [1, n]\}$. Where the node $x_i^s \in V_1$ corresponds to the node $x_i \in V$ for $1 < i < n$. This set is thus composed of the nodes in $V$, and is ordered according to the given ordering.
