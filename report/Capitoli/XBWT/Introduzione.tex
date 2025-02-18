@@ -1,4 +1,5 @@
-\chapter{Introduction}
+\chapter{Extended Burrows-Wheeler Transform}
+\section{Introduction} 
 
 The Extended Burrows-Wheeler Transform (XBWT) is a data structure designed to efficiently compress and index labeled trees. A labeled tree is a data structure where each node is assigned a label from a given alphabet, and the tree can have an arbitrary shape and degree.
 
@@ -11,7 +12,7 @@ This project aims to implement the XBWT data structure and explore its applicati
 Let's start with a quick overview of the XBWT and its theoretical foundations.
 
 
-\subsection{How XBWT Works}
+\subsubsection{How XBWT Works}
 The transformation process of XBWT is as follows:
 \begin{enumerate}
     \item \textbf{Path Sorting:} The labeled tree is linearized by sorting its nodes based on the \emph{paths} from each node's parent to the root. The resulting order groups nodes with similar upward paths together, clustering related labels.
@@ -23,7 +24,7 @@ The transformation process of XBWT is as follows:
     \item \textbf{Compression:} Both \( S_{\text{last}} \) and \( S_{\alpha} \) are highly compressible due to the clustering of similar labels and structural redundancy.
 \end{enumerate}
 
-\subsection{Key Properties of XBWT}
+\subsubsection{Key Properties of XBWT}
 The XBWT has several key properties that make it an effective tool for labeled tree compression and indexing:
 \begin{itemize}
     \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the \emph{information-theoretic lower bound}, which is \( 2t - \Theta(\log t) + t \log |\Sigma| \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.
@@ -31,7 +32,7 @@ The XBWT has several key properties that make it an effective tool for labeled t
     \item \textbf{Scalability:} XBWT is particularly useful for large-scale hierarchical data, such as XML documents or phylogenetic trees, where both compression and fast querying are critical.
 \end{itemize}
 
-\section{Project implementation}
+\subsection{Project implementation}
 
 The XBWT data structure will be implemented in C++ using the Succinct Data Structure Library 2.0 (SDSL) for efficient representation and manipulation of compressed data structures. We will develop two algorithms for constructing the XBWT: one efficient linear-time recursive algorithm and one more straightforward iterative algorithm. Also, we will implement the necessary data structures and algorithms for navigating and querying the XBWT, such as parent-child navigation and path-based searches. 
 
