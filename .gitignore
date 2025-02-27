@@ -7,6 +7,5 @@
 *.run.xml
 *.synctex.gz
 *.toc
-*.pdf
 *.fdb_latexmk
 *.fls

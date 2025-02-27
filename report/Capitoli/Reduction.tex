@@ -1,0 +1,86 @@
+\chapter{Reduction of our problem to the assignment problem}
+
+\section{Introduction}
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+            \node[main] (1s) {$s_1$};
+            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (3s) [below of=2s] {$1$};
+            \node[main] (4s) [below of=3s] {$2$};
+            \node[main] (5s) [below of=4s] {$1$};
+            \node[main] (6s) [below of=5s] {$3$};
+            \node[main] (7s) [below of=6s] {$1$};
+            \node[main] (8s) [below of=7s] {$2$};
+            \node[main] (9s) [below of=8s] {$2$};
+            \node[main] (1d) [right=3cm of 3s] {$1$};
+            \node[main] (2d) [below of=1d] {$2$};
+            \node[main] (3d) [below of=2d] {$1$};
+            \node[main] (4d) [below of=3d] {$3$};
+            \node[main] (5d) [below of=4d] {$1$};
+            \node[main] (6d) [below of=5d] {$2$};
+            \node[main] (7d) [below of=6d] {$2$};
+            \node[main] (8d) [below of=7d] {$d_1$};
+            \node[main] (9d) [below of=8d] {$d_2$};
+            
+            \draw[red, ->] (1s) -- (1d);
+            \draw[red, ->] (1s) -- (2d);
+            \draw[red, ->] (2s) -- (1d);
+            \draw[red, ->] (2s) -- (2d);
+            \draw[red, ->] (3s) -- (2d);
+            \draw[red, ->] (3s) -- (4d);
+            \draw[green, ->] (3s) -- (3d);
+            \draw[red, ->] (4s) -- (3d);
+            \draw[red, ->] (4s) -- (4d);
+            \draw[green, ->] (4s) -- (6d);
+            \draw[red, ->] (5s) -- (4d);
+            \draw[green, ->] (5s) -- (5d);
+            \draw[red, ->] (5s) -- (6d);
+            \draw[red, ->] (6s) -- (5d);
+            \draw[red, ->] (6s) -- (6d);
+            \draw[green, ->] (6s) -- (8d);
+            \draw[green, ->] (6s) -- (9d);
+            \draw[red, ->] (7s) -- (6d);
+            \draw[green, ->] (7s) -- (8d);
+            \draw[green, ->] (7s) -- (9d);
+            \draw[green, ->] (8s) -- (7d);
+            \draw[green, ->] (9s) -- (8d);
+            \draw[green, ->] (9s) -- (9d);
+        \end{tikzpicture} &
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+            \node[main] (1s) {$s_1$};
+            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (3s) [below of=2s] {$1$};
+            \node[main] (4s) [below of=3s] {$2$};
+            \node[main] (5s) [below of=4s] {$1$};
+            \node[main] (6s) [below of=5s] {$3$};
+            \node[main] (7s) [below of=6s] {$1$};
+            \node[main] (8s) [below of=7s] {$2$};
+            \node[main] (9s) [below of=8s] {$2$};
+            \node[main] (1d) [right=3cm of 3s] {$1$};
+            \node[main] (2d) [below of=1d] {$2$};
+            \node[main] (3d) [below of=2d] {$1$};
+            \node[main] (4d) [below of=3d] {$3$};
+            \node[main] (5d) [below of=4d] {$1$};
+            \node[main] (6d) [below of=5d] {$2$};
+            \node[main] (7d) [below of=6d] {$2$};
+            \node[main] (8d) [below of=7d] {$d_1$};
+            \node[main] (9d) [below of=8d] {$d_2$};
+            
+            \draw[red, ->] (1s) -- (1d);
+            \draw[red, ->] (2s) -- (2d);
+            \draw[green, ->] (3s) -- (3d);
+            \draw[red, ->] (4s) -- (4d);
+            \draw[green, ->] (5s) -- (5d);
+            \draw[green, ->] (6s) -- (8d);
+            \draw[red, ->] (7s) -- (6d);
+            \draw[green, ->] (8s) -- (7d);
+            \draw[green, ->] (9s) -- (9d);
+        \end{tikzpicture} \\
+        (a) & (b) \\
+    \end{tabular}
+    \caption[Reduction example]{Example of a reduction for the string $S = \{1,2,1,3,1,2,2\}$. In (a) we have the resulting bipartite graph constructed from $S$. In (b) we have the resulting perfect matching for the graph in (a). Green edges have weight $0$, while red edges have weight $1$.}
+    \label{fig:reduction_example}
+\end{figure}
