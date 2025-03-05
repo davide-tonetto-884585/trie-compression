@@ -2,4 +2,16 @@
 The aim of this thesis is to study a new technique for the compression of labeled trees. The aim of the project is to implement and experiment with the technique, and to compare it with other state-of-the-art techniques for tree compression such as the Extended Burrows-Wheeler Transform (XBWT) \cite{ferragina2009compressing}. 
 
 \section{The idea}
-In order to compress a labeled tree, 
+Let $ T $ be an ordered tree of arbitrary fan-out, depth, and shape. $ T $ consists of $ n $ internal nodes and $ \ell $ leaves, for a total of $ t = n + \ell $ nodes. Every node of $ T $ is labeled with a symbol drawn from an alphabet $ \Sigma $. We assume that $ \Sigma $ is the set of labels effectively used in $ T $'s nodes and that these labels are encoded with the integers in the range $[1, |\Sigma|]$. Then we need to define the array $\pi$ where, for each node $u$, $\pi(u)$ is the string obtained by concatenating the labels on the \textbf{upward path} from $u$'s parent to the root of the tree (root has an empty $\pi$ component).
+
+The following pipeline is used to compress the tree $T$:
+
+\begin{enumerate}
+    \item Initially the array $\pi$ is computed for the tree $T$ by traversing the tree in a pre-order fashion. Then the nodes are stably sorted by the lexicographic order of their $\pi$ strings. In order to sort the nodes, the \textbf{Path Sort} algorithm introduced in \cite{ferragina2009compressing} is used, allowing to sort the nodes in linear time and $O(t \log t)$ space.
+    \item Then, using Hopcroft algorithm for minimization of DFA \cite{HOPCROFT1971189} the nodes are partitioned into equivalence classes where two nodes are equivalent if they have the same subtree rooted at them. 
+    \item Given a width $p$, the nodes previously sorted are then divided into $p$ chains with the aim to minimize the run-length encoding of each chain (by considering the equivalence classes). In order to do so we reduced this problem to the \textbf{Minimum Perfect Bipartite Matching} problem, which can be solved in polynomial time.
+    \item Lastly, the resulting DFA or NFA can be indexed using the indexing scheme introduced by Cotumaccio et al. \cite{cotumaccio2023co}. Also, the chains can be compressed using some techniques that will be discussed in the next chapters.
+\end{enumerate}
+
+\section{The structure of the thesis}
+The thesis is structured as follows:
