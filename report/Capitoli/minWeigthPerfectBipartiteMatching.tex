@@ -1,7 +1,12 @@
 \chapter{Min-Weight Perfect Bipartite Matching}
 
 \section{Problem definition}
-Given a weighted bipartite graph $G = (V, E)$ (remember that a bipartite graph is a graph whose vertices can be divided into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$), a matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. If a vertex $v$ has no edge of $M$ incident to it then $v$ is said to be exposed (or unmatched). A matching is perfect if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
+Given a weighted bipartite graph $G = (V, E)$ (remember that a bipartite graph is a graph whose vertices can be divided into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$), let's define the concept of a matching.
+\begin{definition}[Matching] \label{def:matching}
+    A matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. In other words, a matching is a set of edges such that no two edges share a common vertex. 
+\end{definition}
+
+If a vertex $v$ has no edge of $M$ incident to it then $v$ is said to be exposed (or unmatched). A matching is perfect if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
 
 \begin{figure}[H]
     \centering
@@ -10,7 +15,11 @@ Given a weighted bipartite graph $G = (V, E)$ (remember that a bipartite graph i
     \label{fig:matching_example}
 \end{figure}
 
-The problem of finding a minimum weight perfect matching in a bipartite graph is a well-known problem in combinatorial optimization. The problem can be formulated as follows: given a weighted bipartite graph $G = (V, E)$, where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}.
+The problem of finding a minimum weight perfect matching in a bipartite graph is a well-known problem in combinatorial optimization. The problem can be formulated as follows: 
+
+\begin{definition}[Minimum weight perfect matching in bipartite graphs (\textsc{MWPBM})] \label{def:mwpbm}
+    Given a weighted bipartite graph $G = (V, E)$, where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}.
+\end{definition}
 
 \subsection{Problem formulation}
 The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e.an optimization problem in which the variables are restricted to integer values and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
@@ -43,9 +52,9 @@ In general, even if all the coefficients of the constraint matrix in a linear pr
 
 In our problem, the constraint matrix has a special form that lead to the following result: 
 
-\begin{teorema}
+\begin{theorem}
     Any extreme point of ($P$) is a $0-1$ vector and, hence, is the incidence vector of a perfect matching.
-\end{teorema}
+\end{theorem}
 
 Consequently, the polytope
 

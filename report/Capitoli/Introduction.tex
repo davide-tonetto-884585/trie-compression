@@ -9,7 +9,7 @@ The following pipeline is used to compress the tree $T$:
 \begin{enumerate}
     \item Initially the array $\pi$ is computed for the tree $T$ by traversing the tree in a pre-order fashion. Then the nodes are stably sorted by the lexicographic order of their $\pi$ strings. In order to sort the nodes, the \textbf{Path Sort} algorithm introduced in \cite{ferragina2009compressing} is used, allowing to sort the nodes in linear time and $O(t \log t)$ space.
     \item Then, using Hopcroft algorithm for minimization of DFA \cite{HOPCROFT1971189} the nodes are partitioned into equivalence classes where two nodes are equivalent if they have the same subtree rooted at them. 
-    \item Given a width $p$, the nodes previously sorted are then divided into $p$ chains with the aim to minimize the run-length encoding of each chain (by considering the equivalence classes). In order to do so we reduced this problem to the \textbf{Minimum Perfect Bipartite Matching} problem, which can be solved in polynomial time.
+    \item Given a width $p$, the nodes previously sorted are then divided into $p$ chains with the aim to minimize the run length encoding of each chain (by considering the equivalence classes). In order to do so we reduced this problem to the \textbf{Minimum Perfect Bipartite Matching} problem, which can be solved in polynomial time.
     \item Lastly, the resulting DFA or NFA can be indexed using the indexing scheme introduced by Cotumaccio et al. \cite{cotumaccio2023co}. Also, the chains can be compressed using some techniques that will be discussed in the next chapters.
 \end{enumerate}
 

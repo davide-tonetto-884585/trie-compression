@@ -14,9 +14,9 @@ Given an ordered labeled tree $T$ of arbitrary fan-out, depth and shape, with $n
 
 Then, to define the XBWT, a sorted multi-set $S$ consisting of $t$ triplets (one per node of $T$) is built, where each triplet is of the form $(last[u], \alpha[u], \pi(u))$ for some node $u$ in $T$. $S$ is built by traversing $T$ in a pre-order fashion, for each visited node $u$, the triplet $(last[u], \alpha[u], \pi(u))$ is added to $S$, then $S$ is stably sorted in accordance with the lexicographic order of the $\pi$ component of the triplets.
 
-\begin{teorema}
+\begin{theorem}
     The XBWT of a labeled tree $T$ consist of the two arrays $\{S_{\text{last}}, S_{\alpha}\}$ after sorting, and takes $2t + t \log |\Sigma|$ bits of space. 
-\end{teorema}
+\end{theorem}
 
 \subsection{Properties of XBWT}
 The following two properties of the ordered multi-set $S$ are crucial for the indexing scheme, they immediately follow from the composition of the transform and from the way $S$ is built.
