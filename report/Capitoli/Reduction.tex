@@ -102,7 +102,7 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
 In order to prove the correctness of the reduction, it is important to start by defining the problem we want to solve. 
 
 \begin{definition}[\textsc{CHAINS-DIVISION} problem] \label{def:problem_def}
-    Given a tree $T$ with $t$ nodes, and given the equivalence classes $E$ of the nodes of $T$ and the sorted order of the nodes in $T$ according to the upward path $\pi$, we want to find the optimal partition of the nodes of $T$ into $p$ chains with $p \leq |E| \leq t$ such that the run length encoding of each chain is minimized.
+    Given a tree $T$ with $t$ nodes, and given the equivalence classes $E$ coming from the Hopcroft algorithm applied to the tree $T$, the sorted order of the nodes in $T$ according to the upward path $\pi$, and the number of chain $p \leq t$, we want to find the optimal partition of the nodes of $T$ into $p$ chains with $p \leq t$ such that the run length encoding of each chain is minimized.
 \end{definition}
 
 Let's give a formal definition of run length encoding.
@@ -142,10 +142,51 @@ Let's start by stating the following lemma.
     The proof comes directly from lemma \ref{lemma:optimal_cost}.
 \end{proof}
 
+\begin{lemma} \label{lemma:matching_existence}
+    A perfect matching for a bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} exist for each possible instance of the \textit{CHAINS-DIVISION} problem.
+\end{lemma}
+
+\begin{proof}
+    The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} has a Tutte matrix (definition \ref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists. 
+
+    We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
+\end{proof}
+
+In figure \ref{fig:tutte_matrix_ex} the Tutte matrix for the bipartite graph in Figure \ref{fig:reduction_example}-(a) is shown.
+
+\begin{figure}
+    \centering
+    \[
+    \begin{array}{c|ccccccccc}
+            & \text{1} & \text{2} & \text{1} & \text{3} & \text{1} & \text{2} & \text{2} & \text{$d_1$} & \text{$d_2$} \\
+        \hline
+        \text{$s_1$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \text{$s_2$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        \text{1}   & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+        \text{2}   & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 \\
+        \text{1}   & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
+        \text{3}   & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 & 1 \\
+        \text{1}   & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 1 \\
+        \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+        \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
+    \end{array}
+    \]
+    \caption[Tutte matrix example]{Example of a Tutte matrix for a bipartite graph in figure \ref{fig:reduction_example}-(a). As we can see the matrix has full rank and so a perfect matching exists.}
+    \label{fig:tutte_matrix_ex}
+\end{figure}
+
+\begin{lemma} \label{lemma:greater_nodes}
+    Given a bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} from a tree $T$, for each node $u \in V_1$ coming from the nodes of $T$ it is impossible for $u$ to be connected to node $v \in V_2$ coming from the nodes of $T$ such as $v < u$ in the order of the nodes of the tree $T$.
+\end{lemma}
+
+\begin{proof}
+    The proof comes from the construction of $G$ where the nodes of $V_1$ are always connected to the nodes of $V_2$ coming after them in the ordering of the nodes of the tree $T$.
+\end{proof}
+
 Now we can prove the correctness of the reduction.
 
 \begin{theorem}
-    An optimal solution of an instance $\mathcal I$ of the problem defined in Definition \ref{def:problem_def} is equivalent to an optimal solution of the Minimum Weight Perfect Bipartite Matching for the instance $r(\mathcal I)$ where $r: \mathcal{I}_{CHAINS-DIVISION} \rightarrow \mathcal{I}_{MWPBM}$ is the reduction function that maps an instance of the problem defined in Definition \ref{def:problem_def} to an instance of the Minimum Weight Perfect Bipartite Matching problem defined in Definition \ref{def:mwpbm} constructed as stated in Definition \ref{def:bip_construction}.
+    An optimal solution of an instance $\mathcal I$ with $p \leq |E|$ of the problem defined in Definition \ref{def:problem_def} is equivalent to an optimal solution of the Minimum Weight Perfect Bipartite Matching for the instance $r(\mathcal I)$ where $r: \mathcal{I}_{CHAINS-DIVISION} \rightarrow \mathcal{I}_{MWPBM}$ is the reduction function that maps an instance of the problem defined in Definition \ref{def:problem_def} to an instance of the Minimum Weight Perfect Bipartite Matching problem defined in Definition \ref{def:mwpbm} constructed as stated in Definition \ref{def:bip_construction}.
 \end{theorem}
 
 \begin{proof}
@@ -157,9 +198,9 @@ Now we can prove the correctness of the reduction.
     
     The destination nodes are necessary to close the chains, by connecting the nodes of the tree to the destination nodes we can ensure that the chains are closed and allows to get a perfect matching otherwise we would have $|V_1| > |V_2|$ and so we would have unmatched nodes. From lemma \ref{lemma:all_destinations} we know that exactly $|E|$ nodes of the tree $T$ in $V_1$ are connected to all the destination nodes $d_i \in V_2 \quad \forall i = 1, 2, \dots, p$ with weight $0$. This is done in order to ensure that the chains are closed and that the nodes of the tree are connected to the destination nodes in order to have a perfect matching. The weight of the edges is $0$ since if we conclude a chain no additional cost is needed.
 
-    We know from definition \ref{def:chains} that the order of the nodes of each chain must follow the order given by the upward path $\pi$ of each node in the tree $T$. In order to ensure the order of the nodes in building the chains, the edges of the bipartite graph are constructed in such a way that a node $u$ coming from $T$ is connected with weight $1$ to the first $p$ nodes in $V_2$ with distinct equivalence class and having different class with respect to $u$, also the nodes to connect with must come after the node $u$ in the ordering. In this way also loops are avoided. Then the node $u$ is connected with weight $0$ to the first node with the same class in $V_2$ always coming after the $u$ node in the ordering if there is one, otherwise the node $u$ is connected to the destination nodes $d_i \in V_2 \quad \forall i = 1, 2, \dots, p$ with weight $0$. 
+    We know from definition \ref{def:chains} that the order of the nodes of each chain must follow the order given by the upward path $\pi$ of each node in the tree $T$. This is ensured by lemma \ref{lemma:greater_nodes} that states that it is impossible for a node $u \in V_1$ coming from the nodes of $T$ to be connected to a node $v \in V_2$ coming from the nodes of $T$ such as $v < u$ in the order of the nodes of the tree $T$. This is done in order to ensure that the nodes are connected in the right order.
 
-    Given the construction of the bipartite graph $G$ we can see that the optimal solution of the Minimum Weight Perfect Bipartite Matching problem for the graph $G$ is equivalent to the optimal solution of the \textsc{CHAINS-DIVISION} problem for the tree $T$ since the chains are closed and the nodes are connected in the right order. The weight of the edges $0$ allow the problem to chain subsequent nodes with the same class without adding additional cost. Also from the definition of matching (\ref{def:matching}) no node of $V$ is exposed and so the matching is perfect. The fact that each node in $V_1$ is connected to at least $p$ edges allow the problem to compare all the possible chains and so to find the optimal solution.
+    Given the construction of the bipartite graph $G$ we can see that the optimal solution of the Minimum Weight Perfect Bipartite Matching problem for the graph $G$ is equivalent to the optimal solution of the \textsc{CHAINS-DIVISION} problem for the tree $T$ since the chains are closed and the nodes are connected in the right order. The weight of the edges $0$ allow the problem to chain subsequent nodes with the same class without adding additional cost. Also from the definition of matching (\ref{def:matching}) no node of $G$ is exposed and so the matching is perfect as proved in lemma \ref{lemma:matching_existence}. The fact that each node in $V_1$ is connected to at least $p$ edges allow the problem to compare all the possible chains and so to find the optimal solution.
 \end{proof}
 
 \subsection{Full example}
@@ -244,7 +285,7 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
         \end{tikzpicture} \\
     (a) & (b) \\
     \end{tabular}
-    \caption[Reduction full example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$. In (a), we have the resulting bipartite graph constructed from $S$. In (b), we have the resulting perfect matching for the graph in (a) having weight $4$. Green edges weigh $0$, while red edges weigh $1$.}
+    \caption[Reduction full example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$. In (a), we have the resulting bipartite graph constructed from $E$. In (b), we have the resulting perfect matching for the graph in (a) having weight $4$. Green edges weigh $0$, while red edges weigh $1$.}
     \label{fig:reduction_example}
 \end{figure}
 
@@ -252,6 +293,129 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
 Some changes can be made to the reduction in order to optimize it and to reduce the number of edges in the bipartite graph. Here are some of the improvements that can be made.
 
 \begin{itemize}
-    \item \textbf{Sources' edges optimization}: The sources' edges can be optimized by connecting each source only to the first node in $V_2$ coming from the tree $T$ that is not connected to any other source. This will reduce the number of edges coming from the sources from $O(p^2)$ to $O(p)$.
-    \item 
+    \item \textbf{Sources' edges optimization}:
+    \begin{lemma} \label{lemma:sources_optimization}
+        The sources' edges can be optimized by connecting each source only to the smaller node (considering the order of the nodes) in $V_2$ coming from the tree $T$ that is not connected to any other source. 
+    \end{lemma}
+
+    \begin{proof}
+        Since the source nodes are needed to distinguish the chains as starting points, we need that each source is connected to at least one node in $V_2$ coming from the tree $T$. Having the sources connected to the first $p$ nodes with distinct equivalence class in $V_2$ is not necessary since allows us just to invert the chains starting from each source and so it is redundant. We can connect each source to the smaller node in $V_2$ coming from the tree $T$ that is not connected to any other source since we need to connect each source to at least one node in $V_2$ coming from the tree $T$ and this will allow us to distinguish the chains.
+    \end{proof}
+
+    This will reduce the number of edges coming from the sources from $O(p^2)$ to $O(p)$. In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in green.
+    \item \textbf{Tree nodes' edges optimization 1}: 
+    \begin{lemma} \label{lemma:tree_optimization_1}
+        The tree nodes' edges can be optimized by removing the edges of tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$. 
+    \end{lemma}
+
+    \begin{proof}
+        From definition \ref{def:matching} we know that a matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. In other words, a matching is a set of edges such that no two edges share a common vertex. Given that, in all the solutions to the problem all sources will be connected to exactly one node in $V_2$ coming from the tree $T$ and so we can remove the edges of the tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$ since they will not be part of the final matching.
+    \end{proof}
+
+    This will reduce the number of edges by a factor of $O(p - 1)$. In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in blue.
+
+    \item \textbf{Tree nodes' edges optimization 2}:
+    \begin{lemma} \label{lemma:tree_optimization_2}
+        The tree nodes' edges can be optimized by removing the edges with weight $1$ starting from a node $u \in V_1$ to a node $v \in V_2$ if the node $u$ has another edge with weight $0$ connected to a node $z \in V_2$ such that $z < v$ in the ordering of the nodes.
+    \end{lemma}
+
+    \begin{proof}
+        
+    \end{proof}
+
+    This will reduce the number of edges by a factor of $O(t)$. In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in red.
 \end{itemize}
+
+In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite graph for the example shown in previous section after the optimizations.
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+            \node[main] (1s) {$s_1$};
+            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (3s) [below of=2s] {$1$};
+            \node[main] (4s) [below of=3s] {$2$};
+            \node[main] (5s) [below of=4s] {$1$};
+            \node[main] (6s) [below of=5s] {$3$};
+            \node[main] (7s) [below of=6s] {$1$};
+            \node[main] (8s) [below of=7s] {$2$};
+            \node[main] (9s) [below of=8s] {$2$};
+            \node[main] (1d) [right=3cm of 3s] {$1$};
+            \node[main] (2d) [below of=1d] {$2$};
+            \node[main] (3d) [below of=2d] {$1$};
+            \node[main] (4d) [below of=3d] {$3$};
+            \node[main] (5d) [below of=4d] {$1$};
+            \node[main] (6d) [below of=5d] {$2$};
+            \node[main] (7d) [below of=6d] {$2$};
+            \node[main] (8d) [below of=7d] {$d_1$};
+            \node[main] (9d) [below of=8d] {$d_2$};
+            
+            \draw[black, dashed, ->] (1s) -- (1d);
+            \draw[green, dashed, ->] (1s) -- (2d);
+            \draw[green, dashed, ->] (2s) -- (1d);
+            \draw[black, dashed, ->] (2s) -- (2d);
+            \draw[blue, dashed, ->] (3s) -- (2d);
+            \draw[red, dashed, ->] (3s) -- (4d);
+            \draw[black, ->] (3s) -- (3d);
+            \draw[black, dashed, ->] (4s) -- (3d);
+            \draw[black, dashed, ->] (4s) -- (4d);
+            \draw[black, ->] (4s) -- (6d);
+            \draw[black, dashed, ->] (5s) -- (4d);
+            \draw[black, ->] (5s) -- (5d);
+            \draw[red, dashed, ->] (5s) -- (6d);
+            \draw[black, dashed, ->] (6s) -- (5d);
+            \draw[black, dashed, ->] (6s) -- (6d);
+            \draw[black, ->] (6s) -- (8d);
+            \draw[black, ->] (6s) -- (9d);
+            \draw[black, dashed, ->] (7s) -- (6d);
+            \draw[black, ->] (7s) -- (8d);
+            \draw[black, ->] (7s) -- (9d);
+            \draw[black, ->] (8s) -- (7d);
+            \draw[black, ->] (9s) -- (8d);
+            \draw[black, ->] (9s) -- (9d);
+        \end{tikzpicture} &
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+            \node[main] (1s) {$s_1$};
+            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (3s) [below of=2s] {$1$};
+            \node[main] (4s) [below of=3s] {$2$};
+            \node[main] (5s) [below of=4s] {$1$};
+            \node[main] (6s) [below of=5s] {$3$};
+            \node[main] (7s) [below of=6s] {$1$};
+            \node[main] (8s) [below of=7s] {$2$};
+            \node[main] (9s) [below of=8s] {$2$};
+            \node[main] (1d) [right=3cm of 3s] {$1$};
+            \node[main] (2d) [below of=1d] {$2$};
+            \node[main] (3d) [below of=2d] {$1$};
+            \node[main] (4d) [below of=3d] {$3$};
+            \node[main] (5d) [below of=4d] {$1$};
+            \node[main] (6d) [below of=5d] {$2$};
+            \node[main] (7d) [below of=6d] {$2$};
+            \node[main] (8d) [below of=7d] {$d_1$};
+            \node[main] (9d) [below of=8d] {$d_2$};
+            
+            \draw[black, dashed, ->] (1s) -- (1d);
+            \draw[black, dashed, ->] (2s) -- (2d);
+            \draw[black, ->] (3s) -- (3d);
+            \draw[black, dashed, ->] (4s) -- (3d);
+            \draw[black, dashed, ->] (4s) -- (4d);
+            \draw[black, ->] (4s) -- (6d);
+            \draw[black, dashed, ->] (5s) -- (4d);
+            \draw[black, ->] (5s) -- (5d);
+            \draw[black, dashed, ->] (6s) -- (5d);
+            \draw[black, dashed, ->] (6s) -- (6d);
+            \draw[black, ->] (6s) -- (8d);
+            \draw[black, ->] (6s) -- (9d);
+            \draw[black, dashed, ->] (7s) -- (6d);
+            \draw[black, ->] (7s) -- (8d);
+            \draw[black, ->] (7s) -- (9d);
+            \draw[black, ->] (8s) -- (7d);
+            \draw[black, ->] (9s) -- (8d);
+            \draw[black, ->] (9s) -- (9d);
+        \end{tikzpicture} \\
+    (a) & (b) \\
+    \end{tabular}
+    \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics showed. In (a), the edges removed are shown in green for lemma \ref{lemma:sources_optimization}, blue for lemma \ref{lemma:tree_optimization_1}, and red for lemma \ref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics applied. Dashed edges weigh $1$, while solid edges weigh $0$.}
+    \label{fig:heuristics_example}
+\end{figure}

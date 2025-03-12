@@ -21,6 +21,58 @@ The problem of finding a minimum weight perfect matching in a bipartite graph is
     Given a weighted bipartite graph $G = (V, E)$, where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}.
 \end{definition}
 
+\subsection{The existence of perfect matchings in bipartite graphs}
+In this subsection a theorem is introduced that states a condition for the existence of perfect matchings in bipartite graphs. This theorem will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}.
+
+Let's start with the definition of the \textbf{Tutte matrix} of a bipartite graph.
+\begin{definition}[Tutte matrix] \label{def:tutte_matrix}
+    The Tutte matrix of bipartite graph $G = (U, V, E)$ is an $n \times n$ matrix $M$ with the entry at row $i$ and column $j$
+    \begin{equation}
+        M_{i,j} =
+        \begin{cases}
+            0, & \text{if } (u_i, u_j) \notin E \\
+            x_{i,j}, & \text{if } (u_i, u_j) \in E
+        \end{cases}
+    \end{equation}
+\end{definition}
+
+The determinant of the Tutte matrix is useful in testing whether a graph has a perfect matching or not, as the following theorem shows. 
+
+\begin{theorem}[Existence of perfect matchings in bipartite graphs] \label {thm:perfect_matching_existence}
+    Given a bipartite graph $G$ and the Tutte matrix $M$ for $G$ then the following equivalence holds:
+    $$
+    Det(M) \neq 0 \iff \text{There exists a perfect matching in G}
+    $$
+\end{theorem}
+
+\begin{proof}
+    We have the following expression for the determinant:
+
+    $$
+    \text{Det}(M) = \sum_{\pi \in S_n} (-1)^{sgn(\pi)} \prod_{i=1}^{n} M_{i,\pi(i)}
+    $$
+
+    where $S_n$ is the set of all permutations on $[n]$, and $sgn(\pi)$ is the sign of the permutation $\pi$. There is a one-to-one correspondence between a permutation $\pi \in S_n$ and a (possible) perfect matching 
+
+    $$
+    \{(u_1, v_{\pi(1)}), (u_2, v_{\pi(2)}), \cdots , (u_n, v_{\pi(n)})\} \text{ in } G.
+    $$
+
+    Note that if this perfect matching does not exist in $G$ (i.e., some edge $(u_i, v_{\pi(i)}) \notin E$), then the term corresponding to $\pi$ in the summation is $0$. So we have
+
+    $$
+    \text{Det}(M) = \sum_{\pi \in P} (-1)^{sgn(\pi)} \prod_{i=1}^{n} x_{i,\pi(i)}
+    $$
+
+    where $P$ is the set of perfect matchings in $G$. This is clearly zero if $P = \emptyset$, i.e., if $G$ has no perfect matching. If $G$ has a perfect matching, there is a $\pi \in P$ and the term corresponding to $\pi$ is
+
+    $$
+    \prod_{i=1}^{n} x_{i,\pi(i)} \neq 0.
+    $$
+
+    Additionally, there is no other term in the summation that contains the same set of variables. Therefore, this term is not cancelled by any other term. So in this case, $\text{Det}(M) \neq 0$.
+\end{proof}
+
 \subsection{Problem formulation}
 The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e.an optimization problem in which the variables are restricted to integer values and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
 
