@@ -9,3 +9,6 @@
 *.toc
 *.fdb_latexmk
 *.fls
+/*/.zed
+/*/.vscode
+/*/.DS_Store

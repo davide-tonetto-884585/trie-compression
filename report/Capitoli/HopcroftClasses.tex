@@ -1,7 +1,92 @@
 \chapter{Hopcroft Algorithm for Minimization of DFA}
 
 \section{Introduction}
-The process of automata minimization is the process of reducing the number of states in a DFA while preserving the language accepted by the DFA. The minimization of DFA is crucial for a variety of applications, such model checking, hardware 
+The process of automata minimization is the process of reducing the number of states in a DFA while preserving the language accepted by the DFA. The minimization of DFA is crucial for a variety of applications, such model checking, hardware
 design, and compilers, as it produces a more effective and compact representation of the automata.
 
-The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is the Hopcroft algorithm, which was proposed by John Hopcroft in 1971. The Hopcroft algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
+The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is the Hopcroft algorithm, which was proposed by John Hopcroft in 1971 \cite{HOPCROFT1971189}. The Hopcroft algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
+
+Before we delve into the details of the Hopcroft algorithm, let us first introduce the concept of DFA.
+\subsection{Deterministic Finite Automata (DFA)}
+A deterministic finite automaton (DFA) is a 5-tuple $M = (Q, \Sigma, \delta, q_0, F)$ where:
+\begin{itemize}
+    \item $Q$ is a finite set of states
+    \item $\Sigma$ is a finite set of input symbols (alphabet)
+    \item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function
+    \item $q_0 \in Q$ is the initial state
+    \item $F \subseteq Q$ is the set of final (accepting) states
+\end{itemize}
+
+The DFA processes an input string by starting from the initial state $q_0$ and following transitions based on the input symbols. The string is accepted if the DFA ends in an accepting state after processing all input symbols.
+
+\section{Hopcroft's Minimization Algorithm}
+Minimization of deterministic finite automata (DFA) is a classical and widely studied problem in Theory of Automata and Formal Languages. It consists in finding the unique (up to isomorphism) finite automaton with the minimal number of states, recognizing the same regular language of a given DFA.
+
+The Hopcroft algorithm works by iteratively refining partitions of states until no further refinement is possible. The algorithm is the following:
+
+\begin{algorithm}
+    \caption{Hopcroft's Algorithm: DFA Minimization ($\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$)}
+    \begin{algorithmic}[1]
+        \State $\Pi \gets \{F, Q \setminus F\}$
+        \ForAll{$a \in \Sigma$}
+            \State $\mathcal{W} \gets \{(\min(F, Q \setminus F), a)\}$
+        \EndFor
+        \While{$\mathcal{W} \neq \emptyset$}
+            \State choose and delete any $(C, a)$ from $\mathcal{W}$
+            \ForAll{$B \in \Pi$}
+                \If{$B$ is split from $(C, a)$}
+                    \State $B' \gets \delta_a^{-1}(C) \cap B$
+                    \State $B'' \gets B \setminus \delta_a^{-1}(C)$
+                    \State $\Pi \gets \Pi \setminus \{B\} \cup \{B', B''\}$
+                    \ForAll{$b \in \Sigma$}
+                        \If{$(B, b) \in \mathcal{W}$}
+                            \State $\mathcal{W} \gets \mathcal{W} \setminus \{(B, b)\} \cup \{(B', b), (B'', b)\}$
+                        \Else
+                            \State $\mathcal{W} \gets \mathcal{W} \cup \{(\min(B', B''), b)\}$
+                        \EndIf
+                    \EndFor
+                \EndIf
+            \EndFor
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+
+The algorithm enables to compute equivalence classes of nodes, in particular, the Myhill-Nerode equivalence classes. The Myhill-Nerode theorem states that a language is regular if and only if it has a finite number of Myhill-Nerode equivalence classes. This theorem provides a powerful tool for determining the regularity of languages and is a cornerstone of automata theory. Let's formalize the concept of equivalence classes and the Myhill-Nerode theorem.
+
+\begin{definition}[Equivalence Relation]
+    For a language $L \subseteq \Sigma^*$ and any strings $x,y \in \Sigma^*$, we say $x$ is equivalent to $y$ with respect to $L$ (written as $x \approx_L y$) if and only if for all strings $z \in \Sigma^*$:
+    \[ xz \in L \Leftrightarrow yz \in L \]
+    That is, strings $x$ and $y$ are equivalent if they have the same behavior with respect to the language $L$ - either they both lead to acceptance or both lead to rejection when any suffix $z$ is appended.
+\end{definition}
+
+\begin{theorem}[Myhill-Nerode theorem] \label{def:myhill-nerode}
+    Let $L$ be a language over an alphabet $\Sigma$. Then $L$ is regular if and only if there exists a finite number of Myhill-Nerode equivalence classes for $L$. Specifically, the number of equivalence classes is equal to the number of states in the minimal DFA recognizing $L$.
+\end{theorem}
+
+\section{Tree Equivalence Using DFA Minimization}
+To apply DFA minimization for finding equivalent subtrees:
+
+\begin{enumerate}
+    \item Convert the tree into a DFA representation:
+    \begin{itemize}
+        \item Each node becomes a state
+        \item Transitions represent parent-child relationships
+        \item Leaf nodes are marked as accepting states
+    \end{itemize}
+
+    \item Apply Hopcroft's algorithm to minimize the DFA:
+    \begin{itemize}
+        \item Initial partition separates leaf nodes from internal nodes
+        \item Refinement based on children's equivalence classes
+        \item Final partition gives equivalence classes of nodes
+    \end{itemize}
+
+    \item Equivalent subtrees:
+    \begin{itemize}
+        \item Nodes in same equivalence class have identical subtrees
+        \item Each class represents a unique subtree structure
+        \item Number of classes equals number of distinct subtrees
+    \end{itemize}
+\end{enumerate}
+
+This process efficiently identifies all structurally equivalent subtrees in $O(n \log n)$ time, where $n$ is the number of nodes in the tree.

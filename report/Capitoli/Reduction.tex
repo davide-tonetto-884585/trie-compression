@@ -48,23 +48,23 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
 \begin{figure}[H]
     \centering
     \begin{tabular}{ccc}
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$s_1$};
-            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (2s) [below of=1s] {$s_2$};
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$1$};
             \node[main] (5s) [below of=4s] {$2$};
-            
+
             \node[main] (1d) [right=3cm of 3s] {$1$};
             \node[main] (2d) [below of=1d] {$1$};
             \node[main] (3d) [below of=2d] {$2$};
-            
+
             \draw[red, ->] (1s) -- (1d);
             \draw[red, ->] (1s) -- (3d);
             \draw[red, ->] (2s) -- (1d);
             \draw[red, ->] (2s) -- (3d);
         \end{tikzpicture} &
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$2$};
             \node[main] (5s) [below of=4s] {$1$};
@@ -73,12 +73,12 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
             \node[main] (2d) [below of=1d] {$2$};
             \node[main] (3d) [below of=2d] {$1$};
             \node[main] (4d) [below of=3d] {$3$};
-            
+
             \draw[red, ->] (3s) -- (2d);
             \draw[red, ->] (3s) -- (4d);
             \draw[green, ->] (3s) -- (3d);
         \end{tikzpicture} &
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (7s) [below of=6s] {$1$};
             \node[main] (9s) [below of=7s] {$2$};
             \node[main] (5d) [below of=4d] {$1$};
@@ -93,13 +93,13 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
             \draw[green, ->] (9s) -- (9d);
         \end{tikzpicture} \\
     (a) & (b) & (c) \\
-    \end{tabular} 
+    \end{tabular}
     \caption[Reduction cases examples]{Considering $p=2$ these three examples show how to connect nodes in the bipartite graph in the case of sources (a), tree nodes (b), and destinations (c).}
     \label{fig:reduction_small_examples}
 \end{figure}
 
 \subsection{Proof of correctness}
-In order to prove the correctness of the reduction, it is important to start by defining the problem we want to solve. 
+In order to prove the correctness of the reduction, it is important to start by defining the problem we want to solve.
 
 \begin{definition}[\textsc{CHAINS-DIVISION} problem] \label{def:problem_def}
     Given a tree $T$ with $t$ nodes, and given the equivalence classes $E$ coming from the Hopcroft algorithm applied to the tree $T$, the sorted order of the nodes in $T$ according to the upward path $\pi$, and the number of chain $p \leq t$, we want to find the optimal partition of the nodes of $T$ into $p$ chains with $p \leq t$ such that the run length encoding of each chain is minimized.
@@ -147,7 +147,7 @@ Let's start by stating the following lemma.
 \end{lemma}
 
 \begin{proof}
-    The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} has a Tutte matrix (definition \ref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists. 
+    The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} has a Tutte matrix (definition \ref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
 
     We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
 \end{proof}
@@ -192,10 +192,10 @@ Now we can prove the correctness of the reduction.
 \begin{proof}
     Let $p \leq t$ be the number of chains we want to partition the nodes of a given tree $T$ into. Let $E$ be the set of equivalence classes of the nodes of $T$, from lemma \ref{lemma:p_less_than_E} we consider that $p \leq |E|$. We can construct a bipartite graph $G = (V, E)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ as stated in Definition \ref{def:bip_construction}. We will show that the optimal solution of the Minimum Weight Perfect Bipartite Matching problem for the graph $G$ is equivalent to the optimal solution of the \textsc{CHAINS-DIVISION} problem for the tree $T$.
 
-    From definition \ref{def:bip_construction} we know that $V_1$ contains $t + p$ nodes including $s_1, s_2, \dots, s_p$ and the $t$ elements of $E$ ordered, and $V_2$ contains $t + p$ nodes including the $t$ elements of $E$ ordered and $d_1, d_2, \dots, d_p$. 
+    From definition \ref{def:bip_construction} we know that $V_1$ contains $t + p$ nodes including $s_1, s_2, \dots, s_p$ and the $t$ elements of $E$ ordered, and $V_2$ contains $t + p$ nodes including the $t$ elements of $E$ ordered and $d_1, d_2, \dots, d_p$.
 
     The source nodes are necessary to distinguish the chains, by starting from each source node we can follow the edges of the nodes and reach the destination nodes in order to retrieve the nodes of a chain. The source nodes are all connected to the first $p$ nodes with distinct equivalence class in $V_2$ with weight $1$ since each chains has at least one node and a minimum cost of $1$.
-    
+
     The destination nodes are necessary to close the chains, by connecting the nodes of the tree to the destination nodes we can ensure that the chains are closed and allows to get a perfect matching otherwise we would have $|V_1| > |V_2|$ and so we would have unmatched nodes. From lemma \ref{lemma:all_destinations} we know that exactly $|E|$ nodes of the tree $T$ in $V_1$ are connected to all the destination nodes $d_i \in V_2 \quad \forall i = 1, 2, \dots, p$ with weight $0$. This is done in order to ensure that the chains are closed and that the nodes of the tree are connected to the destination nodes in order to have a perfect matching. The weight of the edges is $0$ since if we conclude a chain no additional cost is needed.
 
     We know from definition \ref{def:chains} that the order of the nodes of each chain must follow the order given by the upward path $\pi$ of each node in the tree $T$. This is ensured by lemma \ref{lemma:greater_nodes} that states that it is impossible for a node $u \in V_1$ coming from the nodes of $T$ to be connected to a node $v \in V_2$ coming from the nodes of $T$ such as $v < u$ in the order of the nodes of the tree $T$. This is done in order to ensure that the nodes are connected in the right order.
@@ -209,9 +209,9 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
 \begin{figure}[H]
     \centering
     \begin{tabular}{cc}
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$s_1$};
-            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (2s) [below of=1s] {$s_2$};
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$2$};
             \node[main] (5s) [below of=4s] {$1$};
@@ -228,7 +228,7 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
             \node[main] (7d) [below of=6d] {$2$};
             \node[main] (8d) [below of=7d] {$d_1$};
             \node[main] (9d) [below of=8d] {$d_2$};
-            
+
             \draw[red, ->] (1s) -- (1d);
             \draw[red, ->] (1s) -- (2d);
             \draw[red, ->] (2s) -- (1d);
@@ -253,9 +253,9 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
             \draw[green, ->] (9s) -- (8d);
             \draw[green, ->] (9s) -- (9d);
         \end{tikzpicture} &
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$s_1$};
-            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (2s) [below of=1s] {$s_2$};
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$2$};
             \node[main] (5s) [below of=4s] {$1$};
@@ -272,7 +272,7 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
             \node[main] (7d) [below of=6d] {$2$};
             \node[main] (8d) [below of=7d] {$d_1$};
             \node[main] (9d) [below of=8d] {$d_2$};
-            
+
             \draw[red, ->] (1s) -- (1d);
             \draw[red, ->] (2s) -- (2d);
             \draw[green, ->] (3s) -- (3d);
@@ -295,7 +295,7 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
 \begin{itemize}
     \item \textbf{Sources' edges optimization}:
     \begin{lemma} \label{lemma:sources_optimization}
-        The sources' edges can be optimized by connecting each source only to the smaller node (considering the order of the nodes) in $V_2$ coming from the tree $T$ that is not connected to any other source. 
+        The sources' edges can be optimized by connecting each source only to the smaller node (considering the order of the nodes) in $V_2$ coming from the tree $T$ that is not connected to any other source.
     \end{lemma}
 
     \begin{proof}
@@ -303,9 +303,9 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
     \end{proof}
 
     This will reduce the number of edges coming from the sources from $O(p^2)$ to $O(p)$. In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in green.
-    \item \textbf{Tree nodes' edges optimization 1}: 
+    \item \textbf{Tree nodes' edges optimization 1}:
     \begin{lemma} \label{lemma:tree_optimization_1}
-        The tree nodes' edges can be optimized by removing the edges of tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$. 
+        The tree nodes' edges can be optimized by removing the edges of tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$.
     \end{lemma}
 
     \begin{proof}
@@ -320,10 +320,10 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
     \end{lemma}
 
     \begin{proof}
-        
+        To proof the lemma since every time we have an edge with weight $0$ between two nodes of $V_1$ and $V_2$ it means that those two nodes have the same equivalence class and so there is no need to add additional cost trying to connect that node to nodes with different classes coming after in the ordering, as that would only increase the cost without providing any benefit to the solution. Also, we know that connecting nodes with the same class is always the best choice for optimizing the run length encoding of each chain.
     \end{proof}
 
-    This will reduce the number of edges by a factor of $O(t)$. In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in red.
+    In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in red.
 \end{itemize}
 
 In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite graph for the example shown in previous section after the optimizations.
@@ -331,9 +331,9 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
 \begin{figure}[H]
     \centering
     \begin{tabular}{cc}
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$s_1$};
-            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (2s) [below of=1s] {$s_2$};
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$2$};
             \node[main] (5s) [below of=4s] {$1$};
@@ -350,7 +350,7 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
             \node[main] (7d) [below of=6d] {$2$};
             \node[main] (8d) [below of=7d] {$d_1$};
             \node[main] (9d) [below of=8d] {$d_2$};
-            
+
             \draw[black, dashed, ->] (1s) -- (1d);
             \draw[green, dashed, ->] (1s) -- (2d);
             \draw[green, dashed, ->] (2s) -- (1d);
@@ -375,9 +375,9 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
             \draw[black, ->] (9s) -- (8d);
             \draw[black, ->] (9s) -- (9d);
         \end{tikzpicture} &
-        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={10mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$s_1$};
-            \node[main] (2s) [below of=1s] {$s_2$}; 
+            \node[main] (2s) [below of=1s] {$s_2$};
             \node[main] (3s) [below of=2s] {$1$};
             \node[main] (4s) [below of=3s] {$2$};
             \node[main] (5s) [below of=4s] {$1$};
@@ -394,7 +394,7 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
             \node[main] (7d) [below of=6d] {$2$};
             \node[main] (8d) [below of=7d] {$d_1$};
             \node[main] (9d) [below of=8d] {$d_2$};
-            
+
             \draw[black, dashed, ->] (1s) -- (1d);
             \draw[black, dashed, ->] (2s) -- (2d);
             \draw[black, ->] (3s) -- (3d);
@@ -419,3 +419,21 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
     \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics showed. In (a), the edges removed are shown in green for lemma \ref{lemma:sources_optimization}, blue for lemma \ref{lemma:tree_optimization_1}, and red for lemma \ref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics applied. Dashed edges weigh $1$, while solid edges weigh $0$.}
     \label{fig:heuristics_example}
 \end{figure}
+
+\section{Moving to Maximum weight perfect bipartite matching}
+In this section, we will discuss how to slightly modify the reduction process to move from a minimum weight perfect bipartite matching problem to a maximum weight perfect bipartite matching problem. This will be helpful in solving the problem more efficiently by using some known algorithms to solve the maximum weight perfect bipartite matching problem.
+
+\begin{theorem}
+    An optimal solution of an instance $\mathcal I$ with $p \leq |E|$ of the \textsc{CHAINS-DIVISION} problem is equivalent to an optimal solution of the Maximum Weight Perfect Bipartite Matching for the instance $r(\mathcal I)$ where $r: \mathcal{I}_{CHAINS-DIVISION} \rightarrow \mathcal{I}_{MWPBM}$ is the reduction function that maps an instance of the CHAINS-DIVISION problem to an instance of the Maximum Weight Perfect Bipartite Matching problem constructed as stated in Definition \ref{def:bip_construction} but with inverted weights (weight $0$ becomes $1$ and weight $1$ becomes $0$).
+\end{theorem}
+
+\begin{proof}
+    Let $M$ be a perfect matching in the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction}. Let $w(M)$ be the sum of the weights of the edges in the matching $M$. From the previous theorem, we know that the optimal solution of the \textsc{CHAINS-DIVISION} problem is equivalent to finding a perfect matching $M$ in $G$ that minimizes $w(M)$.
+
+    Let $G'$ be a bipartite graph constructed as $G$ but with inverted weights (weight $0$ becomes $1$ and weight $1$ becomes $0$). Let $M'$ be a perfect matching in $G'$ and let $w'(M')$ be the sum of the weights of the edges in the matching $M'$. Let $k$ be the number of edges in the matching.
+
+    We can see that for any matching $M$ in $G$:
+    \[ w'(M) = k - w(M) \]
+
+    This means that maximizing $w'(M)$ is equivalent to minimizing $w(M)$. Therefore, finding the maximum weight perfect matching in $G'$ is equivalent to finding the minimum weight perfect matching in $G$, which in turn is equivalent to finding the optimal solution of the \textsc{CHAINS-DIVISION} problem.
+\end{proof}
