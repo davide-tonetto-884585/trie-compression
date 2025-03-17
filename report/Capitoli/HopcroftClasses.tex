@@ -51,7 +51,7 @@ The Hopcroft algorithm works by iteratively refining partitions of states until 
     \end{algorithmic}
 \end{algorithm}
 
-The algorithm enables to compute equivalence classes of nodes, in particular, the Myhill-Nerode equivalence classes. The Myhill-Nerode theorem states that a language is regular if and only if it has a finite number of Myhill-Nerode equivalence classes. This theorem provides a powerful tool for determining the regularity of languages and is a cornerstone of automata theory. Let's formalize the concept of equivalence classes and the Myhill-Nerode theorem.
+The algorithm enables to compute equivalence classes of nodes in $O(n\log n)$, in particular, the Myhill-Nerode equivalence classes. The Myhill-Nerode theorem states that a language is regular if and only if it has a finite number of Myhill-Nerode equivalence classes. This theorem provides a powerful tool for determining the regularity of languages and is a cornerstone of automata theory. Let's formalize the concept of equivalence classes and the Myhill-Nerode theorem.
 
 \begin{definition}[Equivalence Relation]
     For a language $L \subseteq \Sigma^*$ and any strings $x,y \in \Sigma^*$, we say $x$ is equivalent to $y$ with respect to $L$ (written as $x \approx_L y$) if and only if for all strings $z \in \Sigma^*$:
@@ -63,30 +63,37 @@ The algorithm enables to compute equivalence classes of nodes, in particular, th
     Let $L$ be a language over an alphabet $\Sigma$. Then $L$ is regular if and only if there exists a finite number of Myhill-Nerode equivalence classes for $L$. Specifically, the number of equivalence classes is equal to the number of states in the minimal DFA recognizing $L$.
 \end{theorem}
 
-\section{Tree Equivalence Using DFA Minimization}
-To apply DFA minimization for finding equivalent subtrees:
+\section{Minimization of acyclic DFA in linear time}
+For our purpose, we will focus on a specific type of finite automaton: an acyclic deterministic finite automaton (or DAWG). An acyclic DFA is one where there are no cycles within the transitions. This property simplifies the minimization process since it ensures that every state can be reached from the start state through a unique path.
+
+Let's start by giving the notion of directed acyclic word graph (DAWG):
+\begin{definition}[DAWG]
+    A \textbf{DAWG} (directed acyclic word graph) or automaton $\mathcal{A}$ is defined by the following 5-uple:
+    \[
+    \mathcal{A} = (Q, \Sigma, F, T, q_0),
+    \]
+    where
+    \begin{itemize}
+        \item $Q$ is a set of states;
+        \item $\Sigma$ is an alphabet of finite cardinal denoted by $|\Sigma|$;
+        \item $q_0$ is the initial state;
+        \item $T$ is the subset of terminal states of $Q$;
+        \item $F$ is a function of $Q \times \Sigma$ into $Q$ defining the transitions (arcs) of the automaton.
+    \end{itemize}
+\end{definition}
+
+In this section, we will discuss an efficient algorithm for minimizing acyclic deterministic finite automata in linear time on the number of states \cite{revuz1992minimisation}. The minimization process involves identifying and merging equivalent states. Two states are considered equivalent if they have the same set of reachable final states, meaning that from any state $q$, there is a path to a final state in both states. This equivalence relation partitions the DAWG into disjoint sets of states, each representing an equivalence class. The purpose of using this approach is then to apply it to the input tree for our pipeline since the problem can directly be applied to trees where the leaf nodes are considered as final states, the root as the initial state and the edges of the tree are considered directed from node to its children. 
+
+\subsection{The minimization algorithm}
+The minimization algorithm introduced in \cite{revuz1992minimisation} operates by labeling each state with a unique identifier that represents the structure of the automaton from that state onward. It proceeds in the following steps:
 
 \begin{enumerate}
-    \item Convert the tree into a DFA representation:
+    \item \textbf{Height Computation:} The height of each state is determined, where the height of a state is the length of the longest path from that state to a final state.
+    \item \textbf{State Labeling:} Each state is labeled based on the structure of its transitions. The label consists of:
     \begin{itemize}
-        \item Each node becomes a state
-        \item Transitions represent parent-child relationships
-        \item Leaf nodes are marked as accepting states
+        \item Whether the state is final or not.
+        \item The transitions, recorded as ordered pairs of symbols and target state identifiers.
     \end{itemize}
-
-    \item Apply Hopcroft's algorithm to minimize the DFA:
-    \begin{itemize}
-        \item Initial partition separates leaf nodes from internal nodes
-        \item Refinement based on children's equivalence classes
-        \item Final partition gives equivalence classes of nodes
-    \end{itemize}
-
-    \item Equivalent subtrees:
-    \begin{itemize}
-        \item Nodes in same equivalence class have identical subtrees
-        \item Each class represents a unique subtree structure
-        \item Number of classes equals number of distinct subtrees
-    \end{itemize}
+    \item \textbf{Lexicographic Sorting:} States at each height level are sorted lexicographically based on their labels using a bucket sort technique.
+    \item \textbf{Merging Equivalent States:} After sorting, states with identical labels are merged, ensuring that equivalent states are unified.
 \end{enumerate}
-
-This process efficiently identifies all structurally equivalent subtrees in $O(n \log n)$ time, where $n$ is the number of nodes in the tree.
