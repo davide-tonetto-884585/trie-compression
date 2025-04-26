@@ -1,17 +1,41 @@
-\chapter{Introduction}
-The aim of this thesis is to study a new technique for the compression of labeled trees. The aim of the project is to implement and experiment with the technique, and to compare it with other state-of-the-art techniques for tree compression such as the Extended Burrows-Wheeler Transform (XBWT) \cite{ferragina2009compressing}. 
+\chapter{Introduction} \label{chp:introduction}
+\section{Project overview}
+The increasing availability of large structured datasets, such as those found in XML documents, biological data, and hierarchical knowledge bases, has led to the need for efficient compression techniques for trees. Traditional compression methods, such as general-purpose text compression algorithms, often fail to exploit the hierarchical structure of trees effectively. Consequently, specialized tree compression techniques have been developed to address this issue.
 
-\section{The idea}
-Let $ T $ be an ordered tree of arbitrary fan-out, depth, and shape. $ T $ consists of $ n $ internal nodes and $ \ell $ leaves, for a total of $ t = n + \ell $ nodes. Every node of $ T $ is labeled with a symbol drawn from an alphabet $ \Sigma $. We assume that $ \Sigma $ is the set of labels effectively used in $ T $'s nodes and that these labels are encoded with the integers in the range $[1, |\Sigma|]$. Then we need to define the array $\pi$ where, for each node $u$, $\pi(u)$ is the string obtained by concatenating the labels on the \textbf{upward path} from $u$'s parent to the root of the tree (root has an empty $\pi$ component).
+Among the most prominent techniques for tree compression, the \textit{Extended Burrows-Wheeler Transform} \cite{ferragina2009compressing} extends the classical Burrows-Wheeler Transform to labeled trees, leveraging their structural properties to achieve significant compression. Another notable approach includes \textit{Re-Pair-based compression} \cite{lohrey2011tree}, which applies grammar-based compression to the tree structure. 
 
-The following pipeline is used to compress the tree $T$:
+Despite these advancements, existing techniques may not be optimal when dealing with trees characterized by a high degree of repetitiveness. Many real-world datasets, such as versioned documents or biological phylogenies, contain repeated substructures that can be exploited to achieve better compression. The aim of this thesis is to study a novel compression technique designed to efficiently handle such highly repetitive trees. We will implement and evaluate this method, comparing it with existing state-of-the-art approaches to determine its effectiveness in different scenarios.
 
-\begin{enumerate}
-    \item Initially the array $\pi$ is computed for the tree $T$ by traversing the tree in a pre-order fashion. Then the nodes are stably sorted by the lexicographic order of their $\pi$ strings. In order to sort the nodes, the \textbf{Path Sort} algorithm introduced in \cite{ferragina2009compressing} is used, allowing to sort the nodes in linear time and $O(t \log t)$ space.
-    \item Then, using Hopcroft algorithm for minimization of DFA \cite{HOPCROFT1971189} the nodes are partitioned into equivalence classes where two nodes are equivalent if they have the same subtree rooted at them. 
-    \item Given a width $p$, the nodes previously sorted are then divided into $p$ chains with the aim to minimize the run length encoding of each chain (by considering the equivalence classes). In order to do so we reduced this problem to the \textbf{Minimum Perfect Bipartite Matching} problem, which can be solved in polynomial time.
-    \item Lastly, the resulting DFA or NFA can be indexed using the indexing scheme introduced by Cotumaccio et al. \cite{cotumaccio2023co}. Also, the chains can be compressed using some techniques that will be discussed in the next chapters.
-\end{enumerate}
+\section{State of the art}
+We begin with a brief overview of the state of the art for labeled tree compression. Subsequently, the next chapter will provide a detailed examination of the Extended Burrows-Wheeler Transform.
+
+The Extended Burrows-Wheeler Transform \cite{ferragina2009compressing} is a data structure designed for efficient compression and indexing of labeled trees.
+The XBWT works by linearizing a labeled tree into two arrays: one captures the structural properties of the tree and the other stores its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of the XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as parent-child navigation and sophisticated path-based searches, in (near-)optimal time and space.
+The XBWT provides significant improvements in both compression ratio and query performance compared to traditional compression schemes, making it a valid resource for intensive applications.
+
+Tree Re-Pair is a grammar-based compression technique specifically adapted for tree structures \cite{lohrey2011tree}. It extends the principles of the original Re-Pair algorithm introduced in \cite{larsson2000off}, specifically designed for sequences and to handle the hierarchical nature of trees. The core idea of the tool is to identify frequently occurring patterns within the tree and represent them more compactly.
+The process involves the linearization of the tree (e.g., using a specific traversal order) and then the application of the Re-Pair logic. In this way, it finds the most frequent pair of adjacent elements (which could represent nodes, labels, or structural components depending on the linearization) in the sequence. The pair is then replaced by a new non-terminal symbol, and the corresponding production rule is added to a grammar. All this process is then repeated until no more pairs occur frequently enough or some other stopping criterion is met. The final output is a relatively small grammar (a set of production rules) and a sequence of symbols (including the newly introduced non-terminals) that can be used to reconstruct the original tree. An application of Tree Re-Pair to XML documents can be found in \cite{lohrey2013xml}.
+
+\section{Challenges}
+In order to develop an effective tree compression scheme that can exploit repetitive structures, we need to address several key challenges:
+\begin{itemize}
+    \item \textbf{Identification of repetitive structures:} The first step in compressing repetitive trees is to identify the repeated substructures efficiently. This requires the development of algorithms capable of detecting and representing these structures in a compact way.
+    \item \textbf{Optimization of representation:} Once the repetitive structures have been identified, the challenge is to represent them in an optimized way that minimizes the overall size of the compressed tree. This involves finding the most efficient encoding for the repeated substructures.
+\end{itemize}
+
+We will address these challenges by developing a novel tree compression scheme that leverages the deterministic finite automata minimization algorithm to identify and compress repetitive structures in trees and the Minimum Weight Perfect Bipartite Matching algorithm to optimize their representation. Both algorithms are known for their efficiency and effectiveness in solving similar problems and are well-suited to the task at hand. They will be integrated into a comprehensive compression pipeline that can handle trees with repetitive structures efficiently.
 
 \section{The structure of the thesis}
 The thesis is structured as follows:
+\begin{enumerate}
+    \item \textbf{Chapter \ref{chp:introduction}} provides an overview of the project and its objectives.
+    \item \textbf{Chapter \ref{chp:thbg_labeled_tree}} contains the theoretical background on labeled trees necessary to understand the content of the subsequent chapters.
+    \item \textbf{Chapter \ref{chp:tree_compression}} provides a detailed examination of the Extended Burrows-Wheeler Transform and its implementation that we will use as a benchmark for comparison.
+    \item \textbf{Chapter \ref{chp:hopcroft}} introduces the Hopcroft algorithm for minimizing deterministic finite automata and an algorithm derived from it for minimizing acyclic deterministic finite automata in linear time which we will use to identify repetitive structures in trees.
+    \item \textbf{Chapter \ref{chp:min_weight_perfect_bipartite_matching}} presents the concept of matching in bipartite graphs and the Minimum Weight Perfect Bipartite Matching problem, which we will use in our compression scheme to chain repetitive structures.
+    \item \textbf{Chapters \ref{chp:project_overview}} gives an overview of the proposed tree compression scheme, outlining the pipeline used to compress trees with repetitive structures.
+    \item \textbf{Chapter \ref{chp:reduction_to_min_weight_matching}} describes how  the tree compression problem can be reduced to the Minimum Weight Perfect Bipartite Matching problem, providing a formal definition of the problem and discussing its complexity.
+    \item \textbf{Chapter \ref{chp:implementation}} describes the implementation details of the proposed method and the experimental setup used to evaluate its performance.
+    \item \textbf{Chapter \ref{chp:experimental_results}} provides a detailed analysis of the experimental results, discussing the performance of the proposed method in various scenarios.
+    \item \textbf{Chapter \ref{chp:conclusions}} discusses the implications of our findings and outlines possible directions for future research.
+\end{enumerate}

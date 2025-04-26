@@ -1,18 +1,20 @@
-\chapter{Extended Burrows-Wheeler Transform}
-\section{Introduction} 
+\chapter{The Extended Burros-Wheeler Transform} \label{chp:tree_compression}
+This chapter delves into the Extended Burrows-Wheeler Transform (XBWT) introduced Ferragina et al.~\cite{ferragina2009compressing}, a prominent state-of-the-art technique for labeled tree compression. Understanding the principles and performance of XBWT is crucial as it will serve as the primary benchmark against which we will evaluate the novel compression scheme proposed in this thesis. By establishing a baseline with a well-regarded method like XBWT, we can effectively demonstrate the potential advantages and contributions of our new approach, particularly for trees exhibiting high repetitiveness.
 
-The Extended Burrows-Wheeler Transform (XBWT) is a data structure designed to efficiently compress and index labeled trees. A labeled tree is a data structure where each node is assigned a label from a given alphabet, and the tree can have an arbitrary shape and degree.
+\textit{Disclaimer: The fundamental definitions, properties, and algorithms related to the Extended Burrows-Wheeler Transform presented in this chapter are based on the work introduced by Ferragina et al.~`Compressing and Indexing Labeled Trees, with Applications'~\cite{ferragina2009compressing}.}
+
+\section{Introduction to XBWT} 
+In 2005, Ferragina et al. \cite{ferragina2009compressing} observed that succinctness could be achieved for labeled trees by exploiting an index scheme that fit into a space proportional to the entropy-compressed edge labels plus the succinct tree's topology. This observation was the starting point for the development of the Extended Burrows-Wheeler Transform. Let's start by defining the XBWT.
 
 XBWT works by linearizing a labeled tree into two coordinated arrays: one capturing the structural properties of the tree and the other storing its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as parent-child navigation and sophisticated path-based searches, in (near-)optimal time and space.
 
 One of the primary applications of XBWT is in the compression and indexing of hierarchical data formats, such as XML documents. It provides significant improvements in both compression ratio and query performance compared to traditional tools, making it an invaluable resource for data-intensive applications in fields like bioinformatics, information retrieval, and big data analytics.
 
-This project aims to implement the XBWT data structure and explore its applications in the context of labeled trees. We will start by providing an overview of the theoretical foundations of the XBWT. Finally, we will describe and compare the algorithms for constructing the XBWT and demonstrate its use in compressing and indexing labeled trees.
+This chapter aims to explore the XBWT data structure and its applications in the context of labeled trees. We will start by providing an overview of the theoretical foundations of the XBWT. Finally, we will describe and compare the algorithms for constructing the XBWT and demonstrate its use in compressing and indexing labeled trees.
 
 Let's start with a quick overview of the XBWT and its theoretical foundations.
 
-
-\subsubsection{How XBWT Works}
+\subsection{How XBWT Works}
 The transformation process of XBWT is as follows:
 \begin{enumerate}
     \item \textbf{Path Sorting:} The labeled tree is linearized by sorting its nodes based on the \emph{paths} from each node's parent to the root. The resulting order groups nodes with similar upward paths together, clustering related labels.
@@ -24,7 +26,7 @@ The transformation process of XBWT is as follows:
     \item \textbf{Compression:} Both \( S_{\text{last}} \) and \( S_{\alpha} \) are highly compressible due to the clustering of similar labels and structural redundancy.
 \end{enumerate}
 
-\subsubsection{Key Properties of XBWT}
+\subsection{Key Properties of XBWT}
 The XBWT has several key properties that make it an effective tool for labeled tree compression and indexing:
 \begin{itemize}
     \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the \emph{information-theoretic lower bound}, which is \( 2t - \Theta(\log t) + t \log |\Sigma| \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.
@@ -32,8 +34,7 @@ The XBWT has several key properties that make it an effective tool for labeled t
     \item \textbf{Scalability:} XBWT is particularly useful for large-scale hierarchical data, such as XML documents or phylogenetic trees, where both compression and fast querying are critical.
 \end{itemize}
 
-\subsection{Project implementation}
-
+\subsection{XBWT implementation overview}
 The XBWT data structure will be implemented in C++ using the Succinct Data Structure Library 2.0 (SDSL) for efficient representation and manipulation of compressed data structures. We will develop two algorithms for constructing the XBWT: one efficient linear-time recursive algorithm and one more straightforward iterative algorithm. Also, we will implement the necessary data structures and algorithms for navigating and querying the XBWT, such as parent-child navigation and path-based searches. 
 
 The code is available on GitHub at \url{https://github.com/davide-tonetto-884585/XBWT}. The project will be structured as follows:
@@ -45,5 +46,3 @@ The code is available on GitHub at \url{https://github.com/davide-tonetto-884585
     \item \textbf{experiments.cpp}: File containing the experiments and performance evaluation of the XBWT construction algorithms and compression efficiency.
     \item \textbf{CMakeLists.txt}: CMake configuration file for building the project.
 \end{itemize}
-
-The project will be developed and tested on a Linux environment using the GCC compiler and the CMake build system. 

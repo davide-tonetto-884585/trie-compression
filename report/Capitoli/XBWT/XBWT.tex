@@ -1,9 +1,5 @@
-\section{Extended Burrows-Wheeler Transform}
-
-In 2005, Ferragina et al. \cite{ferragina2009compressing} observed that succinctness could be achieved for labeled trees by exploiting an index scheme that fit into a space proportional to the entropy-compressed edge labels plus the succinct tree's topology. This observation was the starting point for the development of the Extended Burrows-Wheeler Transform (XBWT). Let's start by defining the XBWT.
-
-\subsection{Definition of XBWT}
-The \textbf{Extended Burrows-Wheeler Transform (XBWT)} is a data structure designed to efficiently compress and index \emph{labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT) \cite{burrows1994block} for strings, the XBWT extends these principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
+\section{Definition of XBWT}
+The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to efficiently compress and index \emph{labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT) \cite{burrows1994block} for strings, the XBWT extends these principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
 
 Given an ordered labeled tree $T$ of arbitrary fan-out, depth and shape, with $n$ internal nodes and $l$ leaves ($t$ nodes in total) and alphabet $\Sigma$. Let $u$ be a node in $T$, we define the following information:
 \begin{itemize}
@@ -18,17 +14,17 @@ Then, to define the XBWT, a sorted multi-set $S$ consisting of $t$ triplets (one
     The XBWT of a labeled tree $T$ consist of the two arrays $\{S_{\text{last}}, S_{\alpha}\}$ after sorting, and takes $2t + t \log |\Sigma|$ bits of space. 
 \end{theorem}
 
-\subsection{Properties of XBWT}
+\section{Properties of XBWT}
 The following two properties of the ordered multi-set $S$ are crucial for the indexing scheme, they immediately follow from the composition of the transform and from the way $S$ is built.
 
-\subsubsection{Property 1} \label{prop1}
+\subsection{Property 1} \label{prop1}
 \begin{enumerate}
     \item $S_{\text{last}}$ has $n$ 1s (one for each internal node) and $l$ 0s (one for each leaf).
     \item $S_{\alpha}$ is a permutation of the labels of the nodes in $T$.
     \item $S_{\pi}$ contains all the upward labeled paths of $T$ consisting internal node labels only. Also, each path is repeated a number of times equal to the number of its offsprings.
 \end{enumerate}
 
-\subsubsection{Property 2} \label{prop2}
+\subsection{Property 2} \label{prop2}
 \begin{enumerate}
     \item The first triplet of $S$ refers to the root of $T$.
     \item The triplet of node $u$ precedes the triplet of node $v$ in $S$ iff either $\pi[u] < \pi[v]$ or $\pi[u] = \pi[v]$ and $u$ precedes $v$ in the pre-order traversal of $T$.
@@ -36,10 +32,10 @@ The following two properties of the ordered multi-set $S$ are crucial for the in
     \item Let $u, v$ be two nodes in $T$ having the same label $\alpha[u] = \alpha[v]$, then if the triplets of $u$ precedes the triplets of $v$ in $S$, then the contiguous block of children of $u$ in $S$ precedes the contiguous block of children of $v$ in $S$. 
 \end{enumerate}
 
-\subsubsection{Property 3} \label{prop3}
+\subsection{Property 3} \label{prop3}
 Let $c \in \Sigma$ be an internal node label, and let $S[j_1, j_2]$ be all triplets whose $\pi$-components are prefixed by $c$. If $u$ is the $i$-th node labeled $c$ in $S_{\alpha}$, its children occur contiguously within $S[j_1, j_2]$ and delimited by the $i - 1$-th and $i$-th bit set to 1 in $S_{\text{last}}[j_1, j_2]$.
 
-\subsection{XBWT Construction}
+\section{XBWT Construction}
 A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for large deep trees. To overcome this issue, Ferragina et al. \cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time and $O(t \log t)$ space.
 
 The linear time algorithm is called \textbf{pathSort}, it is based on a generalization of the Skew algorithm for suffix array construction of strings \cite{karkkainen2006linear}. Let's see briefly how the Skew algorithm works.
@@ -51,7 +47,7 @@ The linear time algorithm is called \textbf{pathSort}, it is based on a generali
     \label{fig:XBWT_example}
 \end{figure}
 
-\subsubsection{Skew Algorithm}
+\subsection{Skew Algorithm}
 The Skew algorithm is an efficient method for constructing the suffix array of a string in linear time. A suffix array is a data structure that lists the starting indices of all the suffixes of a string in lexicographical order, and it is widely used in various string processing algorithms.
 
 \subsubsection*{Algorithm Overview}
@@ -79,7 +75,7 @@ Once the suffixes in $S_{12}$ are sorted, the algorithm proceeds to sort the suf
 
 Finally, the sorted orders of the suffixes in $S_0$ and $S_{12}$ are merged to obtain the complete suffix array of the original string. This merging process can be performed in linear time, ensuring the overall efficiency of the algorithm.
 
-\subsubsection{PathSort Algorithm}
+\subsection{PathSort Algorithm}
 
 The pseudocode of the pathSort algorithm is shown in Algorithm \ref{alg:pathSort}. As we can see the algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees. The main idea is to recursively sort the upward subpaths of the tree starting at nodes in levels $\not\equiv j \pmod{3}$, then sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the two sets of sorted subpaths by exploiting their lexicographic names. The value of $j$ is chosen in such a way that the number of nodes in \texttt{IntNodes} whose level is $\equiv j \pmod{3}$ is at least $t/3$ so that a constant fraction of upward paths are ensured to be dropped at each recursive step. Is important to note that:
 \begin{enumerate}
@@ -112,7 +108,7 @@ Next, the algorithm selects a value $j$ such that the number of nodes in \texttt
 
 For each node $u$ in \texttt{IntNodesNotAtPosJ}, the algorithm extracts the upward path consisting of the first three ancestors of $u$. These paths are then sorted using radix sort. If the sorted upward paths contain duplicates, the algorithm recursively calls the PathSort function on a new contracted tree, where nodes are renamed according to their sorted paths. Otherwise, if all upward paths are unique, the nodes in \texttt{IntNodesAtPosJ} are sorted and subsequently merged with \texttt{IntNodesNotAtPosJ} using lexicographic ordering, following the same merging strategy as in the Skew algorithm.
 
-\subsection{Inverting the XBWT}
+\section{Inverting the XBWT}
 Property 3 \ref{prop3} ensures that the two array $S_{\text{last}}$ and $S_{\alpha}$ of the XBWT can be used to reconstruct the original tree $T$. The algorithm to invert the XBWT is linear in time and requires $O(t \log t)$ bits of space.
 
 The algorithm \ref{alg:rebuildTree} initially builds the array $F$ that stores the first entry in $S$ whose $\pi$-component is prefixed by a symbol $x$ ($F$ approximates $S_{\pi}$ at its first symbol). Then, it exploits the array $F$ to efficiently build the array $J$ that stores the position in $S$ of the first child of each node in $T$. Finally, the algorithm deploys the array $J$ to
@@ -179,7 +175,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
     \end{algorithmic}
 \end{algorithm}
 
-\subsection{Compressing Labeled Trees}
+\section{Compressing Labeled Trees}
 Let the $k$-context of a node $u$ in a tree $T$ be defined as the first $k$ symbols of the $\pi$-component of the triplet associated with $u$. We denote this $k$-long prefix as $\pi_k[u]$. Thus, $\pi_k[u]$ represents the subpath of length $k$ leading to $u$ in $T$, or equivalently, the node $u$ descends from a subpath labeled as $\pi_k[u]$, where the nodes in $\pi_k[u]$ are encountered in an upward direction.
 
 The XBW[$T$] exhibits a local homogeneity property on the string $S_{\alpha}$, which can be demonstrated through the concept of $k$-contexts on trees. This property mirrors the strong local homogeneity exhibited by strings under the Burrows-Wheeler Transform [Burrows and Wheeler 1994] when applied to labeled trees. Specifically, node labels in $T$ are distributed across $S_{\alpha}$ in a manner that clusters together those labels originating from "similar" upward paths that share long prefixes. 
@@ -191,7 +187,7 @@ $C_{\alpha}$ and $C_{\text{last}}$ are used to squeeze the two strings that comp
 
 In general, let $C_{\alpha}$ be a $k$-th order string compressor that compresses any string $w$ into $|w|H_k(w) + |w| + o(|w|)$ bits, taking $O(|w|)$ time; and let $C_{\text{last}}$ be an algorithm that stores $S_{\text{last}}$ without compression. With this simple instantiation, the labeled tree $T$ can be compressed within $t H_k(S_{\alpha}) + 2t + o(t)$ bits and takes $O(t)$ optimal time.
 
-\subsection{Indexing a compressed labeled tree}
+\section{Indexing a compressed labeled tree}
 In order to implement the efficient operations listed in \ref{compandindexinglabtree} using the compressed arrays $S_{\text{last}}$ and $S_{\alpha}$ of XBWT, we need that the chosen compressors $C_{\alpha}$ and $C_{\text{last}}$ support the following operations:
 
 Given a string $S[1, t]$ over alphabet $\Sigma$

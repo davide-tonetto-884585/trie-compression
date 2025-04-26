@@ -49,6 +49,9 @@
 
 % \usepackage{todonotes}
 
+\newcommand{\draft}[1]{{\color{red}{#1}}}
+\newcommand{\alessio}[1]{{\color[HTML]{34aa15}{\bf{Alessio:}} #1}}
+\newcommand{\davide}[1]{{\color{blue}{\bf{Davide T.:}} #1}}
 % ------------------------
 % ---- DOCUMENT SETUP ----
 % ------------------------
@@ -91,6 +94,13 @@
 \begin{document}
 \pagenumbering{roman} 
 \input{frontespizio.tex} % PAGINA FRONTESPIZIO
+\newpage
+\
+\newpage
+\input{Abstract.tex} % PAGINA ABSTRACT
+\newpage
+\
+
 \tableofcontents  % Genera l'indice
 % \addcontentsline{toc}{chapter}{\listfigurename}
 % \listoffigures
@@ -124,23 +134,26 @@
 \newpage
 \
 \newpage
-\input{Capitoli/HopcroftClasses.tex}
-\newpage
-\
-\newpage
-\input{Capitoli/WheelerGraphs.tex}
+\input{Capitoli/thbgLabeledTrees.tex}
 \newpage
 \
 \newpage
 \input{Capitoli/XBWT/Introduzione}
-\input{Capitoli/XBWT/ThBackground.tex}
 \input{Capitoli/XBWT/XBWT.tex}
 \input{Capitoli/XBWT/Implementation.tex}
 \input{Capitoli/XBWT/ExperimentsAndConclusions.tex}
 \newpage
 \
 \newpage
+\input{Capitoli/HopcroftClasses.tex}
+\newpage
+\
+\newpage
 \input{Capitoli/minWeigthPerfectBipartiteMatching.tex}
+\newpage
+\
+\newpage
+\input{Capitoli/ProjectIntroduction.tex}
 \newpage
 \
 \newpage

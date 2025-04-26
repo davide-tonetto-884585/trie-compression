@@ -14,6 +14,7 @@
         \item $(k_1=k_2) \wedge (u_1<_{\pi}u_2) \Rightarrow v_1\leq_{\pi}v_2$. \label{axiom_3}
     \end{enumerate}
 \end{definition}
+\alessio{Give a brief description of the edge notation: (source, destination, label)}
 
 \section{Examples of Wheeler Graphs}
 \begin{figure}[H]
@@ -32,7 +33,7 @@
         \draw[blue, ->] (2) -- (4);
         \draw (4) edge[blue, loop left] (4);
     \end{tikzpicture}
-    \caption[Example of a Wheeler Graph]{Example of a Wheeler graph with $\sigma=3$. The label order is as follows: red $<$ blue $<$ green. The resulting total order of nodes is: $x_1<x_2<x_3<x_4<x_5$.}
+    \caption[Example of a Wheeler Graph]{Example of a Wheeler graph with $\sigma=3$. The label order is as follows: red $<$ blue $<$ green. The resulting total order of nodes is: $x_1<x_2<x_3<x_4<x_5$. \alessio{What is $\sigma$? I assume the size of the alphabet, but you never defined it. Also, see comment on Figure 3.2}}
     \label{fig:wheeler_example}
 \end{figure}
 
@@ -58,7 +59,7 @@ Consider Figure \ref{fig:wheeler_example}. Axiom (\ref{axiom_1}) states that nod
         \end{tikzpicture} \\
         (a) & (b) \\
     \end{tabular}
-    \caption{Examples for Axiom (\ref{axiom_2}).}
+    \caption{Examples for Axiom (\ref{axiom_2}). \alessio{The colors are very nice, but I would have to remember that red is less than blue, which is an arbitrary choice (and not colorblind friendly?). Would it be hard/ugly to also add labels to the edges? Also since $u$ nodes are always in the "hypothesis" part of the axiom, I think it would be clearer if $u$ nodes were above the $v$ nodes}}
     \label{fig:example_axiom_2}
 \end{figure}
 
@@ -86,7 +87,7 @@ In example (b), we instead have two edges $(u_1,v,red)$ and $(u_2,v,blue)$ with 
         \end{tikzpicture} \\
         (a) & (b) \\
     \end{tabular}
-    \caption{Examples for Axiom (\ref{axiom_3}).}
+    \caption{Examples for Axiom (\ref{axiom_3}). \alessio{Same as before}}
     \label{fig:example_axiom_3}
 \end{figure}
 
@@ -97,12 +98,13 @@ In example (b), we consider the case where the two edges $(u_1,v,red)$ and $(u_2
 \section{Properties of Wheeler Graphs}
 The following is a list of some properties of Wheeler graphs that can be derived from the axioms (Definition \ref{def_wheeler_graphs}).
 
+\alessio{Questa proprietà è già stata dimostrata nel paper originale di Gagie et al. sui Wheeler graphs. Essendo già stata dimostrata bisogna citare il paper in cui è stata provata la prima volta per dare credito agli autori (altrimenti vieni considerato un plagio).}
 \begin{lemma} \label{property_1}
-    All incoming edges to a node $v$ must have the same label. This property makes it equivalent to label either the nodes or the edges of the graph.
+    All incoming edges to a node $v$ must have the same label. \alessio{La frase seguente non fa parte del lemma ed è bene non inserirla qua. Meglio come commento dopo la dimostrazione} \draft{This property makes it equivalent to label either the nodes or the edges of the graph.}
 \end{lemma}
 
 \begin{proof}
-    Lemma \ref{property_1} is a natural derivation of the second Wheeler axiom (Definition \ref{def_wheeler_graphs}). It states that given two edges $(u_1,v_1,k_1)$ and $(u_2,v_2,k_2)$ with $k_1<k_2$, the order of the edge labels propagates to the destination nodes, implying $v_1<v_2$. This means that the destination nodes $v_1$ and $v_2$ cannot be the same if they receive incoming edges with different labels; otherwise, the considered graph would not be Wheeler.
+    \sout{Lemma \ref{property_1} is a natural derivation of the}\alessio{Non si referenzia un lemma nella sua stessa dimostrazione, inizia così: The proof naturally derives from the} second Wheeler axiom (Definition \ref{def_wheeler_graphs}). \draft{It states that given two edges $(u_1,v_1,k_1)$ and $(u_2,v_2,k_2)$ with $k_1<k_2$, the order of the edge labels propagates to the destination nodes, implying $v_1<v_2$. This means that} \alessio{Questa frase sarebbe meglio inserirla dopo la dimostrazione insieme alla frase del lemma, dato che non aggiunge niente alla dimostrazione ma è una spiegazione in termini colloquiali. Un modo migliore sarebbe dire: "If we have two edges $(u_1,v,k_1)$ and $(u_2,v,k_2)$, with $k_1 < k_2$, then by Axiom (ii) it implies $v < v$, which is not possible."} the destination nodes $v_1$ and $v_2$ cannot be the same if they receive incoming edges with different labels. \sout{otherwise, the considered graph would not be Wheeler.} \alessio{basta la frase di prima per la dimostrazione}\alessio{Questa propietà è abbastanza triviale. Di solito quando è così si mette come "observation" o "remark" per far capire al lettore che è solo frutto di un ragionamento semplice}
 \end{proof}
 
 \begin{lemma} \label{property_2}
@@ -110,25 +112,29 @@ The following is a list of some properties of Wheeler graphs that can be derived
 \end{lemma}
 
 \begin{proof}
-    Assume, for contradiction, that the statement does not hold and that a node $v$ cannot have multiple outgoing edges with the same label if the graph is Wheeler. The graph in Figure \ref{fig:wheeler_example} is a valid counterexample demonstrating the opposite, as node $x_1$ has two outgoing edges labeled $red$, and the graph is Wheeler. This leads to a contradiction.
+    Assume, \draft{for} \alessio{by} contradiction, that the statement does not hold and that a node $v$ cannot have multiple outgoing edges with the same label if the graph is Wheeler. The graph in Figure \ref{fig:wheeler_example} is a valid counterexample demonstrating the opposite, as node $x_1$ has two outgoing edges labeled $red$, and the graph is Wheeler. This leads to a contradiction.
 \end{proof}
 
 \begin{lemma} \label{property_3}
-    Consider a Wheeler graph $G=(V,E)$ with labeling defined over a set $\Sigma=\{a,b,c\}$, where the label order is $a<b<c$. Let $V_a \subseteq V$ be the set of vertices with label $a$ (i.e., those with incoming edges labeled $a$), $V_b \subseteq V$ the set of vertices with label $b$, and $V_c \subseteq V$ the set of vertices with label $c$. Also, let $u_a \in V_a$, $u_b \in V_b$, and $u_c \in V_c$. Then, in the context of vertex ordering in the graph, it holds that $u_a < u_b < u_c$. More generally, all vertices in $V_k$ for a certain label $k$ will be consecutive in the ordering, with no nodes of other labels interspersed among them in the total order.
+    \alessio{This Lemma (and the proof) is mixed with an example. It's great to give a simple intuition on the lemma, but try to be more formal in the Lemmas, and after that (or its proof) add the example.}
+    Consider a Wheeler graph $G=(V,E)$ with labeling defined over a \draft{set} \alessio{alphabet} $\Sigma=\{a,b,c\}$, where the label order is $a<b<c$. Let $V_a \subseteq V$ be the set of vertices with label $a$ (i.e., those with incoming edges labeled $a$), $V_b \subseteq V$ the set of vertices with label $b$, and $V_c \subseteq V$ the set of vertices with label $c$. Also, let $u_a \in V_a$, $u_b \in V_b$, and $u_c \in V_c$. Then, in the context of vertex ordering in the graph, it holds that $u_a < u_b < u_c$. More generally, all vertices in $V_k$ for a certain label $k$ will be consecutive in the ordering, with no nodes of other labels interspersed among them in the total order.
 \end{lemma}
 
 \begin{proof}
     Lemma \ref{property_3} follows naturally from the second Wheeler axiom (Definition \ref{def_wheeler_graphs}). Consider a Wheeler graph $G=(V,E)$ with labeling over a set $\Sigma=\{a,b\}$, where the order of labels is $a<b$. Let $V_a \subseteq V$ be the set of vertices labeled $a$ and $V_b \subseteq V$ be the set of vertices labeled $b$. Suppose, for contradiction, that there exist two nodes $u_a \in V_a$ and $u_b \in V_b$ such that $u_b < u_a$ in the Wheeler ordering.
-    
+
     Since $u_a \in V_a$ and $u_b \in V_b$, by the definition of sets $V_a$ and $V_b$, there must exist two edges $(v_1, u_a, a)$ and $(v_2, u_b, b)$. However, this leads to a contradiction because the second axiom states that for two edges $(u_1,v_1,k_1)$ and $(u_2,v_2,k_2)$ with $k_1<k_2$, the order of edge labels must be reflected in the destination nodes, meaning $v_1<v_2$. In our case, $a<b$, but $u_b < u_a$, implying the graph is not Wheeler.
 \end{proof}
 
+\alessio{Probably my fault, but I do not understand what $v_1$ and $v_2$ are. $V_k^1$ contains nodes $v_1$ with edges coming from the nodes following the nodes in the set?}
 \begin{lemma} \label{property_4}
-    Consider a total Wheeler order. Let $V_k$ be the set containing all nodes with the same label $k$. Let $V_k^1$ and $V_k^2$ be two partitions of $V_k$, where $V_k^1$ contains all nodes $v_1$ with incoming edges from nodes preceding $v_1$ in the total order, while $V_k^2$ contains all nodes $v_2$ with incoming edges from nodes following $v_2$ in the total order. Consequently, the intersection of $V_k^1$ and $V_k^2$ contains at most one vertex $u$, and all vertices in $V_k^1 \setminus \{u\}$ precede those in $V_k^2$ in the ordering. Moreover, given a vertex $v \in V_k^1$, there cannot exist an edge $(v, z, k)$ with $z<v$, and similarly, given a vertex $v \in V_k^2$, there cannot exist an edge $(v, z, k)$ with $z>v$ (see \cite{inapproximabilityWheelerGraphs}).
+    Consider a \draft{\sout{total}} Wheeler order. Let $V_k$ be the set containing all nodes with the same label $k$. Let $V_k^1$ and $V_k^2$ be two partitions of $V_k$, where $V_k^1$ contains all nodes $v_1$ with incoming edges from nodes preceding $v_1$ in the total order, while $V_k^2$ contains all nodes $v_2$ with incoming edges from nodes following $v_2$ in the total order. Consequently, the intersection of $V_k^1$ and $V_k^2$ contains at most one \draft{vertex} $u$, and all vertices in $V_k^1 \setminus \{u\}$ precede those in $V_k^2$ in the ordering. Moreover, given a \draft{vertex} $v \in V_k^1$, there cannot exist an edge $(v, z, k)$ with $z<v$, and similarly, given a \draft{vertex} $v \in V_k^2$, there cannot exist an edge $(v, z, k)$ with $z>v$ (see \cite{inapproximabilityWheelerGraphs} \alessio{I could not find the lemma in this article}).
+    \alessio{Use only node or vertex (better node).}
 \end{lemma}
 
 \subsection{Path Coherence}
-The following defines \textit{path coherence} and a related property of Wheeler graphs introduced and proven in \cite{wheelerGrpahs}.
+\alessio{Qui come lettore mi sono perso. Stai introducendo un sacco di definizioni, lemmi e dimostrazioni, ma manca il filo connettore. Qual è l'obiettivo ora? A cosa serve la BWT, perché introduciamo la Path Coherence? }
+The following defines \textit{path coherence} and a related property of Wheeler graphs introduced and proven in \cite{gagie2017wheeler}.
 
 \begin{definition}[Path Coherence]
     A labeled directed graph $G$ is said to be \textit{path coherent} if there exists a total order of nodes such that, for every consecutive interval $[i, j]$ of nodes and a string $\alpha$, the nodes reachable from those in $[i, j]$ in $|\alpha |$ steps, following edges whose labels form $\alpha$ when concatenated, themselves form an interval in the total order.
@@ -138,7 +144,7 @@ The following defines \textit{path coherence} and a related property of Wheeler 
     A Wheeler graph is path coherent with respect to any possible Wheeler order of the nodes.
 \end{lemma}
 
-Thanks to this crucial property, it was proven in \cite{wheelerGrpahs} that if the state diagram of a finite-state automaton is a Wheeler graph, then, due to Lemma \ref{property_5}, the nodes can be ordered so that for any string, the nodes reachable from the initial state(s) by processing that string are consecutive. This means that even if the automaton is non-deterministic, it can still be stored compactly and used to process strings efficiently.
+Thanks to this crucial property, it was proven in \cite{gagie2017wheeler} that if the state diagram of a finite-state automaton is a Wheeler graph, then, due to Lemma \ref{property_5}, the nodes can be ordered so that for any string, the nodes reachable from the initial state(s) by processing that string are consecutive. This means that even if the automaton is non-deterministic, it can still be stored compactly and used to process strings efficiently.
 
 \subsection{Topological Ordering for \texorpdfstring{$\sigma=1$}{Lg}}
 The following defines \textit{topological ordering} and a related property of Wheeler graphs introduced and proven in \cite{inapproximabilityWheelerGraphs}.
@@ -186,19 +192,19 @@ As introduced earlier, the bipartite representation allows us to easily verify w
 \raggedright
 \subsection{Examples of Bipartite Representation of Wheeler Graphs}
 \endgroup
-Consider the Wheeler graph shown in Figure \ref{fig:wheeler_example}, and the resulting bipartite graph shown in Figure \ref{fig:bipartite_example}-(a). 
+Consider the Wheeler graph shown in Figure \ref{fig:wheeler_example}, and the resulting bipartite graph shown in Figure \ref{fig:bipartite_example}-(a).
 
 \begin{figure}[H]
     \centering
     \begin{tabular}{cc}
-        \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (1s) {$x_1^s$};
-            \node[main] (2s) [below of=1s] {$x_2^s$}; 
+            \node[main] (2s) [below of=1s] {$x_2^s$};
             \node[main] (3s) [below of=2s] {$x_3^s$};
             \node[main] (4s) [below of=3s] {$x_4^s$};
             \node[main] (5s) [below of=4s] {$x_5^s$};
             \node[main] (1d) [right=2cm of 1s] {$x_1^d$};
-            \node[main] (2d) [below of=1d] {$x_2^d$}; 
+            \node[main] (2d) [below of=1d] {$x_2^d$};
             \node[main] (3d) [below of=2d] {$x_3^d$};
             \node[main] (4d) [below of=3d] {$x_4^d$};
             \node[main] (5d) [below of=4d] {$x_5^d$};
@@ -210,14 +216,14 @@ Consider the Wheeler graph shown in Figure \ref{fig:wheeler_example}, and the re
             \draw[blue, ->] (2s) -- (4d);
             \draw[blue, ->] (4s) -- (4d);
         \end{tikzpicture} &
-        \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
             \node[main] (3s) {$x_3^s$};
-            \node[main] (2s) [below of=3s] {$x_2^s$}; 
+            \node[main] (2s) [below of=3s] {$x_2^s$};
             \node[main] (1s) [below of=2s] {$x_1^s$};
             \node[main] (4s) [below of=1s] {$x_4^s$};
             \node[main] (5s) [below of=4s] {$x_5^s$};
             \node[main] (3d) [right=2cm of 3s] {$x_3^d$};
-            \node[main] (2d) [below of=3d] {$x_2^d$}; 
+            \node[main] (2d) [below of=3d] {$x_2^d$};
             \node[main] (1d) [below of=2d] {$x_1^d$};
             \node[main] (4d) [below of=1d] {$x_4^d$};
             \node[main] (5d) [below of=4d] {$x_5^d$};

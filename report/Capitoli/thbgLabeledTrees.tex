@@ -1,6 +1,7 @@
-\section{Theoretical Background on Labeled Trees}
+\chapter{Theoretical Background on Labeled Trees} \label{chp:thbg_labeled_tree}
+Before delving into specific compression techniques, it is essential to establish a solid theoretical foundation regarding labeled trees. These structures are fundamental for representing hierarchical data across diverse fields, from bioinformatics to document processing. This chapter provides the necessary background, defining labeled trees, exploring their common applications, and introducing the core concepts behind their compression and indexing. Understanding these principles, including the role of succinct data structures and the information-theoretic limits of compression, is crucial for appreciating the challenges and advancements in handling large-scale tree-structured data effectively, which forms the basis for the work presented in this thesis.
 
-\subsection{Labeled Trees}
+\section{Labeled Trees}
 A \textbf{labeled tree} is a rooted, ordered, hierarchical data structure in which every node is assigned a label from a predefined alphabet $\Sigma$. The structure consists of nodes connected by edges, forming a directed acyclic graph. Formally, a labeled tree $T$ with $t$ nodes can be defined as $T = (V, E, \ell)$, where:
 \begin{itemize}
     \item $V$ is the set of nodes,
@@ -10,7 +11,7 @@ A \textbf{labeled tree} is a rooted, ordered, hierarchical data structure in whi
 
 In the case of ordered labeled tree, the children of a node in the tree are ordered, meaning their positions relative to each other matter. A labeled tree can have arbitrary degrees and shapes, and the alphabet $\Sigma$ used for labels can be of arbitrary size.
 
-\subsubsection{Applications of Labeled Trees}
+\subsection{Applications of Labeled Trees}
 Labeled trees are widely used in computer science and data representation due to their hierarchical structure and flexibility in modeling relationships. Prominent applications include:
 \begin{enumerate}
     \item \textbf{XML Data Representation:} XML documents are often modeled as labeled trees, where each element is a node labeled by its tag, and hierarchical nesting represents parent-child relationships.
@@ -22,7 +23,7 @@ Labeled trees are widely used in computer science and data representation due to
 
 Efficient representation, navigation, and querying of labeled trees are essential for many applications, motivating the development of specialized data structures and algorithms. 
 
-\subsection{Compressing and Indexing Labeled Trees} \label{compandindexinglabtree}
+\section{Compressing and Indexing Labeled Trees} \label{compandindexinglabtree}
 The goal of compressing and indexing labeled trees is to design a compressed storage scheme for a labeled tree $T$ with $t$ nodes that allows for efficient navigation operations in $T$, as well as fast search and retrieval of subtrees or paths within $T$. To be effective, the compressed representation should minimize the space required to store the tree while supporting a wide range of operations in (near-)optimal time.
 
 Let $u$ be a node in the labeled tree $T$ and let $c \in \Sigma$. We define the following navigation operations on $T$:
@@ -34,14 +35,14 @@ Let $u$ be a node in the labeled tree $T$ and let $c \in \Sigma$. We define the 
 
 A naive solution to index labeled trees is to store the tree in a straightforward manner, such as a list of nodes with their labels and parent-child relationships using pointer in $O(t log t)$. However, this representation is not space-efficient and does not support fast navigation or query operations. 
 
-Many data structures have been proposed to compress and index labeled trees, each with its trade-offs in terms of space usage, query performance, and supported operations. One of the most successful approaches is the Extended Burrows-Wheeler Transform (XBWT), which extends the classical Burrows-Wheeler Transform (BWT) to handle labeled trees efficiently. 
+Many data structures have been proposed to compress and index labeled trees, each with its trade-offs in terms of space usage, query performance, and supported operations. One of the most successful approaches is the Extended Burrows-Wheeler Transform, which extends the classical Burrows-Wheeler Transform (BWT) to handle labeled trees efficiently. 
 
 Before the advent of XBWT, Kosaraju \cite{kosaraju1989efficient} proposed a method to index labeled trees by extending the concept of prefix sorting, which is commonly applied to strings, to work with labeled trees by leveraging the structure of tries (prefix trees). To achieve this, he introduced the idea of constructing a suffix tree for a reversed trie allowing subpath queries in $O(|P|\log|\Sigma|+ occ)$ time, where $occ$ is the number of occurrences of $P$ in $T$ but still requiring $O(t \log t)$ space and so not being compressed.
 
-\subsection{Succinct Data Structures for Trees}
+\section{Succinct Data Structures for Trees}
 In order to compress the index of labeled trees, we need to avoid the use of pointers and store the tree in a space-efficient manner. Succinct data structures are a class of compressed data structures that support efficient navigation and query operations on the compressed data. These structures are designed to use close to the information-theoretic lower bound on space while providing fast access to the original data. They were first introduced by Jacobson \cite{jacobson1989space} and have been applied to various problems in string processing, graph theory, and data compression.
 
-\subsubsection{Information-Theoretic Lower Bound for Trees}
+\subsection{Information-Theoretic Lower Bound for Trees}
 The information-theoretic lower bound for storing an unlabeled tree with $t$ nodes is given by:
 
 \begin{itemize}
@@ -64,4 +65,3 @@ Combining the structural representation and the labeling, the information-theore
 $$
     2t - \Theta(\log t) + t \log_2 |\Sigma| \text{ bits}
 $$
-

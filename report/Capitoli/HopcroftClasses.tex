@@ -1,35 +1,47 @@
-\chapter{Hopcroft Algorithm for Minimization of DFA}
+\chapter{Hopcroft's algorithm for Minimization of DFA} \label{chp:hopcroft}
 
-\section{Introduction}
-The process of automata minimization is the process of reducing the number of states in a DFA while preserving the language accepted by the DFA. The minimization of DFA is crucial for a variety of applications, such model checking, hardware
-design, and compilers, as it produces a more effective and compact representation of the automata.
+Tree compression schemes that effectively exploit repetitive structures require efficient techniques for identifying and representing such repetitions in a compact manner. In our approach, we leverage deterministic finite automata (DFA) minimization as a foundational tool for recognizing and compressing recurring patterns within trees. Among the various DFA minimization algorithms, Hopcroft's algorithm stands out due to its optimal time complexity and efficiency in reducing state redundancies. This chapter provides the necessary theoretical background on Hopcroft's algorithm and DFA minimization, explaining their relevance to our proposed compression scheme. Also, we introduce a linear-time algorithm for minimizing acyclic deterministic finite automata, which is particularly suitable for identifying repetitive structures in trees. Let's start by introducing what are deterministic finite automata and why minimizing them is important for tree compression.
 
-The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is the Hopcroft algorithm, which was proposed by John Hopcroft in 1971 \cite{HOPCROFT1971189}. The Hopcroft algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
+\section{Deterministic Finite Automata (DFA)}
+\begin{definition}[Deterministic Finite Automaton] \label{def:dfa}
+    A deterministic finite automaton (DFA) is a 5-tuple $M = (Q, \Sigma, \delta, q_0, F)$ where:
+    \begin{itemize}
+        \item $Q$ is a finite set of states
+        \item $\Sigma$ is a finite set of input symbols (alphabet)
+        \item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function
+        \item $q_0 \in Q$ is the initial state
+        \item $F \subseteq Q$ is the set of final (accepting) states
+    \end{itemize}
+\end{definition}
 
-Before we delve into the details of the Hopcroft algorithm, let us first introduce the concept of DFA.
-\subsection{Deterministic Finite Automata (DFA)}
-A deterministic finite automaton (DFA) is a 5-tuple $M = (Q, \Sigma, \delta, q_0, F)$ where:
-\begin{itemize}
-    \item $Q$ is a finite set of states
-    \item $\Sigma$ is a finite set of input symbols (alphabet)
-    \item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function
-    \item $q_0 \in Q$ is the initial state
-    \item $F \subseteq Q$ is the set of final (accepting) states
-\end{itemize}
+The DFA processes an input string $s$ one symbol at a time by starting from the initial state $q_0$ and following transitions based on the input symbols. The string $s$ is accepted if the DFA ends in an accepting state after processing all input symbols, otherwise, it is rejected. The language recognized by a DFA is the set of all strings that lead to an accepting state. DFA are widely used in various applications, including lexical analysis, pattern matching, and formal language theory. 
 
-The DFA processes an input string by starting from the initial state $q_0$ and following transitions based on the input symbols. The string is accepted if the DFA ends in an accepting state after processing all input symbols.
+\subsection{DFA Minimization}
+The process of automata minimization consists in reducing the number of states in a DFA while preserving the language accepted by the DFA. The minimization of DFA is crucial for a variety of applications, such model checking, hardware design, and compilers, as it produces a more effective and compact representation of the automaton allowing for faster processing and reduced memory usage.
+
+The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is the Hopcroft's algorithm, which was proposed by John Hopcroft in 1971 \cite{HOPCROFT1971189}. The Hopcroft's algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
+
+\section{The Need for DFA Minimization in the novel scheme}
+A key challenge in tree compression is the identification of structurally similar or identical subtrees. By modeling repetitive substructures as states in a DFA, we can transform the problem into one of minimizing redundant states, thereby reducing the size of the representation. DFA minimization ensures that equivalent substructures are merged efficiently, leading to a more compact encoding.
+
+The minimized DFA provides a canonical representation of the repetitive structures, which can then be leveraged in our compression pipeline. This theoretical foundation enables us to systematically identify and encode tree patterns, ultimately improving the compression efficiency.
+
+In the subsequent sections, we delve into the formal definition of the Hopcroft's algorithm. Then, we introduce an algorithm for minimizing acyclic DFAs in linear time, which is particularly relevant for identifying repetitive structures in trees. 
 
 \section{Hopcroft's Minimization Algorithm}
-Minimization of deterministic finite automata (DFA) is a classical and widely studied problem in Theory of Automata and Formal Languages. It consists in finding the unique (up to isomorphism) finite automaton with the minimal number of states, recognizing the same regular language of a given DFA.
+Minimization of DFA is a classical and widely studied problem in automata theory and Formal Languages. It consists of finding the unique (up to isomorphism) finite automaton with the minimal number of states, recognizing the same regular language of a given DFA.
 
-The Hopcroft algorithm works by iteratively refining partitions of states until no further refinement is possible. The algorithm is the following:
+The algorithm is introduced in Algorithm \ref{alg:hopcroft} and works as follows:
+\begin{enumerate}
+    \item 
+\end{enumerate}
 
-\begin{algorithm}
+\begin{algorithm} \label{alg:hopcroft}
     \caption{Hopcroft's Algorithm: DFA Minimization ($\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$)}
     \begin{algorithmic}[1]
         \State $\Pi \gets \{F, Q \setminus F\}$
         \ForAll{$a \in \Sigma$}
-            \State $\mathcal{W} \gets \{(\min(F, Q \setminus F), a)\}$
+            \State $\mathcal{W} \gets \{(\min(F, Q \setminus F), a)\}$ \alessio{how does min work given the two sets?}
         \EndFor
         \While{$\mathcal{W} \neq \emptyset$}
             \State choose and delete any $(C, a)$ from $\mathcal{W}$
@@ -51,7 +63,9 @@ The Hopcroft algorithm works by iteratively refining partitions of states until 
     \end{algorithmic}
 \end{algorithm}
 
-The algorithm enables to compute equivalence classes of nodes in $O(n\log n)$, in particular, the Myhill-Nerode equivalence classes. The Myhill-Nerode theorem states that a language is regular if and only if it has a finite number of Myhill-Nerode equivalence classes. This theorem provides a powerful tool for determining the regularity of languages and is a cornerstone of automata theory. Let's formalize the concept of equivalence classes and the Myhill-Nerode theorem.
+\alessio{You should also give an intuition/explanation on how it works with words}
+
+The algorithm enables to compute equivalence classes of nodes in $O(n\log n)$, in particular, the Myhill-Nerode equivalence classes \alessio{cite}. The Myhill-Nerode theorem states that a language is regular if and only if it has a finite number of Myhill-Nerode equivalence classes. This theorem provides a powerful tool for determining the regularity of languages and is a cornerstone of automata theory. Let's formalize the concept of equivalence classes and the Myhill-Nerode theorem.
 
 \begin{definition}[Equivalence Relation]
     For a language $L \subseteq \Sigma^*$ and any strings $x,y \in \Sigma^*$, we say $x$ is equivalent to $y$ with respect to $L$ (written as $x \approx_L y$) if and only if for all strings $z \in \Sigma^*$:
@@ -62,11 +76,12 @@ The algorithm enables to compute equivalence classes of nodes in $O(n\log n)$, i
 \begin{theorem}[Myhill-Nerode theorem] \label{def:myhill-nerode}
     Let $L$ be a language over an alphabet $\Sigma$. Then $L$ is regular if and only if there exists a finite number of Myhill-Nerode equivalence classes for $L$. Specifically, the number of equivalence classes is equal to the number of states in the minimal DFA recognizing $L$.
 \end{theorem}
+\alessio{You should explain what does it mean for a language to be regular.}
 
 \section{Minimization of acyclic DFA in linear time}
 For our purpose, we will focus on a specific type of finite automaton: an acyclic deterministic finite automaton (or DAWG). An acyclic DFA is one where there are no cycles within the transitions. This property simplifies the minimization process since it ensures that every state can be reached from the start state through a unique path.
 
-Let's start by giving the notion of directed acyclic word graph (DAWG):
+Let's start by giving the notion of \draft{directed acyclic word graph} (DAWG):
 \begin{definition}[DAWG]
     A \textbf{DAWG} (directed acyclic word graph) or automaton $\mathcal{A}$ is defined by the following 5-uple:
     \[
@@ -85,6 +100,7 @@ Let's start by giving the notion of directed acyclic word graph (DAWG):
 In this section, we will discuss an efficient algorithm for minimizing acyclic deterministic finite automata in linear time on the number of states \cite{revuz1992minimisation}. The minimization process involves identifying and merging equivalent states. Two states are considered equivalent if they have the same set of reachable final states, meaning that from any state $q$, there is a path to a final state in both states. This equivalence relation partitions the DAWG into disjoint sets of states, each representing an equivalence class. The purpose of using this approach is then to apply it to the input tree for our pipeline since the problem can directly be applied to trees where the leaf nodes are considered as final states, the root as the initial state and the edges of the tree are considered directed from node to its children. 
 
 \subsection{The minimization algorithm}
+\alessio{Section 2.3 is already called "minimization of...", consider removing this section title or rename one of the two.}
 The minimization algorithm introduced in \cite{revuz1992minimisation} operates by labeling each state with a unique identifier that represents the structure of the automaton from that state onward. It proceeds in the following steps:
 
 \begin{enumerate}

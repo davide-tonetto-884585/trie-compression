@@ -1,6 +1,6 @@
 *.aux
 *.bcf
-*.bbl
+*.bbl*
 *.blg
 *.log
 *.out

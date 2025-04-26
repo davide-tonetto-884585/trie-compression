@@ -1,8 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{p}{\PYGZob{}}
-    \PYG{l+s+s1}{\PYGZsq{}n\PYGZus{}estimators\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+m+mi}{100}\PYG{p}{,} \PYG{l+m+mi}{200}\PYG{p}{,} \PYG{l+m+mi}{500}\PYG{p}{,} \PYG{l+m+mi}{700}\PYG{p}{,} \PYG{l+m+mi}{1000}\PYG{p}{],}
-    \PYG{l+s+s1}{\PYGZsq{}criterion\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}gini\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}entropy\PYGZsq{}}\PYG{p}{],}
-    \PYG{l+s+s1}{\PYGZsq{}max\PYGZus{}depth\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{k+kc}{None}\PYG{p}{,} \PYG{l+m+mi}{20}\PYG{p}{,} \PYG{l+m+mi}{60}\PYG{p}{],}
-    \PYG{l+s+s1}{\PYGZsq{}max\PYGZus{}features\PYGZsq{}}\PYG{p}{:} \PYG{p}{[}\PYG{k+kc}{None}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}sqrt\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}log2\PYGZsq{}}\PYG{p}{]}
-\PYG{p}{\PYGZcb{}}
-\end{Verbatim}
