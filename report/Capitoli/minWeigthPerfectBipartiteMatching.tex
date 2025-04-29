@@ -21,9 +21,10 @@ The problem of finding a minimum weight perfect matching in a bipartite graph is
     Given a weighted bipartite graph $G = (V, E)$, where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}.
 \end{definition}
 
-\subsection{The existence of perfect matchings in bipartite graphs}
-In this subsection a theorem is introduced that states a condition for the existence of perfect matchings in bipartite graphs. This theorem will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}.
+\section{The existence of perfect matchings in bipartite graphs}
+In this section two theorems that states a condition for the existence of perfect matchings in bipartite graphs are introduced. These theorems will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}.
 
+\subsection{The Tutte matrix and its determinant}
 Let's start with the definition of the \textbf{Tutte matrix} of a bipartite graph.
 \begin{definition}[Tutte matrix] \label{def:tutte_matrix}
     The Tutte matrix of bipartite graph $G = (U, V, E)$ is an $n \times n$ matrix $M$ with the entry at row $i$ and column $j$
@@ -36,9 +37,9 @@ Let's start with the definition of the \textbf{Tutte matrix} of a bipartite grap
     \end{equation}
 \end{definition}
 
-The determinant of the Tutte matrix is useful in testing whether a graph has a perfect matching or not, as the following theorem shows. 
+The determinant of the Tutte matrix is useful in testing whether a graph has a perfect matching or not, as the following theorem introduced in \cite{lovasz1979matching} shows. 
 
-\begin{theorem}[Existence of perfect matchings in bipartite graphs] \label {thm:perfect_matching_existence}
+\begin{theorem}[Existence of perfect matchings in bipartite graphs \cite{lovasz1979matching}] \label {thm:perfect_matching_existence}
     Given a bipartite graph $G$ and the Tutte matrix $M$ for $G$ then the following equivalence holds:
     $$
     Det(M) \neq 0 \iff \text{There exists a perfect matching in G}
@@ -73,7 +74,23 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
     Additionally, there is no other term in the summation that contains the same set of variables. Therefore, this term is not cancelled by any other term. So in this case, $\text{Det}(M) \neq 0$.
 \end{proof}
 
-\subsection{Problem formulation}
+\subsection{The Hall's Marriage Theorem}
+Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching in a bipartite graph that saturates one side of the partition. It's often stated in the context of finding pairings (like marriages) between two sets of entities.
+    
+\begin{definition}[Neighborhood] \label{def:neighborhood}
+For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the set of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
+\[ N(W) = \{ v \in V_2 \mid \exists u \in W \text{ such that } \{u, v\} \in E \} \]
+\end{definition}
+
+\begin{theorem}[Hall's Marriage Theorem \cite{hall1935representatives}] \label{thm:halls_marriage_theorem}
+Let $G = (V_1 \cup V_2, E)$ be a bipartite graph. There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
+\[ |N(W)| \geq |W| \]
+This condition is known as \textbf{Hall's condition}.
+\end{theorem}
+
+In simpler terms, a matching that covers all vertices in $V_1$ exists if and only if every group of vertices chosen from $V_1$ collectively has at least as many neighbors in $V_2$ as there are vertices in the chosen group.
+
+\section{Problem formulation}
 The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e.an optimization problem in which the variables are restricted to integer values and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
 
 \begin{equation}
@@ -130,4 +147,6 @@ problem that find numerous applications in engineering and
 scientific computing. This result is important also for our problem, since the maximum weight perfect matching problem can be reduced to the minimum-cost flow problem, allowing to solve the problem in almost-linear time.
 
 \section{Implementation used in this work}
+\davide{Da completare una volta deciso come procedere}
+
 In this section, we will present an implementation of the Gabow and Tarjan algorithm to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The algorithm is based on scaling and is a generalization of the Hungarian method. The algorithm works by scaling the edge weights and then finding a perfect matching in the scaled graph. 

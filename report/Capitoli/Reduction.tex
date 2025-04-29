@@ -1,12 +1,29 @@
-\chapter{Reduction to the assignment problem} \label{chp:reduction_to_min_weight_matching}
-
-\section{Introduction}
-In this chapter, we will show how we can reduce the problem of finding the optimal partition of the nodes of a tree $T$ given their equivalence classes into $p$ with $p \leq |E| \leq t$ chains to the Minimum Weight Perfect Bipartite Matching problem, where $E$ is the set of equivalence classes of the nodes of $T$ and $t$ is the number of nodes of the tree. This reduction will allow us to solve the problem in polynomial time as shown in the previous chapter.
+\section{Reducing Chains-Division Problem to the Assignment Problem}
+In this section, we will show how we can reduce the problem of finding the optimal partition of the nodes of a tree $T$ given their equivalence classes into $p$ with $p \leq |E| \leq t$ chains to the Minimum Weight Perfect Bipartite Matching problem, where $E$ is the set of equivalence classes of the nodes of $T$ and $t$ is the number of nodes of the tree. This reduction will allow us to solve the problem in polynomial time as shown in the previous chapter.
 
 Then we will show how to optimize the reduction by introducing some constraints that will allow us to reduce the number of edges in the bipartite graph, and we will also show how to move from the Minimum Weight Perfect Bipartite Matching problem to the more studied Maximum Weight Perfect Bipartite Matching problem without losing generality.
 
-\section{The reduction}
+\subsection{Chains-Division problem definition}
+It is important to start by defining the problem we want to solve.
+
+\begin{definition}[\textsc{CHAINS-DIVISION} problem] \label{def:problem_def}
+    Given a tree $T$ with $t$ nodes, and given the equivalence classes $E$ coming from the Hopcroft algorithm applied to the tree $T$, the sorted order of the nodes in $T$ according to the upward path $\pi$, and the number of chain $2 \leq p \leq t$, we want to find the optimal partition of the nodes of $T$ into $p$ chains such that the run length encoding of each chain is minimized.
+\end{definition}
+
+Let's give a formal definition of run length encoding.
+\begin{definition}[Run length encoding]
+    Given a sequence $S = \{s_1, s_2, \dots, s_n\}$, the run length encoding of $S$ is the sequence $R = \{r_1, r_2, \dots, r_m\}$ where $r_i$ is the number of times the element $s_i$ is repeated in $S$. It allows us to represent the sequence $S$ in a more compact way.
+\end{definition}
+
+So, we aim to divide the nodes of the tree into $p$ chains such that the run length encoding of the chains is minimized meaning that we want to minimize the number of distinct equivalence classes in each chain. Follows the definition of chain.
+
+\begin{definition}[Chains] \label{def:chains}
+    Given a tree $T$ with $t$ nodes and $p$ chains, a chain $C$ is a sequence of nodes $C = \{c_1, c_2, \dots, c_m\}$ such that $c_i$ is a node of $T$ for $i = 1, 2, \dots, m$ and $m \leq t$. Also, Each node of $T$ is in exactly one chain and the nodes of the chain are ordered according to the upward path $\pi$ of the tree.
+\end{definition}
+
 \subsection{Bipartite graph construction}
+Now we will show how to construct a bipartite graph that will allow us to solve the problem of finding the optimal partition of the nodes of a tree $T$ given their equivalence classes into $p$ with $p \leq |E| \leq t$ chains.
+
 Let $T$ be a tree with $t$ nodes and $p$, which is the number of chains we want to partition the nodes into. Let $E$ be the set of equivalence classes of the nodes of $T$. We can construct a bipartite graph $G = (V, E)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ in the following way:
 
 \begin{definition} \label{def:bip_construction}
@@ -99,23 +116,6 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
 \end{figure}
 
 \subsection{Proof of correctness}
-In order to prove the correctness of the reduction, it is important to start by defining the problem we want to solve.
-
-\begin{definition}[\textsc{CHAINS-DIVISION} problem] \label{def:problem_def}
-    Given a tree $T$ with $t$ nodes, and given the equivalence classes $E$ coming from the Hopcroft algorithm applied to the tree $T$, the sorted order of the nodes in $T$ according to the upward path $\pi$, and the number of chain $p \leq t$, we want to find the optimal partition of the nodes of $T$ into $p$ chains with $p \leq t$ such that the run length encoding of each chain is minimized.
-\end{definition}
-
-Let's give a formal definition of run length encoding.
-\begin{definition}[Run length encoding]
-    Given a sequence $S = \{s_1, s_2, \dots, s_n\}$, the run length encoding of $S$ is the sequence $R = \{r_1, r_2, \dots, r_m\}$ where $r_i$ is the number of times the element $s_i$ is repeated in $S$. It allows us to represent the sequence $S$ in a more compact way.
-\end{definition}
-
-So, we aim to divide the nodes of the tree into $p$ chains such that the run length encoding of the chains is minimized meaning that we want to minimize the number of distinct equivalence classes in each chain. Follows the definition of chain.
-
-\begin{definition}[Chains] \label{def:chains}
-    Given a tree $T$ with $t$ nodes and $p$ chains, a chain $C$ is a sequence of nodes $C = \{c_1, c_2, \dots, c_m\}$ such that $c_i$ is a node of $T$ for $i = 1, 2, \dots, m$ and $m \leq t$. Also, Each node of $T$ is in exactly one chain and the nodes of the chain are ordered according to the upward path $\pi$ of the tree.
-\end{definition}
-
 Let's start by stating the following lemma.
 
 \begin{lemma} \label{lemma:all_destinations}
@@ -142,39 +142,6 @@ Let's start by stating the following lemma.
     The proof comes directly from lemma \ref{lemma:optimal_cost}.
 \end{proof}
 
-\begin{lemma} \label{lemma:matching_existence}
-    A perfect matching for a bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} exist for each possible instance of the \textit{CHAINS-DIVISION} problem.
-\end{lemma}
-
-\begin{proof}
-    The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} has a Tutte matrix (definition \ref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
-
-    We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
-\end{proof}
-
-In figure \ref{fig:tutte_matrix_ex} the Tutte matrix for the bipartite graph in Figure \ref{fig:reduction_example}-(a) is shown.
-
-\begin{figure}
-    \centering
-    \[
-    \begin{array}{c|ccccccccc}
-            & \text{1} & \text{2} & \text{1} & \text{3} & \text{1} & \text{2} & \text{2} & \text{$d_1$} & \text{$d_2$} \\
-        \hline
-        \text{$s_1$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-        \text{$s_2$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-        \text{1}   & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
-        \text{2}   & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 \\
-        \text{1}   & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
-        \text{3}   & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 & 1 \\
-        \text{1}   & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 1 \\
-        \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-        \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
-    \end{array}
-    \]
-    \caption[Tutte matrix example]{Example of a Tutte matrix for a bipartite graph in figure \ref{fig:reduction_example}-(a). As we can see the matrix has full rank and so a perfect matching exists.}
-    \label{fig:tutte_matrix_ex}
-\end{figure}
-
 \begin{lemma} \label{lemma:greater_nodes}
     Given a bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} from a tree $T$, for each node $u \in V_1$ coming from the nodes of $T$ it is impossible for $u$ to be connected to node $v \in V_2$ coming from the nodes of $T$ such as $v < u$ in the order of the nodes of the tree $T$.
 \end{lemma}
@@ -182,6 +149,64 @@ In figure \ref{fig:tutte_matrix_ex} the Tutte matrix for the bipartite graph in 
 \begin{proof}
     The proof comes from the construction of $G$ where the nodes of $V_1$ are always connected to the nodes of $V_2$ coming after them in the ordering of the nodes of the tree $T$.
 \end{proof}
+
+\begin{lemma} \label{lemma:matching_existence}
+    For every possible instance of the \textit{CHAINS-DIVISION} problem, a perfect matching exists in the bipartite graph G constructed as specified in Definition \ref{def:bip_construction}.
+\end{lemma}
+
+\begin{proof}
+    The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:halls_marriage_theorem}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} satisfies the Hall's condition and so, since by construction $|V_1| = |V_2|$, a perfect matching for $G$ exists.
+
+    To verify Hall's condition we need to prove that for any subset $W \subseteq V_1$ we have that $|W| \leq |N(W)|$, where $N(W)$ is the neighborhood of $W$ (Definition \ref{def:neighborhood}). We have the following cases (we refer to the set of source nodes $s_i \in V_1$ as $S$, the set of destination nodes $d_i \in V_2$ as $D$, and the set of tree nodes $u_i \in V_1$ as $U$):
+    \begin{enumerate}
+        \item \textbf{$W$ contains only source nodes ($W \subseteq S$)}: Let $W = \{s_{i_1}, \dots, s_{i_k}\}$ where $k = |W| \leq p$. By construction rule 1, each source $s_i$ is connected to the first $p$ distinct-class nodes $v_j$ in $V_2$. Let these target nodes be $T = \{v_{j_1}, \dots, v_{j_p}\}$. The neighborhood $N(W)$ is a subset of $T$. Since all sources in $W$ connect to nodes within $T$, $|N(W)| \leq |T| = p$. However, the construction connects each source $s_i$ to $p$ distinct nodes in $V_2$. A precise analysis of $N(W)$ is needed. In the definition, where all sources connect to the same first $p$ distinct class nodes, $N(W)$ would be exactly those $p$ nodes if $W$ is non-empty. So, $|N(W)| = p$. Since $|W| = k \leq p$, we have $|N(W)| \geq |W|$.
+        \item \textbf{$W$ contains only tree nodes ($W \subseteq U$)}: Let $W = \{u_{j_1}, \dots, u_{j_k}\} \subseteq V_1$ where $k = |W|$. This is the most complex case. We need to consider the neighborhood $N(W) \subseteq V_2 = V \cup D$. By construction:
+        \begin{itemize}
+            \item Each $u_j \in W$ connects only to nodes $v_l$ in $V_2$ where $l > j$ (lemma \ref{lemma:greater_nodes})
+            \item Each node connects to the next node of the same class with weight 0 (same-class connections)
+            \item Each node connects to the next $p$ distinct-class nodes with weight 1 (distinct-class connections) 
+            \item Nodes that are last of their class connect to all destination nodes $d_1,\dots,d_p$ (destination connections)
+        \end{itemize}
+        We distinguish the following cases:
+        \begin{itemize}
+            \item In $W$ there are only nodes which are not last of their class, by lemma \ref{lemma:greater_nodes}, $u_m$ connects to nodes $v_l$ or $d_l$ where $l > m$. For sure at least one neighbor is distinct from those of earlier nodes in $W$ meaning that $|N(W)| \geq |W|$.
+            \item In $W$ there are only nodes which are last of their class, also in this case for sure we have $|N(W)| \geq |W|$ since the last node of $W$ in the ordering connects only to all destination nodes $d_1,\dots,d_p$ (with $p \geq 2$) but the previous ones in the ordering connect to destinations but also to the next node of distinct class with weight 1 allowing to connect not only the destination nodes but also to other distinct tree nodes in $V_2$.
+            \item In $W$ there are both nodes which are last of their class and nodes which are not last of their class, in this last case we have $|N(W)| \geq |W|$ as a derivation from the previous cases.
+        \end{itemize}
+        \item \textbf{$W$ contains both source and tree nodes ($W=W_S \cup W_U, where W_S \subseteq S, W_U \subseteq U$)}: We have $|N(W)| \geq |W|$ as a derivation from the previous cases and lemma \ref{lemma:greater_nodes}.
+    \end{enumerate}
+\end{proof}
+
+\begin{comment}
+    \begin{proof}
+        The proof comes from the construction of the bipartite graph $G$ and from theorem \ref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in Definition \ref{def:bip_construction} has a Tutte matrix (definition \ref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
+
+        We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
+    \end{proof}
+
+    In figure \ref{fig:tutte_matrix_ex} the Tutte matrix for the bipartite graph in Figure \ref{fig:reduction_example}-(a) is shown.
+
+    \begin{figure}
+        \centering
+        \[
+        \begin{array}{c|ccccccccc}
+                & \text{1} & \text{2} & \text{1} & \text{3} & \text{1} & \text{2} & \text{2} & \text{$d_1$} & \text{$d_2$} \\
+            \hline
+            \text{$s_1$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+            \text{$s_2$} & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+            \text{1}   & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+            \text{2}   & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 \\
+            \text{1}   & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 \\
+            \text{3}   & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 1 & 1 \\
+            \text{1}   & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 1 \\
+            \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+            \text{2}   & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
+        \end{array}
+        \]
+        \caption[Tutte matrix example]{Example of a Tutte matrix for a bipartite graph in figure \ref{fig:reduction_example}-(a). As we can see the matrix has full rank and so a perfect matching exists.}
+        \label{fig:tutte_matrix_ex}
+    \end{figure}
+\end{comment}
 
 Now we can prove the correctness of the reduction.
 
@@ -289,7 +314,7 @@ Consider The example in Figure \ref{fig:reduction_example} where we have a tree 
     \label{fig:reduction_example}
 \end{figure}
 
-\section{Heuristics and Improvements}
+\subsection{Heuristics and Improvements}
 Some changes can be made to the reduction in order to optimize it and to reduce the number of edges in the bipartite graph. Here are some of the improvements that can be made.
 
 \begin{itemize}
@@ -320,7 +345,7 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
     \end{lemma}
 
     \begin{proof}
-        To proof the lemma since every time we have an edge with weight $0$ between two nodes of $V_1$ and $V_2$ it means that those two nodes have the same equivalence class and so there is no need to add additional cost trying to connect that node to nodes with different classes coming after in the ordering, as that would only increase the cost without providing any benefit to the solution. Also, we know that connecting nodes with the same class is always the best choice for optimizing the run length encoding of each chain.
+        Since every time we have an edge with weight $0$ between two nodes of $V_1$ and $V_2$ it means that those two nodes have the same equivalence class and so there is no need to add additional cost trying to connect that node to nodes with different classes coming after in the ordering, as that would only increase the cost without providing any benefit to the solution. Also, we know that connecting nodes with the same class is always the best choice for optimizing the run length encoding of each chain.
     \end{proof}
 
     In Figure \ref{fig:heuristics_example}-(a) the removed edges are shown in red.
@@ -420,7 +445,7 @@ In figure \ref{fig:heuristics_example}-(b) we can see the resulting bipartite gr
     \label{fig:heuristics_example}
 \end{figure}
 
-\section{Moving to Maximum weight perfect bipartite matching}
+\subsection{Moving to Maximum weight perfect bipartite matching}
 In this section, we will discuss how to slightly modify the reduction process to move from a minimum weight perfect bipartite matching problem to a maximum weight perfect bipartite matching problem. This will be helpful in solving the problem more efficiently by using some known algorithms to solve the maximum weight perfect bipartite matching problem.
 
 \begin{theorem}

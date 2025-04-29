@@ -1,5 +1,5 @@
 *.aux
-*.bcf
+*.bcf*
 *.bbl*
 *.blg
 *.log
@@ -12,5 +12,5 @@
 /*/.zed
 /*/.vscode
 /*/.DS_Store
-minted_*
+_minted*
 .DS_Store
