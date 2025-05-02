@@ -116,7 +116,7 @@ Lastly, in Figure \ref{fig:reduction_small_examples}-(c) there is an example for
 \end{figure}
 
 \subsection{Proof of correctness}
-Let's start by stating the following lemma.
+Let's start by stating the following lemmas.
 
 \begin{lemma} \label{lemma:all_destinations}
     Exactly $|E|$ nodes of the tree $T$ of the set $V_1$ are connected each to all the destination nodes $d_i \in V_2 \quad \forall i = 1, 2, \dots, p$ with weight $0$. Where $E$ is the set of equivalence classes of the nodes of $T$ coming from the Hopcroft algorithm applied to the tree $T$.
@@ -131,12 +131,12 @@ Let's start by stating the following lemma.
 \end{lemma}
 
 \begin{proof}
-    Since we aim to minimize the run length encoding of the chains, and the minimum cost of a chain is $1$, then the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater or equal to the number of equivalence classes since if we dispose them in $|E|$ chains we will have a cost of $|E|$ since each chain contains only nodes with the same class, and if we dispose them in $p < |E|$ chains we will have a cost greater or equal to $|E|$ since we will have to put at least two nodes with the same class into one chain or more than one.
+    Since we aim to minimize the run length encoding of the chains, and the minimum cost of a chain is $1$, then the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater or equal to the number of equivalence classes since if we dispose them in $|E|$ chains we will have a cost of $|E|$ since each chain contains only nodes with the same class, and if we dispose them in $p < |E|$ chains we will have a cost greater or equal to $|E|$ since we will have to put at least two nodes with the same class into one chain or more.
 \end{proof}
 
-\begin{lemma} \label{lemma:p_less_than_E}
+\begin{claim} \label{claim:p_less_than_E}
     The solutions for the \textit{CHAINS-DIVISION} problem for the instances where the number $p$ of chains is greater than $|E|$ are not better than the solutions for the instances where $p \leq |E|$.
-\end{lemma}
+\end{claim}
 
 \begin{proof}
     The proof comes directly from lemma \ref{lemma:optimal_cost}.
@@ -215,17 +215,30 @@ Now we can prove the correctness of the reduction.
 \end{theorem}
 
 \begin{proof}
-    Let $p \leq t$ be the number of chains we want to partition the nodes of a given tree $T$ into. Let $E$ be the set of equivalence classes of the nodes of $T$, from lemma \ref{lemma:p_less_than_E} we consider that $p \leq |E|$. We can construct a bipartite graph $G = (V, E)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ as stated in Definition \ref{def:bip_construction}. We will show that the optimal solution of the Minimum Weight Perfect Bipartite Matching problem for the graph $G$ is equivalent to the optimal solution of the \textsc{CHAINS-DIVISION} problem for the tree $T$.
+    Let $\mathcal{I}$ be an instance of the \textsc{CHAINS-DIVISION} problem with a tree $T$ (having $t$ nodes), its equivalence classes $E$, and a target number of chains $p$. From claim \ref{claim:p_less_than_E}, we only consider $p \leq |E|$. Let $G = (V_1 \cup V_2, E')$ be the bipartite graph constructed according to Definition \ref{def:bip_construction}, which is the instance $r(\mathcal{I})$ for the \textsc{MWPBM} problem. We need to show that an optimal solution to \textsc{CHAINS-DIVISION} for $\mathcal{I}$ corresponds directly to an optimal solution (a minimum weight perfect matching) for \textsc{MWPBM} on $G$, and vice versa.
 
-    From definition \ref{def:bip_construction} we know that $V_1$ contains $t + p$ nodes including $s_1, s_2, \dots, s_p$ and the $t$ elements of $E$ ordered, and $V_2$ contains $t + p$ nodes including the $t$ elements of $E$ ordered and $d_1, d_2, \dots, d_p$.
+    By construction, $|V_1| = |V_2| = t+p$. Lemma \ref{lemma:matching_existence} guarantees that a perfect matching always exists in $G$.
 
-    The source nodes are necessary to distinguish the chains, by starting from each source node we can follow the edges of the nodes and reach the destination nodes in order to retrieve the nodes of a chain. The source nodes are all connected to the first $p$ nodes with distinct equivalence class in $V_2$ with weight $1$ since each chains has at least one node and a minimum cost of $1$.
+    Consider a perfect matching $M$ in $G$. Since $|V_1|=|V_2|$ and $M$ is perfect, every node in $V_1$ is matched to exactly one node in $V_2$, and vice versa. The matching $M$ consists of $t+p$ edges. Due to the construction and Lemma \ref{lemma:greater_nodes} (nodes $u \in V_1 \cap T$ only connect to $v \in V_2 \cap T$ with $v > u$ or to destination nodes $d_j$), the matching $M$ naturally decomposes into $p$ paths starting from the source nodes $s_1, \dots, s_p$ and ending at the destination nodes $d_1, \dots, d_p$. Each path traverses a sequence of nodes corresponding to the nodes of the tree $T$.
+    Specifically, a path starting at $s_i$ will match $s_i$ to some tree node $u_{j_1} \in V_2$. Then, the corresponding node $u_{j_1} \in V_1$ must be matched to some $u_{j_2} \in V_2$ (where $j_2 > j_1$) or a destination node $d_k$. This continues until a tree node $u_{j_m} \in V_1$ is matched to a destination node $d_k$. This forms a sequence $s_i \rightarrow u_{j_1} \rightarrow u_{j_2} \rightarrow \dots \rightarrow u_{j_m} \rightarrow d_k$.
 
-    The destination nodes are necessary to close the chains, by connecting the nodes of the tree to the destination nodes we can ensure that the chains are closed and allows to get a perfect matching otherwise we would have $|V_1| > |V_2|$ and so we would have unmatched nodes. From lemma \ref{lemma:all_destinations} we know that exactly $|E|$ nodes of the tree $T$ in $V_1$ are connected to all the destination nodes $d_i \in V_2 \quad \forall i = 1, 2, \dots, p$ with weight $0$. This is done in order to ensure that the chains are closed and that the nodes of the tree are connected to the destination nodes in order to have a perfect matching. The weight of the edges is $0$ since if we conclude a chain no additional cost is needed.
+    Let this set of $p$ paths define a partition of the tree nodes into $p$ chains $C_1, \dots, C_p$, where each chain $C_k$ contains the sequence of tree nodes visited by the $k$-th path. The ordering within each chain respects the original tree ordering $\pi$ due to Lemma \ref{lemma:greater_nodes}.
 
-    We know from definition \ref{def:chains} that the order of the nodes of each chain must follow the order given by the upward path $\pi$ of each node in the tree $T$. This is ensured by lemma \ref{lemma:greater_nodes} that states that it is impossible for a node $u \in V_1$ coming from the nodes of $T$ to be connected to a node $v \in V_2$ coming from the nodes of $T$ such as $v < u$ in the order of the nodes of the tree $T$. This is done in order to ensure that the nodes are connected in the right order.
+    Now, let's analyze the weight of the matching $M$. The total weight $W(M)$ is the sum of the weights of its edges. According to Definition \ref{def:bip_construction}:
+    \begin{itemize}
+        \item Edges from source nodes $s_i$ have weight 1. There are $p$ such edges in $M$. These correspond to the start of each chain, contributing a base cost of 1 per chain.
+        \item Edges $(u_j, u_k)$ between tree nodes in $V_1$ and $V_2$ have weight 0 if $u_j$ and $u_k$ belong to the same equivalence class ($class(u_j) = class(u_k)$). These edges continue a run of the same class within a chain.
+        \item Edges $(u_j, u_k)$ between tree nodes have weight 1 if $class(u_j) \neq class(u_k)$. These edges signify a change in the equivalence class within a chain, thus starting a new run in the RLE sense.
+        \item Edges $(u_j, d_k)$ from a tree node to a destination node have weight 0. These edges terminate a chain and do not contribute to the RLE cost.
+    \end{itemize}
+    The total weight of the matching $M$ is therefore 
+    $$W(M) = p + (\text{number of weight-1 edges between tree nodes})$$
+    The cost of the chain partition, defined as the sum of the lengths of the run-length encodings of the chains, is precisely $p + (\text{number of class changes within chains})$. A class change occurs exactly when a path in the matching uses a weight-1 edge between tree nodes.
+    Therefore, $W(M)$ is exactly equal to the RLE cost of the partition defined by the matching $M$.
 
-    Given the construction of the bipartite graph $G$ we can see that the optimal solution of the Minimum Weight Perfect Bipartite Matching problem for the graph $G$ is equivalent to the optimal solution of the \textsc{CHAINS-DIVISION} problem for the tree $T$ since the chains are closed and the nodes are connected in the right order. The weight of the edges $0$ allow the problem to chain subsequent nodes with the same class without adding additional cost. Also from the definition of matching (\ref{def:matching}) no node of $G$ is exposed and so the matching is perfect as proved in lemma \ref{lemma:matching_existence}. The fact that each node in $V_1$ is connected to at least $p$ edges allow the problem to compare all the possible chains and so to find the optimal solution.
+    Conversely, any valid partition of $T$ into $p$ ordered chains $C_1, \dots, C_p$ can be mapped to a perfect matching $M$ in $G$. For each chain $C_k = [u_{k,1}, \dots, u_{k,m_k}]$, we construct a path in $G$: match $s_k$ to $u_{k,1} \in V_2$. Then match $u_{k,i} \in V_1$ to $u_{k,i+1} \in V_2$ for $i=1, \dots, m_k-1$. Finally, match $u_{k,m_k} \in V_1$ to one of the available destination nodes $d_j$. Since we have $p$ chains and $p$ source/destination nodes, and every tree node is in exactly one chain, this process uses all $t+p$ nodes in $V_1$ and $V_2$, forming a perfect matching. The weight of this matching will correspond to the RLE cost of the partition, as argued above.
+
+    Since there is a one-to-one correspondence between valid chain partitions and perfect matchings in $G$, and the cost of a partition (total RLE length) is equal to the weight of the corresponding matching, minimizing the matching weight is equivalent to minimizing the RLE cost. Thus, an optimal solution to \textsc{MWPBM} on $G$ yields an optimal solution to \textsc{CHAINS-DIVISION} on $T$.
 \end{proof}
 
 \subsection{Full example}
