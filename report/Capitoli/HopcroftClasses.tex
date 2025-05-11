@@ -1,4 +1,4 @@
-\chapter{Hopcroft's algorithm for Minimization of DFA} \label{chp:hopcroft}
+\chapter{Hopcroft's Algorithm for Minimization of DFA} \label{chp:hopcroft}
 Tree compression schemes that effectively exploit repetitive structures require efficient techniques for identifying and representing such repetitions in a compact manner. In our approach, we leverage deterministic finite automata (DFA) minimization as a foundational tool for recognizing and compressing recurring patterns within trees. Among the various DFA minimization algorithms, Hopcroft's algorithm stands out due to its optimal time complexity and efficiency in reducing state redundancies. This chapter provides the necessary theoretical background on Hopcroft's algorithm and DFA minimization, explaining their relevance to our proposed compression scheme. Also, we introduce a linear-time algorithm for minimizing acyclic deterministic finite automata, which is particularly suitable for identifying repetitive structures in trees. Let's start by introducing what are deterministic finite automata and why minimizing them is important for tree compression.
 
 \section{Deterministic Finite Automata (DFA)}
@@ -195,7 +195,7 @@ Algorithm \ref{alg:distinguish} distinguishes states within a given height level
 $$label(s) = (F/NF, l_1, nl_1, l_2, nl_2, \dots, l_k, nl_k)$$
 where $F/NF$ indicates final/non-final, $l_k$ is the $k$-th transition symbol, and $nl_k$ is the (renumbered) target state name. The sorting happens component by component.
 
-\begin{algorithm} 
+\begin{algorithm}[h]
     \caption{Distinguish Algorithm} \label{alg:distinguish}
     \begin{algorithmic}[1] 
         \Function{Distinguish}{List\_of\_States}
@@ -230,3 +230,87 @@ where $F/NF$ indicates final/non-final, $l_k$ is the $k$-th transition symbol, a
 \end{algorithm}
 
 \textit{Note:} The pseudocode in the paper is slightly intertwined with the bucket sort details. This representation attempts to capture the logic described. The renumbering function is called implicitly when accessing $nl_j$. The handling of merging might occur after the Distinguish procedure completes for level $i$, or potentially within it as groups become fully distinguished. The pseudocode merges states within bucket Q[\$], which relates to the end-of-string marker in the generic sort; for state labels, equivalence is confirmed when a group remains together after checking all label components.
+
+\subsection{Example}
+Now we are going to see an example of reduction for a given DAWG. The DAWG is represented in figure \ref{fig:example_dawg} and, as we can notice, it is also a valid ordered rooted tree with $n = 11$ nodes, $e = 10$ edges and the following alphabet: $\Sigma = \{0, 1\}$. The node $a$ is the root of the tree and the initial state of the automaton, while the leaf nodes $e,g,h,i,l,m$ are final states.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        sibling distance=3cm,
+        state/.style={circle, draw, minimum size=7mm},
+        accepting/.style={circle, draw, double, minimum size=7mm},
+        edge from parent/.style={draw, -latex},
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2.5cm},
+        level 3/.style={sibling distance=2cm}
+        ]
+    
+    \node[state] (a) {a}
+        child {node[state] (b) {b} 
+        child {node[state] (d) {d}
+            child {node[accepting] (h) {h}}
+            child {node[accepting] (i) {i}}
+        }
+        child {node[accepting] (e) {e}}
+        }
+        child {node[state] (c) {c}
+        child {node[state] (f) {f}
+            child {node[accepting] (l) {l}}
+            child {node[accepting] (m) {m}}
+        }
+        child {node[accepting] (g) {g}}
+        };
+    
+    % Etichette degli archi
+    \path (a) -- (b) node[midway, left] {0};
+    \path (a) -- (c) node[midway, right] {1};
+    \path (b) -- (d) node[midway, left] {0};
+    \path (b) -- (e) node[midway, right] {1};
+    \path (c) -- (f) node[midway, left] {0};
+    \path (c) -- (g) node[midway, right] {1};
+    \path (d) -- (h) node[midway, left] {0};
+    \path (d) -- (i) node[midway, right] {1};
+    \path (f) -- (l) node[midway, left] {0};
+    \path (f) -- (m) node[midway, right] {1};
+    \end{tikzpicture}
+    \caption{Example DAWG to be minimized}
+    \label{fig:example_dawg}
+\end{figure}
+
+Now by applying the algorithm, we obtain minimized DAWG represented in figure \ref{fig:example_minimized_dawg}. Each node of the original DAWG is represented by a node in the minimized DAWG (equivalence classes). The edges represent transitions between these nodes. The root node $A$ is the initial state of the minimized DAWG, while the node $D$ is the final state.
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[->, >=stealth, node distance=3cm, on grid, auto]
+        \node[state, initial] (A) {A};
+        \node[state] (B) [right=of A] {B};
+        \node[state] (C) [right=of B] {C};
+        \node[state, accepting] (D) [right=of C] {D};
+    
+        \path (A) edge [bend left] node {0} (B)
+                edge [bend right] node[below] {1} (B)
+            (B) edge [bend left] node {0} (C)
+                edge [bend right] node[below] {1} (D)
+            (C) edge [bend left] node {0} (D)
+                edge [bend right] node[below] {1} (D);
+    \end{tikzpicture}
+    \caption{Minimized DAWG}
+    \label{fig:example_minimized_dawg}
+\end{figure}      
+
+The equivalence classes of the nodes are listed in table \ref{tab:equivalence_classes}.
+\begin{center}
+    \begin{tabular}{|c|l|}
+    \hline
+    \textbf{Class} & \textbf{States} \\
+    \hline
+    A & $a$ \\
+    B & $b, c$ \\
+    C & $d, f$ \\
+    D & $e, g, h, i, l, m$ \\
+    \hline
+    \end{tabular}
+    \captionof{table}{Equivalence classes of the nodes}
+    \label{tab:equivalence_classes}
+\end{center}
