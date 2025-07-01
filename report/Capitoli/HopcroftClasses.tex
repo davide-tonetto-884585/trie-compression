@@ -157,10 +157,10 @@ The challenge arises when performing the lexicographic sort (using repeated buck
     \item Alternatively, representing state numbers as strings of digits would increase the length of the labels by a factor proportional to $\log |Q|$, again potentially breaking the overall linear time complexity.
 \end{itemize}
 
-The renumbering scheme overcomes this issue by assigning temporary, small integer names to the target states ($nl_i$) during the sorting process for each height level $\Pi_i$. The key idea is that when sorting states at height $i$, we only need to distinguish between the equivalence classes of the target states $nl_i$ from lower levels ($j < i$), as those levels have already been processed and minimized. The renumbering scheme ensures that the bucket array size is bounded by the maximum of $|C|$ (the alphabet size) and $E_i$ (the total number of edges from states at height i). The renumbering function adopted is the following:
+The renumbering scheme overcomes this issue by assigning temporary, small integer names to the target states ($nl_i$) during the sorting process for each height level $\Pi_i$. The key idea is that when sorting states at height $i$, we only need to distinguish between the equivalence classes of the target states $nl_i$ from lower levels ($j < i$), as those levels have already been processed and minimized. The renumbering scheme ensures that the bucket array size is bounded by the maximum of $|C|$ (the alphabet size) and $E_i$ (the total number of edges from states at height i). The renumbering function adopted is the one provided in Algorithm \ref{alg:renumbering}.
 
 \begin{algorithm}
-    \caption{Renumbering Function}
+    \caption{Renumbering Function} \label{alg:renumbering}
     \begin{algorithmic}[1]
         \Function{Renumber}{s, h, n}
             \If{$s.\text{ch} \ne h$}

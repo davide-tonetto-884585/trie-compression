@@ -6,8 +6,8 @@
 #include <map>
 #include <algorithm>
 #include <set>
-#include <list>       
-#include <functional> 
+#include <list>
+#include <functional>
 
 // Valori speciali usati nell'ordinamento per rappresentare
 // l'assenza di una transizione o una transizione verso uno "stato morto".
