@@ -35,25 +35,47 @@
 \usepackage{enumerate, mdwlist}
 \usepackage{fancyhdr}
 \usepackage{amsthm}
-\newtheorem{definition}{Definition}
-\newtheorem{lemma}{Lemma}
-\newtheorem{claim}{Claim}
-\newtheorem{theorem}{Theorem}
 \usepackage{amsmath,amssymb}
 \usepackage{minted}
 \usepackage{verbatim}
+\usepackage{cleveref}
+\usepackage{xspace}
+\usepackage{enumitem}
+\usepackage{subcaption}
 
 % Algorithms
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-\usepackage{csquotes} % Dipendenza di babel
+\usepackage{csquotes}
 
-% \usepackage{todonotes}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+
+\crefname{claim}{Claim}{Claims}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{definition}{Definition}{Definitions}
 
 \newcommand{\draft}[1]{{\color{red}{#1}}}
 \newcommand{\alessio}[1]{{\color[HTML]{34aa15}{\bf{Alessio:}} #1}}
 \newcommand{\davide}[1]{{\color{blue}{\bf{Davide T.:}} #1}}
+
+\newcommand{\equivset}{\mathcal{C}}
+\newcommand{\equivsetmath}{$\equivset$\xspace}
+\newcommand{\equivsetfunc}[1]{$\equivset(#1)$\xspace}
+
+\newcommand{\sourcesetbase}{\mathcal{S}}
+\newcommand{\sourceset}{$\sourcesetbase$\xspace}
+
+\newcommand{\destsetbase}{\mathcal{D}}
+\newcommand{\destset}{$\destsetbase$\xspace}
+
+\newcommand{\treesetbase}[1]{\mathcal{T}_{#1}}
+\newcommand{\treeset}[1]{$\treesetbase{#1}$\xspace}
+
 % ------------------------
 % ---- DOCUMENT SETUP ----
 % ------------------------
