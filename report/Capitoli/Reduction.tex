@@ -24,16 +24,18 @@ So, we aim to divide the nodes of the tree into $p$ chains such that the run-len
 \end{definition}
 \alessio{È abbastanza questa definizione? Se ho un albero con una radice A e due figli B e C, seguendo questa definizione, \{B, C\} è una catena, ma non sono comparabili e non possono generalmente. Penso che serva aggiungere che $c_i$ è genitore (o antenato) di $c_{i+1}$} 
 \davide{effettivamente due nodi fratelli non sono comparabili ma da definizione di XBWT lo diventano in quanto l’algoritmo ordina in maniera stabile i nodi quindi rispettando l'ordinamento dei figli di un nodo (il figlio più piccolo nell'ordinamento è quello tutto a sx). Devo specificare meglio che la strategia di ordinamento utilizzata è quella specifica ottenuta con il pathSort così ogni incongruenza dovrebbe risolversi.. Corretto?}
+\alessio{Ok, metterei una nota sotto la definizione specificando questa cosa allora. ``Note that, following the XBWT definition, two sibling nodes...''}
 
 \subsection{Reduction idea}
-The intuition behind the reduction is the following. Given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists and, a perfect matching with minimum weight allows to retrieve the optimal partition of the nodes of $T$ into $p$ chains such that the run-length encoding of each chain is minimized.
+The intuition behind the reduction is the following: given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists\draft{\sout{and, a}. In turn, a} perfect matching with minimum weight allows us to retrieve the optimal partition of the nodes of $T$ into $p$ chains such that the run-length encoding of each chain is minimized.
 
 In the following sections we will show how to construct the bipartite graph $G$ and proof that $G$ constructed as defined in \cref{def:bip_construction} always allows to find a perfect matching and the weight of the matching is the minimum run length encoding of the optimal partition of the nodes of $T$ into $p$ chains.
 
 \alessio{Introduci il bipartite graph con troppa cattiveria :). Prima abbiamo parlato di alberi, adesso subito di grafi bipartiti. La soluzione con grafo bipartito è quella che hai voluto seguire tu, quindi dovresti introdurla più come una scelta implementativa, che come un dato di fatto. In breve, dovresti dimostrare qua che Chains-Div. si riduce al MWBGP, quindi sarebbe da girare un attimo l'ordine: Se abbiamo un grafo con un perfect matching allora possiamo ridurre il problema -> creiamo un grafo in questo modo -> contiene un perfect matching -> possiamo sempre fare la riduzione.} \davide{Ho aggiunto un paragrafo introduttivo.. può andare o intendevi proprio girare tutta la dimostrazione?}
+\alessio{Se l'esistenza perfect matching è sufficiente a fare la riduzione, secondo me è meglio girare l'ordine delle dimostrazioni. Altrimenti, se per la riduzione ti servono le proprietà specifiche del grafo che hai creato allora va bene questo ordine. Pensandoci, puoi riportare questa discussione nell'intrduzione della sezione 6.2, mettendo qualcosa tipo ``In particular we show that, given a tree $T$ and the number of chains $p$, we can construct a bipartite ...'' tra i due paragrafi che ci sono già. (occhio alle frasi troppo lunghe).}
 
 \subsection{Bipartite graph construction}
-Now we will show how to construct a bipartite graph that will allow us to solve the \textsc{CHAINS-DIVISION} problem.
+Now, we will show how to construct a bipartite graph that allows us to solve the \textsc{CHAINS-DIVISION} problem.
 
 \begin{definition}[Bipartite graph construction] \label{def:bip_construction}
     Let $T$ be a tree with $t$ nodes, and $p$ the number of chains we want to partition the nodes into. Let \equivsetmath be the set of equivalence classes of the nodes of $T$. We can construct a bipartite graph $G = (V, E)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ in the following way:
@@ -47,15 +49,16 @@ Now we will show how to construct a bipartite graph that will allow us to solve 
         \item The \sourceset nodes are connected to the first $p$ nodes with distinct equivalence class in $V_2$, with weight $1$.
         \item Let $u_i \in$ \treeset{V_1}. We define \equivsetfunc{u_i} as the equivalence class of node $u_i$. For each node $u_i$, we construct the following edges:
         
-        - For the first $p$ nodes $v_j \in$ \treeset{V_2} such that $j > i$ and \equivsetfunc{v_j} $\neq$ \equivsetfunc{u_i}, we add an edge $(u_i, v_j)$ with weight $1$. If there are fewer than $p$ nodes in $V_2$ with distinct equivalence classes, we simply stop earlier.
+        - For the first $p$ nodes $v_j \in$ \treeset{V_2} such that $j > i$ and \equivsetfunc{v_j} $\neq$ \equivsetfunc{u_i}, we add an edge $(u_i, v_j)$ with weight $1$. If there are fewer than $p$ nodes in $V_2$ with distinct equivalence classes, we stop earlier.
 
         - Let $v_k \in$ \treeset{V_2} be the first node in the ordering such that $k > i$ and \equivsetfunc{v_k} $=$ \equivsetfunc{u_i}, we add an edge $(u_i, v_k)$ with weight $0$. If such a node does not exist, we add $p$ edges $(u_i, d_j)$ with weight $0$ for each $j = 1, 2, \ldots, p$, where $d_j \in$ \destset.
     \end{enumerate}
+    \alessio{Bella!}
 \end{definition}
 
 Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition, because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{fig:reduction_example_parts}.
 
-Notice also that when we talk about the same \treeset{V_1} node placed in \treeset{V_2}, we are referring to the corresponding node in \treeset{V_2} that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets \treeset{V_1} and \treeset{V_2}. In Figures \cref{fig:reduction_example_parts}, \cref{fig:reduction_small_examples}, and \cref{fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
+Notice also that when we talk about the same \treeset{V_1} node placed in \treeset{V_2}, we are referring to the corresponding node in \treeset{V_2} that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets \treeset{V_1} and \treeset{V_2}. In  \cref{fig:reduction_example_parts,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 
 \begin{figure}[H]
     \centering
@@ -156,14 +159,14 @@ Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the d
         \label{fig:sub3}
     \end{subfigure}
 
-    \caption[Examples of reduction to a bipartite graph]{Examples of the connection construction in the bipartite graph for $p=2$, showing the cases for source nodes \sourceset (a), internal tree nodes \treeset{V_1} and \treeset{V_2} (b), and destination nodes \destset (c). Red arrows indicate edges with weight 1 while green arrows indicate edges with weight 0.}
+    \caption[Examples of reduction to a bipartite graph]{Examples of the connection construction in the bipartite graph for $p=2$, showing the cases for source nodes \sourceset (a), internal tree nodes \treeset{V_1} and \treeset{V_2} (b), and destination nodes \destset (c). Red arrows indicate edges with weight 1, while green arrows indicate edges with weight 0.}
     \label{fig:reduction_small_examples}
 \end{figure}
 
 Before we present the proof of the correctness of the reduction, let us state the following theorem regarding the number of edges in the bipartite graph resulting from \cref{def:bip_construction}. This theorem is essential for understanding the complexity of the final algorithm employed to solve the \textsc{MWPBM} problem and so, the \textsc{CHAIN-DIVISION} problem.
 
 \begin{theorem}[Bipartite graph properties]
-    The bipartite graph $G$ constructed as stated in \cref{def:bip_construction} will have $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges.
+    The bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges.
 \end{theorem}
 
 \begin{proof}
@@ -178,7 +181,8 @@ In this section, we present the proof of the correctness of the reduction introd
 \end{lemma}
 
 \begin{proof}
-    As outlined in \cref{def:bip_construction} the destination nodes $d_i \in V_2$ are connected to nodes $u_i \in$ \treeset{V_1} with weight $0$ iff there is no other node $v_j \in$ \treeset{V_2} such that $j > i$ and \equivsetfunc{v_j} $\neq$ \equivsetfunc{u_i}, meaning that they are last of their class in the ordering. Consequently, there are exactly $|\equivset|$ nodes in \treeset{V_1} that are last representatives of their class in the ordering.
+    As outlined in \cref{def:bip_construction}, the destination nodes $d_i \in V_2$ are connected to nodes $u_i \in$ \treeset{V_1} with weight $0$ iff \draft{\sout{there is no other node} for all} $v_j \in$ \treeset{V_2} such that $j \draft{>} i$ \alessio{È giusto o dovrebbe essere $<$?} \draft{\sout{and},} \equivsetfunc{v_j} $\neq$ \equivsetfunc{u_i}, \draft{\sout{meaning that they are} i.e. $u_i$ is the} last of \draft{\sout{their} its} class in the ordering. Consequently, there are exactly $|\equivset|$ nodes in \treeset{V_1} that are last representatives of their class in the ordering.
+    \alessio{``no other'' e ``$\neq$'' creano una doppia negazione, quindi si traduce in "se ci sono altri nodi che hanno una classe di equivalenza uguale." Quello che vuoi dire qua è che, dato un nodo $u$, questo si connette alle destinazioni sse tutti gli altri nodi hanno una classe di equivalenza diversa da $u$ (o posta al contrario, se nessun nodo dopo ha classe equivalenza uguale). Le negazioni in italiano sono un casino...}
 \end{proof}
 
 \begin{lemma} \label{lemma:optimal_cost}
@@ -186,7 +190,7 @@ In this section, we present the proof of the correctness of the reduction introd
 \end{lemma}
 
 \begin{proof}
-    To minimize the run-length encoding of the chains, we note that the minimum cost of a chain is $1$. Consequently, the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater than or equal to the cardinality of the set of equivalence classes \equivsetmath. This is because if we partition them into $p = |\equivset|$ chains, the cost will equal $|\equivset|$, as each chain contains only nodes belonging to the same class. Conversely, if we partition them into $p < |\equivset|$ chains, the cost will be greater than or equal to $|\equivset|$, since we will need to include at least two nodes from different classes within a single chain or more.
+    To minimize the run-length encoding of the chains, we note that the minimum cost of a chain is $1$. Consequently, the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater than or equal to the cardinality of the set of equivalence classes \equivsetmath. This is because if we partition them into $p = |\equivset|$ chains, the cost will be equal to $|\equivset|$, since each chain contains only nodes belonging to the same class. Conversely, if we partition them into $p < |\equivset|$ chains, the cost will be greater than or equal to $|\equivset|$, since we will need to include at least two nodes from different classes within a single chain \draft{\sout{or more}}.
 \end{proof}
 
 \begin{claim} \label{claim:p_less_than_E}
@@ -194,22 +198,25 @@ In this section, we present the proof of the correctness of the reduction introd
 \end{claim}
 
 \begin{proof}
-    The proof comes directly from \cref{lemma:optimal_cost}.
+    The proof comes directly from \cref{lemma:optimal_cost}. \alessio{Magari spiega che appunto avresti chain vuote quindi la soluzione è cmq $|\equivset|$}
 \end{proof}
 
 Therefore, for the proof of the reduction, we will only consider instances of the problem where $p < |\equivset|$, as they do not present a trivial solution.
 
 \begin{lemma} \label{lemma:greater_nodes}
-    Given a bipartite graph $G$ constructed as stated in \cref{def:bip_construction}, for each node $u_i \in$ \treeset{V_1} it is impossible for $u_i$ to be connected to a node $v_j \in$ \treeset{V_2} such as $j < i$ in the order of the nodes.
+    Given a bipartite graph $G$ constructed as stated in \cref{def:bip_construction}, for each node $u_i \in$ \treeset{V_1} it is impossible for $u_i$ to be connected to a node $v_j \in$ \treeset{V_2}, such that $j < i$ in the order of the nodes.
+    \alessio{Anche per $\leq$ dovrebbe andare bene, che è anche più stringente.}
 \end{lemma}
 
 \begin{proof}
-    The proof comes from the construction of $G$ (\cref{def:bip_construction}) where the nodes of \treeset{V_1} are always connected to the nodes of \treeset{V_2} coming after them in the ordering of the nodes of the tree $T$.
+    The proof comes from the construction of $G$ (\cref{def:bip_construction}) where the nodes of \treeset{V_1} are always connected to the nodes of \treeset{V_2} coming after them \draft{\sout{in the ordering of the nodes of the tree $T$}}.
 \end{proof}
 
+\alessio{Lo metterei come Lemma questo piuttosto che come claim. Come per il Claim 1, dovrebbero derivare direttamente da un altro lemma.}
 \begin{claim} \label{claim:node_connectivity}
-    In the bipartite graph $G$ constructed as per \cref{def:bip_construction}, every node $u \in \treesetbase{V_1}$ has a non-empty neighborhood, i.e., $|N(\{u\})| \geq 1$.
+    In the bipartite graph $G$ constructed as per \cref{def:bip_construction}, for every node $u \in \treesetbase{V_1}$ \rem{has a non-empty neighborhood, i.e.} $|N(\{u\})| \geq 1$.
 \end{claim}
+\draft{In other words, every node in $V_1$ is connected to at least another node in $V_2$.}
 \begin{proof}
     Let $u_i \in \treesetbase{V_1}$ be an arbitrary node. We analyze the construction of its outgoing edges based on \cref{def:bip_construction}. There are two mutually exclusive cases for $u_i$:
     \begin{enumerate}
@@ -220,16 +227,16 @@ Therefore, for the proof of the reduction, we will only consider instances of th
 \end{proof}
 
 \begin{lemma} \label{lemma:distinct_neighborhoods}
-    For any pair of distinct nodes $u_i, u_j \in \treesetbase{V_1}$, their sets of neighbors are distinct, i.e., $N(\{u_i\}) \neq N(\{u_j\})$.
+    For any pair of distinct nodes $u_i, u_j \in \treesetbase{V_1}$\rem{, their sets of neighbors are distinct, i.e.}, $N(\{u_i\}) \neq N(\{u_j\})$.
 \end{lemma}
 \begin{proof}
-    Let $u_i, u_j \in \treesetbase{V_1}$ be two distinct nodes. Without loss of generality, assume $i < j$. We need to prove that $N(\{u_i\}) \neq N(\{u_j\})$.
+    Let $u_i, u_j \in \treesetbase{V_1}$ be two distinct nodes. Without loss of generality, assume $i < j$. \alessio{Dato che i nodi hanno un ordinamento, potresti lavorare direttamente su quelli, dicendo $u_i \prec u_j$, che implica anche l'ordinamento dei nodi dell'albero e non serve riscriverlo (vedi prima).}
 
-    By \cref{lemma:greater_nodes}, any neighbor of $u_j$ belonging to \treeset{V_2} must be a node $v_k$ with index $k > j$.
+    \draft{\sout{By Lemma 3, any neighbor of $u_j$ belonging to \treeset{V_2} must be a node $v_k$ with index $k > j$.}} \alessio{Questo lo ripeti sotto}
 
-    Now consider node $u_i$. By \cref{claim:node_connectivity}, its set of neighbors $N(\{u_i\})$ is non-empty. Let $y$ be a neighbor of $u_i$. If $y$ is a node $v_k \in \treesetbase{V_2}$, then its index $k$ must be greater than $i$.
+    Now consider node $u_i$. By \cref{claim:node_connectivity}, its set of neighbors $N(\{u_i\})$ is non-empty. Let $y$ be a neighbor of $u_i$. If $y$ is a node $v_k \in \treesetbase{V_2}$, then\draft{, by \cref{lemma:greater_nodes},} its index $k$ must be greater than $i$.
 
-    If we can find a neighbor $v_k \in N(\{u_i\})$ with $k \leq j$, then the proof is complete, since $v_k$ cannot be a neighbor of $u_j$. Let's assume by contradiction that every neighbor $v_k \in N(\{u_i\})$ has an index $k > j$. This would imply that $u_i$ is not connected to any node $v_k$ with $i < k \leq j$.
+    If we can find a neighbor $v_k \in N(\{u_i\})$ with $k \leq j$, then the proof is complete, since\draft{, following \cref{lemma:greater_nodes},} $v_k$ cannot be a neighbor of $u_j$. Let's assume by contradiction that every neighbor $v_k \in N(\{u_i\})$ has an index $k > j$. This would imply that $u_i$ is not connected to any node $v_k$ with $i < k \leq j$.
 
     However, consider node $v_{i+1}$. Since $i < t$ (otherwise $j$ would not exist), this node exists. Given that $i < i+1 \leq j$ (since $j$ is an integer and $j>i$), our hypothesis implies that $v_{i+1}$ cannot be a neighbor of $u_i$. Let's analyze why this would be impossible:
     \begin{itemize}
@@ -253,7 +260,7 @@ Therefore, for the proof of the reduction, we will only consider instances of th
 \begin{proof}
     The proof comes from the construction of the bipartite graph $G$ and from \cref{thm:halls_marriage_theorem}. We are going to prove that $G$ satisfies Hall's condition (see \cref{thm:halls_marriage_theorem}) and so, since by construction $|V_1| = |V_2|$, a perfect matching for $G$ exists.
 
-    To verify Hall's condition we need to prove that for any subset $W \subseteq V_1$ we have that $|N(W)| \geq |W|$, where $N(W)$ is the neighborhood of $W$ (\cref{def:neighborhood}). We have the following cases:
+    To verify Hall's condition, we need to prove that for any subset $W \subseteq V_1$ we have that $|N(W)| \geq |W|$, where $N(W)$ is the neighborhood of $W$ (\cref{def:neighborhood}). We have the following cases:
     \begin{enumerate}
         \item $W \subseteq$ \sourceset: Let $W$ be a subset of $S$ of size $k$. By construction, every source node $s_i \in$ \sourceset is connected to the same set of $p$ nodes in $V_2$, which are the first $p$ nodes with distinct equivalence classes in the ordering. Therefore, for any non-empty $W \subseteq$ \sourceset, the neighborhood $N(W)$ consists of exactly these $p$ nodes, so $|N(W)| = p$. From \cref{lemma:optimal_cost} and \cref{claim:p_less_than_E}, we only consider instances where $p \leq |\equivset|$, ensuring that at least $p$ such nodes exist. Since $|\sourcesetbase|=p$, we have $|W| = k \leq p$. Thus, $|N(W)| \geq |W|$.
         
@@ -271,7 +278,7 @@ Therefore, for the proof of the reduction, we will only consider instances of th
 
 \alessio{Questa parte non mi convince ancora. Penso che se dimostrassi il lemma che ogni nodo in $U$ punta almeno ad un nodo diverso dagli altri, tutti questi punti non servono, ma non saprei ancora come dimostrarlo...} \davide{Ho seguito questa strada, fammi sapere se secondo te è corretto il lemma che ho aggiunto.}
 
-\alessio{Un lemma è utile perché è un mini teorema che serve a dimostrare un teorema più grande. Se enunci dei lemmi prima di un teorema, dovresti usarli all'interno della sua dimostrazione.}
+\alessio{Un lemma è utile perché è un mini teorema che serve a dimostrare un teorema più grande. Se enunci dei lemmi prima di un teorema, dovresti usarli all'interno della sua dimostrazione.} \davide{Attualmente solo il lemma 1 non viene utilizzato. Lo tolgo?}
 
 \begin{comment}
     \begin{proof}
@@ -304,43 +311,35 @@ Therefore, for the proof of the reduction, we will only consider instances of th
     \end{figure}
 \end{comment}
 
-Now we can prove the correctness of the reduction.
+We can now prove the correctness of the reduction. Consider a perfect matching $M$ in $G$. Therefore, $|V_1|=|V_2|$ and $M$ is perfect, every node in $V_1$ is matched to exactly one node in $V_2$, and vice versa. The matching $M$ consists of $t+p$ edges. Due to the construction of $G$ (\cref{def:bip_construction}) and \cref{lemma:greater_nodes} (a node $u_i \in \treesetbase{V_1}$ only connect to a node $v_j \in \treesetbase{V_2}$ with $i < j$ or to destination nodes \destset), the matching $M$ naturally decomposes into $p$ paths starting from the source nodes $s_1, \dots, s_p$ and ending at the destination nodes $d_1, \dots, d_p$. Each path traverses a sequence of nodes corresponding to the nodes of the original tree $T$.
+Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \treesetbase{V_2}$. Then, the corresponding node of $u_{a} \in \treesetbase{V_1}$ can be matched to a node $u_{b} \in \treesetbase{V_2}$ (where $b > a$). This continues until a node $u_{x} \in \treesetbase{V_1}$ is matched to a destination node $d_k \in \destsetbase$. This forms a sequence $s_i \rightarrow u_{a} \rightarrow u_{b} \rightarrow \dots \rightarrow u_{x} \rightarrow d_k$. Following this technique, we will retrieve all the optimal chains from the solution of the \textsc{MWPBM} problem.
+
+\alessio{Tutta questa parte qua la spiegherei prima, fuori da questa dimostrazione. È importante per definire bene il problema e in questo modo snellisci anche la proof.} \davide{l'ho spostata qui. TODO: aggiungere esempio grafico}
 
 \begin{theorem}
-    An optimal solution of an instance $\mathcal I$ with $p \leq |E|$ of the \draft{\sout{problem defined in \ref{def:problem_def}} CHAINS-DIVISION problem} is equivalent to an optimal solution of the Minimum Weight Perfect Bipartite Matching for the instance $r(\mathcal I)$ where $r: \mathcal{I}_{CHAINS-DIVISION} \rightarrow \mathcal{I}_{MWPBM}$ is the reduction function that maps an instance of the \draft{\sout{problem defined in \ref{def:problem_def}} CHAINS-DIVISION problem} to an instance of the Minimum Weight Perfect Bipartite Matching problem (\draft{\sout{defined in}} \ref{def:mwpbm}) \draft{for a bipartite graph $G$} constructed as stated in \ref{def:bip_construction}.
+    An optimal solution of an instance $\mathcal I$ with $p \leq |\equivset|$ of the \textsc{CHAINS-DIVISION} problem (\cref{def:problem_def}) is equivalent to an optimal solution of the \textsc{MWPBM} problem (\cref{def:mwpbm}) for the instance $r(\mathcal I)$ where $r: \mathcal{I}_{CHAINS-DIVISION} \rightarrow \mathcal{I}_{MWPBM}$ is the reduction function that maps an instance of the CHAINS-DIVISION problem to an instance of the MWPBM problem for a bipartite graph $G$ constructed as stated in \cref{def:bip_construction}.
 \end{theorem}
 
 \begin{proof}
-    Let $\mathcal{I}$ be an instance of the \textsc{CHAINS-DIVISION} problem for a tree $T$ (having $t$ nodes), its equivalence classes $E$, and a target number of chains $p$. From \cref{claim:p_less_than_E}, we only consider $p \leq |E|$. Let $G = (V_1 \cup V_2, E')$ be the bipartite graph constructed according to \cref{def:bip_construction}, which is the instance $r(\mathcal{I})$ for the \textsc{MWPBM} problem. We need to show that an optimal solution to \textsc{CHAINS-DIVISION} for $\mathcal{I}$ corresponds directly to an optimal solution (a minimum weight perfect matching) for \textsc{MWPBM} on $G$, and vice versa.
+    Let $\mathcal{I} = (T, \equivset, p)$ be an instance of the \textsc{CHAINS-DIVISION} problem, where $T$ is a tree with $t$ nodes, \equivsetmath is the set of equivalence classes, and $p$ is the target number of chains. We assume $p \leq |\equivset|$, per \cref{claim:p_less_than_E}. Let $G = r(\mathcal{I})$ be the bipartite graph constructed according to \cref{def:bip_construction}. We will demonstrate a bijection between the set of valid chain partitions of $T$ and the set of perfect matchings in $G$, such that the cost of a partition equals the weight of its corresponding matching.
 
-    By construction, $|V_1| = |V_2| = t+p$. \cref{lemma:matching_existence} guarantees that a perfect matching always exists in $G$.
+    First, we establish the existence of a perfect matching. By construction, the graph $G$ is bipartite with partitions $V_1$ and $V_2$ such that $|V_1| = |V_2| = t+p$. \cref{lemma:matching_existence} ensures that a perfect matching exists in $G$.
 
-    Consider a perfect matching $M$ in $G$. \draft{\sout{Since $|V_1|=|V_2|$ and $M$ is perfect, every node in $V_1$ is matched to exactly one node in $V_2$, and vice versa.}} \alessio{Questa è la definzione di perfect matching. Se vuoi ribadirla allora va bene, ma con ``Therefore'' invece di ``Since''} The matching $M$ consists of $t+p$ edges. Due to the construction and \cref{lemma:greater_nodes} (nodes $u \in V_1 \cap T$ only connect to $v \in V_2 \cap T$ with $v > u$ or to destination nodes $d_j$) \alessio{Prima $T$ era $U$, ed è anche l'albero, non i nodi dell'albero nel grafo}, \draft{the matching $M$ naturally decomposes into $p$ paths starting from the source nodes $s_1, \dots, s_p$ and ending at the destination nodes $d_1, \dots, d_p$. Each path traverses a sequence of nodes corresponding to the nodes of the tree $T$.
-    Specifically, a path starting at $s_i$ will match \draft{\sout{$s_i$} it} to some tree node $u_{j_1} \in V_2$. Then, the corresponding node $u_{j_1} \in V_1$ must be matched to some $u_{j_2} \in V_2$ (where $j_2 > j_1$) or a destination node $d_k$. This continues until a tree node $u_{j_m} \in V_1$ is matched to a destination node $d_k$. This forms a sequence $s_i \rightarrow u_{j_1} \rightarrow u_{j_2} \rightarrow \dots \rightarrow u_{j_m} \rightarrow d_k$.} \alessio{Tutta questa parte qua la spiegherei prima, fuori da questa dimostrazione. È importante per definire bene il problema e in questo modo snellisci anche la proof.}
+    Let $\mathcal{P} = \{C_1, \dots, C_p\}$ be a valid partition of the nodes of $T$ into $p$ chains. We can construct a perfect matching $M_\mathcal{P}$ in $G$ as follows:  For each chain $C_k = [u_{1}, \dots, u_{m_k}]$, we construct a path in $G$: match $s_k$ to $u_{1} \in \treesetbase{V_2}$. Then match $u_{i} \in \treesetbase{V_1}$ to $u_{i+1} \in \treesetbase{V_2}$ for $i=1, \dots, m_k-1$. Finally, match $u_{m_k} \in \treesetbase{V_1}$ to one of the available destination nodes $d_j \in \destsetbase$. Since we have $p$ chains and $p$ source/destination nodes, and every tree node is in exactly one chain, this process uses all $t+p$ nodes in $V_1$ and $V_2$, forming a perfect matching. The weight of this matching is given by:
+    \begin{align*}
+        W(M_\mathcal{P}) &= \sum_{(u,v) \in M_\mathcal{P}} w(u,v) \\
+        &= p + |\{ (u_i, u_j) \in M_\mathcal{P} \mid u_i \in \treesetbase{V_1}, u_j \in \treesetbase{V_2}, \equivset(u_i) \neq \equivset(u_j) \}|
+    \end{align*}
+    where $p$ represents the contribution from the source nodes $s_i$, as each source node must be connected with weight 1 to start a chain. A class change occurs exactly when a path in the matching uses a weight-1 edge between tree nodes.
+    Therefore, $W(M)$ is exactly equal to the RLE cost of the partition defined by the matching $M_\mathcal{P}$.
 
-    Let this set of $p$ paths define a partition of the tree nodes into $p$ chains $C_1, \dots, C_p$, where each chain $C_k$ contains the sequence of tree nodes visited by the $k$-th path. The ordering within each chain respects the original tree ordering $\pi$ due to \cref{lemma:greater_nodes}.
+    Conversely, let $M$ be a perfect matching in $G$. The structure of $G$ ensures that $M$ consists of $p$ disjoint paths starting from source nodes $\{s_1, \dots, s_p\}$ and ending at destination nodes $\{d_1, \dots, d_p\}$. Each path defines an ordered chain of nodes from $T$. By \cref{lemma:greater_nodes}, the node order within these chains is consistent with the original node ordering $\pi$. Thus, $M$ maps to a valid partition of $T$. The cost of this partition is equal to $W(M)$.
 
-    Now, let's analyze the weight of the matching $M$. The total weight $W(M)$ is the sum of the weights of its edges. According to \cref{def:bip_construction}:
-    \draft{
-    \begin{itemize}
-        \item Edges from source nodes $s_i$ have weight 1. There are $p$ such edges in $M$. These correspond to the start of each chain, contributing a base cost of 1 per chain.
-        \item Edges $(u_j, u_k)$ between tree nodes in $V_1$ and $V_2$ have weight 0 if $u_j$ and $u_k$ belong to the same equivalence class ($class(u_j) = class(u_k)$). These edges continue a run of the same class within a chain.
-        \item Edges $(u_j, u_k)$ between tree nodes have weight 1 if $class(u_j) \neq class(u_k)$. These edges signify a change in the equivalence class within a chain, thus starting a new run in the RLE sense.
-        \item Edges $(u_j, d_k)$ from a tree node to a destination node have weight 0. These edges terminate a chain and do not contribute to the RLE cost.
-    \end{itemize}
-    } \alessio{ridurrei questa parte qua che è già stata scritta nella def. 14, spiegando che $p$ deriva dai collegamenti con $s_i$ dopo l'equazione.}
-    The total weight of the matching $M$ is therefore 
-    $$W(M) = p + (\text{number of weight-1 edges between tree nodes})$$
-    The cost of the chain partition, defined as the sum of the lengths of the run-length encodings of the chains, is precisely $\draft{p} + (\text{number of class changes within chains})$ \alessio{è giusto $p$ o dovrebbe essere 1?}. A class change occurs exactly when a path in the matching uses a weight-1 edge between tree nodes.
-    Therefore, $W(M)$ is exactly equal to the RLE cost of the partition defined by the matching $M$.
-
-    Conversely, any valid partition of $T$ into $p$ ordered chains $C_1, \dots, C_p$ can be mapped to a perfect matching $M$ in $G$. For each chain $C_k = [u_{k,1}, \dots, u_{k,m_k}]$, we construct a path in $G$: match $s_k$ to $u_{k,1} \in V_2$. Then match $u_{k,i} \in V_1$ to $u_{k,i+1} \in V_2$ for $i=1, \dots, m_k-1$. Finally, match $u_{k,m_k} \in V_1$ to one of the available destination nodes $d_j$. Since we have $p$ chains and $p$ source/destination nodes, and every tree node is in exactly one chain, this process uses all $t+p$ nodes in $V_1$ and $V_2$, forming a perfect matching. The weight of this matching will correspond to the RLE cost of the partition, as argued above.
-
-    Since there is a one-to-one correspondence between valid chain partitions and perfect matchings in $G$, and the cost of a partition (total RLE length) is equal to the weight of the corresponding matching, minimizing the matching weight is equivalent to minimizing the RLE cost. Thus, an optimal solution to \textsc{MWPBM} on $G$ yields an optimal solution to \textsc{CHAINS-DIVISION} on $T$.
+    Since there is a cost-preserving bijection between the set of all valid partitions and the set of all perfect matchings, an optimal solution to one problem corresponds to an optimal solution to the other. Therefore, finding a minimum weight perfect matching in $G$ is equivalent to solving the \textsc{CHAINS-DIVISION} problem for $T$.
 \end{proof}
 
 \subsection{Full example}
-Consider The example in \cref{fig:reduction_example} where we have a tree $T$ with $t=7$ nodes, $p = 2$ chains and the equivalence classes $E = \{1,2,1,3,1,2,2\}$ sorted accordingly to the upward path $\pi$ of each node of the tree. We can construct the two distinct sets $V_1$ and $V_2$ of the bipartite graph $G$ as follows: $V_1 = \{s_1, s_2, 1,2,1,3,1,2,2\}$ and $V_2 = \{1,2,1,3,1,2,2, d_1, d_2\}$. The edges of the graph $G$ will be constructed as stated in \cref{def:bip_construction}. In \cref{fig:reduction_example}-(a) we have the resulting bipartite graph, and in \cref{fig:reduction_example}-(b) we have one of the possible minimum perfect matchings for the graph in (a) having weight $4$. A the end we can see that the optimal partition of the nodes of the tree $T$ is $C_1 = \{1,1,1,2,2\}$ and $C_2 = \{2,3\}$ with a total cost of $4$, this can be obtained starting from the sources and by following the edges of the nodes, jumping to the corresponding node in $V_1$ and following the edges again until we reach the destination nodes.
+Consider the example in \cref{fig:reduction_example} where we have a tree $T$ with $t=7$ nodes, $p = 2$ chains and the equivalence classes $E = \{1,2,1,3,1,2,2\}$ sorted accordingly to the upward path $\pi$ of each node of the tree. We can construct the two distinct sets $V_1$ and $V_2$ of the bipartite graph $G$ as follows: $V_1 = \{s_1, s_2, 1,2,1,3,1,2,2\}$ and $V_2 = \{1,2,1,3,1,2,2, d_1, d_2\}$. The edges of the graph $G$ will be constructed as stated in \cref{def:bip_construction}. In \cref{fig:reduction_example}-(a) we have the resulting bipartite graph, and in \cref{fig:reduction_example}-(b) we have one of the possible minimum perfect matchings for the graph in (a) having weight $4$. A the end we can see that the optimal partition of the nodes of the tree $T$ is $C_1 = \{1,1,1,2,2\}$ and $C_2 = \{2,3\}$ with a total cost of $4$, this can be obtained starting from the sources and by following the edges of the nodes, jumping to the corresponding node in $V_1$ and following the edges again until we reach the destination nodes.
 
 \begin{figure}[H]
     \centering
