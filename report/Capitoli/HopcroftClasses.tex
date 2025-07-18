@@ -1,10 +1,18 @@
-\chapter{Hopcroft's Algorithm for Minimization of DFA} \label{chp:hopcroft}
-Tree compression schemes that effectively exploit repetitive structures require efficient techniques for identifying and representing such repetitions in a compact manner. In our approach, we leverage deterministic finite automata (DFA) minimization as a foundational tool for recognizing and compressing recurring patterns within trees. Among the various DFA minimization algorithms, Hopcroft's algorithm stands out due to its optimal time complexity and efficiency in reducing state redundancies. This chapter provides the necessary theoretical background on Hopcroft's algorithm and DFA minimization, explaining their relevance to our proposed compression scheme. Also, we introduce a linear-time algorithm for minimizing acyclic deterministic finite automata, which is particularly suitable for identifying repetitive structures in trees. Let's start by introducing what are deterministic finite automata and why minimizing them is important for tree compression.
+\chapter{DFA Minimization} \label{chp:hopcroft}
 
-\section{Deterministic Finite Automata (DFA)}
+\section{Introduction and Motivation}
+Tree compression schemes that effectively exploit repetitive structures require efficient techniques for identifying and representing such repetitions in a compact manner. A powerful approach to this problem is to view a tree as a finite language, where each path from the root to a leaf represents a word. Such a language can be recognized by a Deterministic Finite Automaton (DFA). More specifically, since trees are inherently acyclic, they can be represented by Acyclic Deterministic Finite Automata (ADFAs).
+
+The problem of finding and compressing identical subtrees is thus equivalent to minimizing the corresponding DFA. DFA minimization ensures that equivalent substructures are merged efficiently, leading to a more compact encoding. The minimized DFA provides a canonical representation of the repetitive structures, which can then be leveraged in our compression pipeline. This theoretical foundation enables us to systematically identify and encode tree patterns, ultimately improving the compression efficiency.
+
+While general-purpose minimization algorithms like Hopcroft's are highly efficient for any DFA, the specific structure of ADFAs allows for even faster, linear-time algorithms. In this context, we focus on Revuz's algorithm, which is designed for minimizing ADFAs and is therefore particularly well-suited for compressing tree structures.
+
+This chapter provides the necessary theoretical background on DFA minimization. We will first introduce the concepts of DFAs and their minimization, followed by a detailed look at both Hopcroft's algorithm as a general solution and Revuz's algorithm as a specialized, linear-time solution for acyclic graphs, which is central to our tree compression methodology.
+
+\section{Deterministic Finite Automata}
 \begin{definition}[Deterministic Finite Automaton] \label{def:dfa}
     A deterministic finite automaton (DFA) is a 5-tuple $M = (Q, \Sigma, \delta, q_0, F)$ where:
-    \begin{itemize}
+    \begin{itemize}[leftmargin=25pt]
         \item $Q$ is a finite set of states
         \item $\Sigma$ is a finite set of input symbols (alphabet)
         \item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function
@@ -13,27 +21,21 @@ Tree compression schemes that effectively exploit repetitive structures require 
     \end{itemize}
 \end{definition}
 
-The DFA processes an input string $s$ one symbol at a time by starting from the initial state $q_0$ and following transitions based on the input symbols. The string $s$ is accepted if the DFA ends in an accepting state after processing all input symbols, otherwise, it is rejected. The language recognized by a DFA is the set of all strings that lead to an accepting state. DFA are widely used in various applications, including lexical analysis, pattern matching, and formal language theory. 
+The DFA processes an input string $s$ one symbol at a time by starting from the initial state $q_0$ and following transitions based on the input symbols. The string $s$ is accepted if the DFA ends in an accepting state after processing all input symbols, otherwise, it is rejected. The language recognized by a DFA is the set of all strings that lead to an accepting state. DFAs are widely used in various applications, including lexical analysis, pattern matching, and formal language theory. 
 
 \subsection{DFA Minimization}
 The process of automata minimization consists in reducing the number of states in a DFA while preserving the language accepted by the DFA. The minimization of DFA is crucial for a variety of applications, such model checking, hardware design, and compilers, as it produces a more effective and compact representation of the automaton allowing for faster processing and reduced memory usage.
 
-The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is the Hopcroft's algorithm, which was proposed by John Hopcroft in 1971 \cite{HOPCROFT1971189}. The Hopcroft's algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
-
-\section{The Need for DFA Minimization in the novel scheme}
-A key challenge in tree compression is the identification of structurally similar or identical subtrees. By modeling repetitive substructures as states in a DFA, we can transform the problem into one of minimizing redundant states, thereby reducing the size of the representation. DFA minimization ensures that equivalent substructures are merged efficiently, leading to a more compact encoding.
-
-The minimized DFA provides a canonical representation of the repetitive structures, which can then be leveraged in our compression pipeline. This theoretical foundation enables us to systematically identify and encode tree patterns, ultimately improving the compression efficiency.
-
-In the subsequent sections, we delve into the formal definition of the Hopcroft's algorithm. Then, we introduce an algorithm for minimizing acyclic DFAs in linear time, which is particularly relevant for identifying repetitive structures in trees. 
+The minimization of DFA is a well-studied problem in automata theory, and there are several algorithms available for this purpose. One of the most popular algorithms for DFA minimization is Hopcroft's algorithm, which was proposed by John Hopcroft in 1971 \cite{HOPCROFT1971189}. Hopcroft's algorithm is an efficient and simple algorithm that can minimize a DFA in $O(n \log n)$ time, where $n$ is the number of states in the DFA.
 
 \section{Hopcroft's Minimization Algorithm}
-Minimization of DFA is a classical and widely studied problem in automata theory and Formal Languages. It consists of finding the unique (up to isomorphism) finite automaton with the minimal number of states, recognizing the same regular language of a given DFA.
+DFA minimization is a classical and widely studied problem in Automata Theory and Formal Languages. It consists of finding the unique (up to isomorphism) finite automaton with the minimal number of states, recognizing the same regular language of a given DFA.
 
 \begin{algorithm}
     \caption{Hopcroft's Algorithm for DFA Minimization} \label{alg:DFA_min}
     \begin{algorithmic}[1]
-    \Require A DFA $M = (Q, \Sigma, \delta, q_0, F)$
+    \Require $M = (Q, \Sigma, \delta, q_0, F)$
+    \Function{HopcroftMinimization}{$M$}
     
     \State $P \gets \{F, Q \setminus F\}$ \Comment{Initial partition}
     \State $W \gets \{F\}$ \Comment{Working set initialized with final states}
@@ -54,17 +56,18 @@ Minimization of DFA is a classical and widely studied problem in automata theory
     \EndWhile
     
     \State \Return the minimized DFA built from partition $P$
+    \EndFunction
     \end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:DFA_min} works by iteratively refining a partition of the states until no further refinement is possible, meaning all states within each set of the partition are indistinguishable. The final partition represents the equivalence classes, which correspond to the states of the minimal DFA. Here's a step-by-step explanation based on the provided pseudocode:
+Algorithm \cref{alg:DFA_min} works by iteratively refining a partition of the states until no further refinement is possible, meaning all states within each set of the partition are indistinguishable. The final partition represents the equivalence classes, which correspond to the states of the minimal DFA. Here's a step-by-step explanation based on the provided pseudocode:
 
 \begin{enumerate}
-    \item \textbf{Initialization:} The algorithm starts with an initial partition $P$ containing two sets: the set of final states $F$ and the set of non-final states $Q \setminus F$. These are the coarsest sets of potentially distinguishable states. A working set $W$ is initialized, typically containing the set of final states $F$ (or the smaller of the two initial sets as an optimization). $W$ holds the sets that are used as "splitters" to refine the partition $P$.
+    \item \textbf{Initialization:} The algorithm starts with an initial partition $P$ containing two sets: the set of final states $F$ and the set of non-final states $Q \setminus F$. These are the coarsest sets of potentially distinguishable states. A working set $W$ is initialized, typically containing the set of final states $F$ (or the smaller of the two initial sets as an optimization). $W$ holds the sets that are used as ``splitters'' to refine the partition $P$. \alessio{Perché si chiamano splitters?}
 
-    \item \textbf{Refinement Loop:} The algorithm iterates as long as the working set $W$ is not empty. In each iteration, a set $A$ (a "splitter") is removed from $W$. Then, for each input symbol $c \in \Sigma$:
+    \item \textbf{Refinement Loop:} The algorithm iterates as long as the working set $W$ is not empty. In each iteration, a set $A$ (a ``splitter'') is removed from $W$. Then, for each input symbol $c \in \Sigma$:
         \begin{itemize}
-            \item Calculate the set $X = \{q \in Q \mid \delta(q, c) \in A\}$. This is the set of all states that transition *into* the set $A$ upon reading symbol $c$.
+            \item Calculate the set $X = \{q \in Q \mid \delta(q, c) \in A\}$. This is the set of all states that transition into the set $A$ upon reading symbol $c$.
             \item For each set $Y$ currently in the partition $P$, check if $Y$ needs to be split by $X$. A split is necessary if some states in $Y$ are in $X$ and some are not (i.e., $X \cap Y \neq \emptyset$ and $Y \setminus X \neq \emptyset$). This indicates that states in $Y$ are distinguishable based on whether their $c$-transition leads into $A$.
             \item If $Y$ needs to be split, replace $Y$ in the partition $P$ with two new sets: $Y_1 = X \cap Y$ (states in $Y$ that transition into $A$) and $Y_2 = Y \setminus X$ (states in $Y$ that do not transition into $A$).
             \item Update the working set $W$: If the original set $Y$ was in $W$, remove $Y$ and add both new sets $Y_1$ and $Y_2$ to $W$. If $Y$ was not in $W$, add only the smaller of the two new sets ($Y_1$ or $Y_2$) to $W$. This optimization helps maintain the algorithm's efficiency.
@@ -80,44 +83,28 @@ The algorithm enables to compute equivalence classes of nodes in $O(n\log n)$, i
 \begin{definition}[Equivalence Relation]
     For a language $L \subseteq \Sigma^*$ and any strings $x,y \in \Sigma^*$, we say $x$ is equivalent to $y$ with respect to $L$ (written as $x \approx_L y$) if and only if for all strings $z \in \Sigma^*$:
     \[ xz \in L \Leftrightarrow yz \in L \]
-    That is, strings $x$ and $y$ are equivalent if they have the same behavior with respect to the language $L$ - either they both lead to acceptance or both lead to rejection when any suffix $z$ is appended.
 \end{definition}
+That is, strings $x$ and $y$ are equivalent if they have the same behavior with respect to the language $L$: either they both lead to acceptance or both lead to rejection when any suffix $z$ is appended.
 
 \begin{definition}[Regular Language]
-    A language $L$ over an alphabet $\Sigma$ is called a \textbf{regular language} if it can be recognized by a deterministic finite automaton (DFA). Equivalently, a language is regular if it can be described by a regular expression or generated by a regular grammar. Regular languages form the simplest class in the Chomsky hierarchy of formal languages.
+    A language $L$ over an alphabet $\Sigma$ is called a \textbf{regular language} if it can be recognized by a deterministic finite automaton (DFA).
 \end{definition}
 
 \begin{theorem}[Myhill-Nerode theorem \cite{nerode1958linear,myhill1957finite}] \label{def:myhill-nerode}
     Let $L$ be a language over an alphabet $\Sigma$. Then $L$ is regular if and only if there exists a finite number of Myhill-Nerode equivalence classes for $L$. Specifically, the number of equivalence classes is equal to the number of states in the minimal DFA recognizing $L$.
 \end{theorem}
 
-\section{Minimization of acyclic DFA in linear time}
-For our purpose, we will focus on a specific type of finite automaton: an acyclic deterministic finite automaton (or DAWG). An acyclic DFA is one where there are no cycles within the transitions. This property simplifies the minimization process since it ensures that every state can be reached from the start state through a unique path.
+\section{Minimization of Acyclic DFA in Linear Time}
+For our purpose, we will focus on a specific type of finite automaton: an acyclic deterministic finite automaton. An ADFA is a DFA where the transition graph contains no cycles. This structure is also commonly known as a Directed Acyclic Word Graph (DAWG) when used to represent a set of strings. The acyclic property is key, as it simplifies the minimization process significantly. 
 
-Let's start by giving the notion of directed acyclic word graph (DAWG):
-\begin{definition}[DAWG]
-    A \textbf{DAWG} (directed acyclic word graph) or automaton $\mathcal{A}$ is defined by the following 5-uple:
-    \[
-    \mathcal{A} = (Q, \Sigma, F, T, q_0),
-    \]
-    where
-    \begin{itemize}
-        \item $Q$ is a set of states;
-        \item $\Sigma$ is an alphabet of finite cardinal denoted by $|\Sigma|$;
-        \item $q_0$ is the initial state;
-        \item $T$ is the subset of terminal states of $Q$;
-        \item $F$ is a function of $Q \times \Sigma$ into $Q$ defining the transitions (arcs) of the automaton.
-    \end{itemize}
-\end{definition}
+In this section, we will discuss an efficient algorithm for minimizing acyclic deterministic finite automata in linear time on the number of states \cite{revuz1992minimisation}. Notice that we will use the following notation for DAWG: for a state $q$ and a symbol $a$, the transition $\delta(q,a)$ will be denoted as $q.a$. This notation is extended to words, so for a word $w = w_1w_2\dots w_n$, $q.w$ is the state reached from $q$ by following the path labeled by $w$. A word $w$ is accepted by the automaton if $q_0.w \in F$.
 
-The state reached by a transition labeled $a$ from state $q$ is denoted by $q.a = F(q,a)$. This notation extends transitively to words: if $w$ is a word, then $q.w$ denotes the state reached by following the transitions labeled by each letter $w_1, w_2, \ldots, w_n$ of $w$. A word $w$ is accepted by the automaton if $q_0.w \in T$.
-
-In this section, we will discuss an efficient algorithm for minimizing acyclic deterministic finite automata in linear time on the number of states \cite{revuz1992minimisation}. Let's start by giving some definitions and theorems introduced in the paper \cite{revuz1992minimisation}.
+Let's start by giving some definitions and theorems introduced in the paper \cite{revuz1992minimisation}.
 
 \begin{definition}[Height function]
     For a state $s$ in an automaton, the height $h(s)$ is defined as the length of the longest path starting at $s$ and going to a final state. 
 
-    $$h(s) = \{|w||s.w \text{ is final}\}$$
+    $$h(s) = \max\{|w|:s.w \text{ is final}\}$$
 \end{definition}
 
 This height function induces a partition $\Pi_i$ of $Q$, where $\Pi_i$ denotes the set of states of height $i$.
@@ -130,26 +117,30 @@ This height function induces a partition $\Pi_i$ of $Q$, where $\Pi_i$ denotes t
 The minimization algorithm introduced in \cite{revuz1992minimisation} operates by labeling each state with a unique identifier that represents the structure of the automaton from that state onward. It proceeds in the following steps:
 
 \begin{enumerate}
-    \item \textbf{Height Computation:} The height of each state is determined, where the height of a state is the length of the longest path from that state to a final state.
+    \item \textbf{Height Computation:} The height of each state is determined, \draft{\sout{where the height of a state is the length of the longest path from that state to a final state.}} \alessio{È la definzione 5, non serve riscriverlo. Al massimo fai una ref.}
     \item \textbf{State Labeling:} Each state is labeled based on the structure of its transitions. The label consists of:
     \begin{itemize}
         \item Whether the state is final or not.
         \item The transitions, recorded as ordered pairs of symbols and target state identifiers.
     \end{itemize}
+    \alessio{Andrei più nello specifico, dopo riporti la label $(F/NF, l_1, nl_1, l_2, nl_2, \dots, l_k, nl_k)$, se sono la stessa cosa, conviene spiegarlo subito qua.}
     \item \textbf{Lexicographic Sorting:} States at each height level are sorted lexicographically based on their labels using a bucket sort technique.
     \item \textbf{Merging Equivalent States:} After sorting, states with identical labels are merged, ensuring that equivalent states are unified.
 \end{enumerate}
 
-In details, the algorithm minimizes an acyclic deterministic finite automaton by leveraging the concept of state height. The algorithm partitions the states based on their height. It then processes these partitions in increasing order of height, starting from height 0.
+In detail\draft{\sout{s}}, the algorithm minimizes a\draft{\sout{n acyclic deterministic finite automaton} DAWG} by leveraging the concept of state height. The algorithm partitions the states based on their height. It then processes these \draft{\sout{partitions} groups} in increasing order of height, starting from height 0.
+\alessio{Dettaglio che ho scoperto anche io un mese fa: la partizione è l'insiseme dei sottoinsiemi, i sottoinsiemi che formano la partizione si chiamano ``groups''.}
 
 The core idea relies on the `height property': If every $\Pi_j$ with $j < i$ is distinguished, then two states $p$ and $q$ in $\Pi_i$ (the set of states with height $i$) are equivalent if and only if for every letter $a$ in the alphabet $\Sigma$, the transitions $p.a$ and $q.a$ lead to the same state (or both are undefined).
 
 The algorithm iteratively ensures that each $\Pi_i$ is distinguished. It starts with $\Pi_0$, where all states are trivially equivalent (as they are final states with no outgoing paths to other final states contributing to height) and merges them. Then, for each subsequent height $i$, it sorts the states in $\Pi_i$ based on their transitions. Specifically, states are grouped based on the target states of their transitions for each symbol in the alphabet. Since all lower levels ($j < i$) are already distinguished by the inductive step, states in $\Pi_i$ that have identical transitions for all symbols (leading to equivalent states in lower levels) are themselves equivalent according to the height property. These equivalent states are then merged.
 
-This process uses a specialized lexicographic sorting technique (related to bucket sort) optimized for this task, which helps achieve linear time complexity relative to the size of the automaton (number of states and transitions). The algorithm leverages a technique similar to the one presented in \cite{aho1974design} for testing tree isomorphism. Specifically, Revuz adopt a renumbering scheme during the lexicographic sorting phase to optimize both time and space complexity. 
+This process uses a specialized lexicographic sorting technique (related to bucket sort) optimized for this task, which helps achieve linear time complexity relative to the size of the automaton (number of states and transitions). The algorithm leverages a technique similar to the one presented in \cite{aho1974design} for testing tree isomorphism. Specifically, Revuz adopt\draft{s} a renumbering scheme during the lexicographic sorting phase to optimize both time and space complexity. 
 
-\subsection{Renumbering Scheme Explained}
+\subsection{Renumbering Scheme \draft{\sout{Explained}}}
+\alessio{Maybe a subsection separates too much, try using a subsubsection/paragraph (without numbering).}
 The core minimization algorithm relies on sorting states at the same height level based on their transitions. A state $s$ can be represented by a label or tuple: $(F/NF, l_1, nl_1, l_2, nl_2, \dots, l_k, nl_k)$, where $F/NF$ denotes final/non-final status, $l_i$ is the $i$-th transition symbol (alphabet character), and $nl_i$ is the target state of that transition.
+\alessio{Give an example}
 
 The challenge arises when performing the lexicographic sort (using repeated bucket sorts) on these labels, specifically concerning the $nl_i$ components. If the actual state numbers (ranging from $1$ to $|Q|$, the total number of states) are used directly as the values for $nl_i$:
 \begin{itemize}
@@ -157,10 +148,11 @@ The challenge arises when performing the lexicographic sort (using repeated buck
     \item Alternatively, representing state numbers as strings of digits would increase the length of the labels by a factor proportional to $\log |Q|$, again potentially breaking the overall linear time complexity.
 \end{itemize}
 
-The renumbering scheme overcomes this issue by assigning temporary, small integer names to the target states ($nl_i$) during the sorting process for each height level $\Pi_i$. The key idea is that when sorting states at height $i$, we only need to distinguish between the equivalence classes of the target states $nl_i$ from lower levels ($j < i$), as those levels have already been processed and minimized. The renumbering scheme ensures that the bucket array size is bounded by the maximum of $|C|$ (the alphabet size) and $E_i$ (the total number of edges from states at height i). The renumbering function adopted is the one provided in Algorithm \ref{alg:renumbering}.
+The renumbering scheme overcomes this issue by assigning temporary, small integer names to the target states ($nl_i$) during the sorting process for each height level $\Pi_i$. The key idea is that when sorting states at height $i$, we only need to distinguish between the equivalence classes of the target states \draft{$nl_i$} \alessio{È corretto il pedice $i$ o dovrebbe essere $j$?} from lower levels ($j < i$), as those levels have already been processed and minimized. The renumbering scheme ensures that the bucket array size is bounded by the maximum \draft{\sout{of} between} $|\draft{\sout{C} \Sigma}|$ (the alphabet size) and $\draft{|E_i|}$ (the total number of edges from states at height i). The renumbering function adopted is \draft{\sout{the following:} presented in Algorithm \cref{alg:renumbering}} \alessio{Non usare mai ``in the following'' o simili, perché a Latex piace muovere le cose e potrebbe essere poco chiaro. Usa sempre ref con i numeri.}
 
 \begin{algorithm}
-    \caption{Renumbering Function} \label{alg:renumbering}
+    \caption{Renumbering Function}
+    \label{alg:renumbering}
     \begin{algorithmic}[1]
         \Function{Renumber}{s, h, n}
             \If{$s.\text{ch} \ne h$}
@@ -174,10 +166,11 @@ The renumbering scheme overcomes this issue by assigning temporary, small intege
 \end{algorithm}
 
 \subsection{Pseudocode}
-The paper presents the core minimization logic and a more detailed sorting (or distinguishing) algorithm separately. Here's a combined representation based on the `Final algorithm' section of the paper.
+\draft{The paper presents} \alessio{Cita} the core minimization logic and a more detailed sorting (or distinguishing) algorithm separately. \draft{\sout{Here is} Algorithm \cref{alg:minimization-dawg} shows} a combined representation based on the `Final algorithm' section of the paper.
 
 \begin{algorithm}
-    \caption{Minimization Algorithm for Acyclic DFAs}  
+    \caption{Minimization Algorithm for \draft{\sout{Acyclic DFAs} DAWGs}}  
+    \label{alg:minimization-dawg}
     \begin{algorithmic}[1]
     \State Calculate height $h(s)$ for every state $s$.
     \State Create partitions $\Pi_i = \{s \in Q \mid h(s) = i\}$.
@@ -191,9 +184,9 @@ The paper presents the core minimization logic and a more detailed sorting (or d
     \end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:distinguish} distinguishes states within a given height level $\Pi_i$. It iteratively refines partitions based on transitions. Each state $s$ is labeled with the following:
+Algorithm \cref{alg:distinguish} distinguishes states within a given height level $\Pi_i$. It iteratively refines partitions based on transitions. Each state $s$ is labeled with the following:
 $$label(s) = (F/NF, l_1, nl_1, l_2, nl_2, \dots, l_k, nl_k)$$
-where $F/NF$ indicates final/non-final, $l_k$ is the $k$-th transition symbol, and $nl_k$ is the (renumbered) target state name. The sorting happens component by component.
+\draft{\sout{where $F/NF$ indicates final/non-final, $l_k$ is the $k$-th transition symbol, and $nl_k$ is the (renumbered) target state name.}} \alessio{Spiegato prima} The sorting happens component by component.
 
 \begin{algorithm}[h]
     \caption{Distinguish Algorithm} \label{alg:distinguish}
@@ -231,8 +224,9 @@ where $F/NF$ indicates final/non-final, $l_k$ is the $k$-th transition symbol, a
 
 \textit{Note:} The pseudocode in the paper is slightly intertwined with the bucket sort details. This representation attempts to capture the logic described. The renumbering function is called implicitly when accessing $nl_j$. The handling of merging might occur after the Distinguish procedure completes for level $i$, or potentially within it as groups become fully distinguished. The pseudocode merges states within bucket Q[\$], which relates to the end-of-string marker in the generic sort; for state labels, equivalence is confirmed when a group remains together after checking all label components.
 
-\subsection{Example}
-Now we are going to see an example of reduction for a given DAWG. The DAWG is represented in figure \ref{fig:example_dawg} and, as we can notice, it is also a valid ordered rooted tree with $n = 11$ nodes, $e = 10$ edges and the following alphabet: $\Sigma = \{0, 1\}$. The node $a$ is the root of the tree and the initial state of the automaton, while the leaf nodes $e,g,h,i,l,m$ are final states.
+\subsection{Example} \alessio{Usa un example environment.}
+Now we are going to see an example of reduction for a given DAWG. The DAWG is represented in figure \cref{fig:example_dawg} and, as we can notice, it is also a valid ordered rooted tree with $n = 11$ nodes, $e = 10$ edges and the following alphabet: $\Sigma = \{0, 1\}$. The node $a$ is the root of the tree and the initial state of the automaton, while the leaf nodes $e,g,h,i,l,m$ are final states.
+\alessio{Ricorda di specificare che questo è un caso specifico e che potrebbe anche non essere un albero, ma a noi va bene così perché ci concentriamo su quelli.}
 
 \begin{figure}[H]
     \centering
@@ -279,7 +273,8 @@ Now we are going to see an example of reduction for a given DAWG. The DAWG is re
     \label{fig:example_dawg}
 \end{figure}
 
-Now by applying the algorithm, we obtain minimized DAWG represented in figure \ref{fig:example_minimized_dawg}. Each node of the original DAWG is represented by a node in the minimized DAWG (equivalence classes). The edges represent transitions between these nodes. The root node $A$ is the initial state of the minimized DAWG, while the node $D$ is the final state.
+Now by applying the algorithm, we obtain minimized DAWG represented in figure \cref{fig:example_minimized_dawg}. \alessio{Mostra come! Fai vedere un po' di passaggi dell'algoritmo per mostrare bene come funziona.}
+Each node of the original DAWG is represented by a node in the minimized DAWG (equivalence classes). The edges represent transitions between these nodes. The root node $A$ is the initial state of the minimized DAWG, while the node $D$ is the final state.
 \begin{figure}[H]
     \centering
     \begin{tikzpicture}[->, >=stealth, node distance=3cm, on grid, auto]
@@ -299,7 +294,7 @@ Now by applying the algorithm, we obtain minimized DAWG represented in figure \r
     \label{fig:example_minimized_dawg}
 \end{figure}      
 
-The equivalence classes of the nodes are listed in table \ref{tab:equivalence_classes}.
+The equivalence classes of the nodes are listed in table \cref{tab:equivalence_classes}.
 \begin{center}
     \begin{tabular}{|c|l|}
     \hline

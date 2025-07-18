@@ -1,28 +1,31 @@
 \chapter{Min-Weight Perfect Bipartite Matching} \label{chp:min_weight_perfect_bipartite_matching}
+\alessio{Ricorda sempre un cappello introduttivo ad ogni capitolo}
 
 \section{Problem definition}
-Given a weighted bipartite graph $G = (V, E)$ (remember that a bipartite graph is a graph whose vertices can be divided into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$), let's define the concept of a matching.
+Given a weighted bipartite graph $G = (V, E)$ \draft{(remember that a bipartite graph is a graph whose vertices can be divided into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$)}, let's define the concept of a matching. \alessio{Non hai mai spiegato cos'è un grafo bipartito, quindi non posso ricordarlo :)}
 \begin{definition}[Matching] \label{def:matching}
-    A matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. In other words, a matching is a set of edges such that no two edges share a common vertex. 
+    \draft{Given a generic graph $G = (V, E)$, }A matching $M \draft{\sout{\in}} \draft{\subseteq} E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. \draft{\sout{In other words, a matching is a set of edges such that no two edges share a common vertex}}
 \end{definition}
-
+\draft{In other words, a matching is a set of edges such that no two edges share a common vertex}
 If a vertex $v$ has no edge of $M$ incident to it then $v$ is said to be exposed (or unmatched). A matching is perfect if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{Immagini/matching_example.png}
-    \caption{Example of a perfect matching in a bipartite graph.}
+    \caption{Example of a \draft{perfect matching} in a bipartite graph. \alessio{Però ci sono dei nodi exposed, quindi non è perfect. Farei 3 subfigure: un non matching, un matching non perfect, un matching perfect. La legenda la puoi spiegare poi nella caption.}}
     \label{fig:matching_example}
 \end{figure}
 
 The problem of finding a minimum weight perfect matching in a bipartite graph is a well-known problem in combinatorial optimization. The problem can be formulated as follows: 
 
 \begin{definition}[Minimum weight perfect matching in bipartite graphs (\textsc{MWPBM})] \label{def:mwpbm}
-    Given a weighted bipartite graph $G = (V, E)$, where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}.
+    Given a weighted bipartite graph $G = (V, E)$, \draft{where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$}, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. \draft{The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}}.
 \end{definition}
+\alessio{La parte sui nodi $V_1$ e $V_2$ è nella definizione di grafo bipartito, per cui spostiamola nella definizione.}
+\alessio{La parte sui pesi si può spiegare fuori dalla definizione, dato che non è relativa al problema ma al grafo. Occhio che qua usi $e$ per indicare un arco, ma prima usavi $e$ per indicare il numero di archi in un grafo. $e$ ci sta meglio qua a mio parere, prima scegli se usare $m$ (se è un simbolo libero) o direttamente $|E|$}
 
 \section{The existence of perfect matchings in bipartite graphs}
-In this section two theorems that states a condition for the existence of perfect matchings in bipartite graphs are introduced. These theorems will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}.
+In this section \draft{we introduce} two theorems that state\draft{\sout{s}} a condition for the existence of perfect matchings in bipartite graphs \draft{\sout{are introduced}}. These theorems will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}. \alessio{Specifica se la condizione è sufficiente e/o necessaria}
 
 \subsection{The Tutte matrix and its determinant}
 Let's start with the definition of the \textbf{Tutte matrix} of a bipartite graph.
@@ -31,10 +34,14 @@ Let's start with the definition of the \textbf{Tutte matrix} of a bipartite grap
     \begin{equation}
         M_{i,j} =
         \begin{cases}
-            0, & \text{if } (u_i, u_j) \notin E \\
-            x_{i,j}, & \text{if } (u_i, u_j) \in E
+            0 & \text{if } (u_i, u_j) \notin E \\
+            x_{i,j} & \text{if } (u_i, u_j) \in E
         \end{cases}
     \end{equation}
+    \alessio{Cos'é $U$ nella definizione del grafo? Prima hai usato $V_1$ e $V_2$ per le due componenti, mantieni la stessa notazione (o cambiala prima, ma forse è più bella con i pedici).}
+    \alessio{Posta così, $u_i$ e $u_j$ sembrano appartenere solo a $U$. In ogni caso, la Tutte matrix si può calcolare per un qualsiasi grafo, quindi lascerei la definizione generica. Altrimenti se vuoi stare sul grafo bipartito, bisognerebbe usare la Edmonds matrix (e in quel caso usare $U$ e $V$)}
+    \alessio{Dovresti specificare che i vari $x_{i,j}$ sono ``indeterminates''}
+
 \end{definition}
 
 The determinant of the Tutte matrix is useful in testing whether a graph has a perfect matching or not, as the following theorem introduced in \cite{lovasz1979matching} shows. 
@@ -47,13 +54,15 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
 \end{theorem}
 
 \begin{proof}
-    We have the following expression for the determinant:
+    We have the following expression for the determinant, \draft{also called Leibniz formula}:
 
     $$
     \text{Det}(M) = \sum_{\pi \in S_n} (-1)^{sgn(\pi)} \prod_{i=1}^{n} M_{i,\pi(i)}
     $$
+    \alessio{Cosa ritorna sgn? 0 o 1? In caso puoi fargli ritornare -1 e 1 e non ti serve l'esponente.}
 
-    where $S_n$ is the set of all permutations on $[n]$, and $sgn(\pi)$ is the sign of the permutation $\pi$. There is a one-to-one correspondence between a permutation $\pi \in S_n$ and a (possible) perfect matching 
+    where $S_n$ is the set of all permutations on $[n]$, and $sgn(\pi)$ is the sign of the permutation $\pi$. \alessio{Definisci il segno di una permutazione. Prima indicavi le permutazioni con $\Pi$, ora con $\pi$. Immagino che sia per la moltiplicatoria, valuta se usare $\pi$ anche prima.}
+    There is a one-to-one correspondence between a permutation $\pi \in S_n$ and a (possible) perfect matching 
 
     $$
     \{(u_1, v_{\pi(1)}), (u_2, v_{\pi(2)}), \cdots , (u_n, v_{\pi(n)})\} \text{ in } G.
@@ -65,7 +74,7 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
     \text{Det}(M) = \sum_{\pi \in P} (-1)^{sgn(\pi)} \prod_{i=1}^{n} x_{i,\pi(i)}
     $$
 
-    where $P$ is the set of perfect matchings in $G$. This is clearly zero if $P = \emptyset$, i.e., if $G$ has no perfect matching. If $G$ has a perfect matching, there is a $\pi \in P$ and the term corresponding to $\pi$ is
+    where $P$ is the set of perfect matchings in $G$. This is clearly zero if $P = \emptyset$, i.e., if $G$ has no perfect matching. If $G$ has a perfect matching, there is \draft{at least} a $\pi \in P$ and the term corresponding to $\pi$ is
 
     $$
     \prod_{i=1}^{n} x_{i,\pi(i)} \neq 0.
@@ -74,24 +83,26 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
     Additionally, there is no other term in the summation that contains the same set of variables. Therefore, this term is not cancelled by any other term. So in this case, $\text{Det}(M) \neq 0$.
 \end{proof}
 
-\subsection{The Hall's Marriage Theorem}
+\subsection{\draft{\sout{The}} Hall's Marriage Theorem}
 Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching in a bipartite graph that saturates one side of the partition. It's often stated in the context of finding pairings (like marriages) between two sets of entities.
     
 \begin{definition}[Neighborhood] \label{def:neighborhood}
-For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the set of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
-\[ N(W) = \{ v \in V_2 \mid \exists u \in W \text{ such that } \{u, v\} \in E \} \]
+For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the \draft{sub}set of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
+\[ N(W) = \{ v \in V_2 \mid \exists u \in W \text{ \draft{\sout{such that} $\land$} } \{u, v\} \in E \} \]
 \end{definition}
 
 \begin{theorem}[Hall's Marriage Theorem \cite{hall1935representatives}] \label{thm:halls_marriage_theorem}
-Let $G = (V_1 \cup V_2, E)$ be a bipartite graph. There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
+Let \draft{$G = (V_1 \cup V_2, E)$ be a bipartite graph}. \alessio{Adatta la notazione a quella che hai scelto prima}.
+There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
 \[ |N(W)| \geq |W| \]
-This condition is known as \textbf{Hall's condition}.
+\draft{\sout{This condition is known as \textbf{Hall's condition}.}}
 \end{theorem}
+\draft{This condition is known as \textbf{Hall's condition}.}
 
 In simpler terms, a matching that covers all vertices in $V_1$ exists if and only if every group of vertices chosen from $V_1$ collectively has at least as many neighbors in $V_2$ as there are vertices in the chosen group.
 
 \section{Problem formulation}
-The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e.an optimization problem in which the variables are restricted to integer values and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
+The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e. an optimization problem in which the variables are restricted to integer values, and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
 
 \begin{equation}
     \begin{aligned}
@@ -115,14 +126,14 @@ The linear program relaxation of the above integer program is as follows:
     \end{aligned}
 \end{equation}
 
-The set of feasible solutions to the constraints in (P) forms a polytope. When optimizing a linear constraint over a polytope, the optimum will be achieved at one of the "corners" or extreme points of the polytope. An extreme point $x$ of a set $Q$ is an element $x \in Q$ that cannot be expressed as $\lambda y + (1 - \lambda) z$ with $0 < \lambda < 1$, $y, z \in Q$, and $y \neq z$. (This concept will be formalized and discussed in more detail when we cover polyhedral theory.)
+The set of feasible solutions to the constraints in \draft{(P)} \alessio{Cos'é (P)?} forms a polytope. When optimizing a linear constraint over a polytope, the optimum will be achieved at one of the ``corner'' or extreme points of the polytope. An extreme point $x$ of a set $Q$ is an element $x \in Q$ that cannot be expressed as $\lambda y + (1 - \lambda) z$ with $0 < \lambda < 1$, $y, z \in Q$, and $y \neq z$. (This concept will be formalized and discussed in more detail when we cover polyhedral theory \alessio{Fai una ref a dove ne parli})
 
-In general, even if all the coefficients of the constraint matrix in a linear program are either 0 or 1, the extreme points of a linear program are not guaranteed to have all coordinates integral. This is not surprising since the general integer programming problem is NP-hard, while linear programming is solvable in polynomial time. Consequently, there is no guarantee that the value $Z_{IP}$ of an integer program is equal to the value $Z_{LP}$ of its LP relaxation. However, since the integer program is more constrained than the relaxation, we always have $Z_{IP} \geq Z_{LP}$, implying that $Z_{LP}$ is a lower bound on $Z_{IP}$ for a minimization problem. Moreover, if an optimal solution to a linear programming relaxation is integral, then it must also be an optimal solution to the integer program.
+In general, even if all the coefficients of the constraint matrix in a linear program are either 0 or 1, the extreme points of a linear program are not guaranteed to all have integral coordinates. This is not surprising since the general integer programming problem is NP-hard, while linear programming is solvable in polynomial time. Consequently, there is no guarantee that the value $Z_{IP}$ of an integer program is equal to the value $Z_{LP}$ of its LP relaxation. However, since the integer program is more constrained than the relaxation, we always have $Z_{IP} \geq Z_{LP}$, implying that $Z_{LP}$ is a lower bound on $Z_{IP}$ for a minimization problem. Moreover, if an optimal solution to a linear programming relaxation is integral, then it must also be an optimal solution to the integer program.
 
-In our problem, the constraint matrix has a special form that lead to the following result: 
+In our problem, the constraint matrix has a special form that leads to the following result: 
 
 \begin{theorem}
-    Any extreme point of ($P$) is a $0-1$ vector and, hence, is the incidence vector of a perfect matching.
+    Any extreme point of ($P$) is a $0-1$ vector, hence, it is the incidence vector of a perfect matching.
 \end{theorem}
 
 Consequently, the polytope
@@ -140,11 +151,9 @@ is called the bipartite perfect matching polytope.
 \section{Solutions to the problem}
 There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955 \cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the assignment problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$, but later Dinic and Kronrod \cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
 
-The Hungarian method is a powerful algorithm, however, the algorithm is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve the problem of finding a minimum weight perfect matching in a bipartite graph. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time,  where $n,m$ and $W$ denote the number of vertices, number of edges, and largest magnitude of a cost; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^w)$ time, where $w$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
+The Hungarian method is a powerful algorithm, however, \draft{\sout{the algorithm} it} is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve \draft{\sout{the problem of finding a minimum weight perfect matching in a bipartite graph} this problem}. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time,  where $n,m$ and $W$ denote the number of vertices, number of edges, and largest magnitude of a cost; costs are assumed to be integral. \draft{The algorithms work by scaling}. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^w)$ time, where $w$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
-In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a new solution to the Minimum-Cost Flow problem that woks in almost-linear time, precisely in $O(m^{1+o(1)})$ time. The minimum-cost flow problem is a classic combinatorial graph
-problem that find numerous applications in engineering and
-scientific computing. This result is important also for our problem, since the maximum weight perfect matching problem can be reduced to the minimum-cost flow problem, allowing to solve the problem in almost-linear time.
+In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a new solution to the Minimum-Cost Flow problem that works in almost-linear time, precisely in $O(m^{1+o(1)})$ time. The minimum-cost flow problem is a classic combinatorial graph problem that find\draft{s} numerous applications in engineering and scientific computing. This result is important also for our problem, since the maximum weight perfect matching problem can be reduced to the minimum-cost flow problem, allowing to solve the problem in almost-linear time.
 
 \section{Implementation used in this work}
 \davide{Da completare una volta deciso come procedere}

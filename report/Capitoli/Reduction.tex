@@ -53,8 +53,9 @@ Now, we will show how to construct a bipartite graph that allows us to solve the
 
         - Let $v_k \in$ \treeset{V_2} be the first node in the ordering such that $k > i$ and \equivsetfunc{v_k} $=$ \equivsetfunc{u_i}, we add an edge $(u_i, v_k)$ with weight $0$. If such a node does not exist, we add $p$ edges $(u_i, d_j)$ with weight $0$ for each $j = 1, 2, \ldots, p$, where $d_j \in$ \destset.
     \end{enumerate}
-    \alessio{Bella!}
+    \alessio{Bella! Forse si può semplificare ancora la notazione facendo \treeset{1} e \treeset{2}.}
 \end{definition}
+\alessio{Piccolo dettaglio implementativo di Latex. Da quello che ho letto a suo tempo, \texttt{xspace} è deprecato, quindi sarebbe meglio non usarlo. Per mettere lo spazio dopo basta mettere il comando tra graffe e considerarlo come parola unica. Per i simboli matematici "custom", tipo treeset, non mettere i dollari nelle definizioni, così da metterli intorno a quando li usi e non rischi di dover splittare le formule, quindi \texttt{newcommand\{treeset\}}}
 
 Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition, because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{fig:reduction_example_parts}.
 
@@ -234,8 +235,10 @@ Therefore, for the proof of the reduction, we will only consider instances of th
 
     \draft{\sout{By Lemma 3, any neighbor of $u_j$ belonging to \treeset{V_2} must be a node $v_k$ with index $k > j$.}} \alessio{Questo lo ripeti sotto}
 
+    \alessio{Il nodo $y$ lo chiamerei direttamente $v_k$, specificando che è un vicino di $u_i$}
     Now consider node $u_i$. By \cref{claim:node_connectivity}, its set of neighbors $N(\{u_i\})$ is non-empty. Let $y$ be a neighbor of $u_i$. If $y$ is a node $v_k \in \treesetbase{V_2}$, then\draft{, by \cref{lemma:greater_nodes},} its index $k$ must be greater than $i$.
 
+    \alessio{Da qua in poi forse è complicato ma potrebbe essere più semplice. Senza contraddizione, sappiamo che $u_i$ è connesso a nodi sotto di lui, sicuramente a $v_{i+1}$. Dato che $u_{i+1}$ non è connesso al suo corrispettivo per il Lemma 3, segue la dimostrazione.}
     If we can find a neighbor $v_k \in N(\{u_i\})$ with $k \leq j$, then the proof is complete, since\draft{, following \cref{lemma:greater_nodes},} $v_k$ cannot be a neighbor of $u_j$. Let's assume by contradiction that every neighbor $v_k \in N(\{u_i\})$ has an index $k > j$. This would imply that $u_i$ is not connected to any node $v_k$ with $i < k \leq j$.
 
     However, consider node $v_{i+1}$. Since $i < t$ (otherwise $j$ would not exist), this node exists. Given that $i < i+1 \leq j$ (since $j$ is an integer and $j>i$), our hypothesis implies that $v_{i+1}$ cannot be a neighbor of $u_i$. Let's analyze why this would be impossible:
@@ -246,11 +249,13 @@ Therefore, for the proof of the reduction, we will only consider instances of th
     In both cases, we arrive at a contradiction. Therefore, the initial hypothesis must be false. There must exist at least one neighbor $v_k$ of $u_i$ with $i < k \leq j$. Since $k \leq j$, $v_k$ cannot be a neighbor of $u_j$. Consequently, $N(\{u_i\}) \neq N(\{u_j\})$.
 \end{proof}
 
+\alessio{Non so se sia abbastanza questo claim, forse andrebbe dimostrato in entrambe le direzioni, quindi $N(\{u_i\}) \not\subseteq N(\{u_j\})$ e $N(\{u_j\}) \not\subseteq N(\{u_i\})$. In pratica la dimostrazione è la stessa ma va spiegata bene. A questo punto no so se il Lemma 4 serva, dato che deriva fa questa proprietà. Quindi in pratica il nodo sopra sarà connesso a nodi sopra il nodo sotto, mentre il nodo sotto sarà connesso ad altri nodi più sotto.
+Dimostrando questo, puoi dire che ogni nodo aggiunge sempre almeno un nodo in più a $N(W)$, che sarà quindi almeno uguale a $|W|$. Occhio che però questo vale solo per i nodi che non sono gli ultimi della loro classe.}
 \begin{claim} \label{claim:prev_not_subset}
     For any pair of distinct nodes $u_i, u_j \in \treesetbase{V_1}$ with $i < j$, then we have that $N(\{u_i\}) \not\subseteq N(\{u_j\})$.
 \end{claim}
 \begin{proof}
-    This is a direct consequence of the proof of \cref{lemma:distinct_neighborhoods}. In that proof, we showed that for any pair of nodes $u_i, u_j$ with $i < j$, there exists a neighbor $v_k \in N(\{u_i\})$ such that $k \leq j$. By \cref{lemma:greater_nodes}, any neighbor of $u_j$ must have an index greater than $j$. Therefore, $v_k$ cannot be a neighbor of $u_j$, which implies that $N(\{u_i\})$ cannot be a subset of $N(\{u_j\})$.
+    This is a direct consequence of the proof of \cref{lemma:distinct_neighborhoods}. In its proof, we showed that for any pair of nodes $u_i, u_j$ with $i < j$, there exists a neighbor $v_k \in N(\{u_i\})$ such that $k \leq j$. By \cref{lemma:greater_nodes}, any neighbor of $u_j$ must have an index greater than $j$. Therefore, $v_k$ cannot be a neighbor of $u_j$, which implies that $N(\{u_i\})$ cannot be a subset of $N(\{u_j\})$.
 \end{proof}
 
 \begin{lemma} \label{lemma:matching_existence}
@@ -325,7 +330,7 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
 
     First, we establish the existence of a perfect matching. By construction, the graph $G$ is bipartite with partitions $V_1$ and $V_2$ such that $|V_1| = |V_2| = t+p$. \cref{lemma:matching_existence} ensures that a perfect matching exists in $G$.
 
-    Let $\mathcal{P} = \{C_1, \dots, C_p\}$ be a valid partition of the nodes of $T$ into $p$ chains. We can construct a perfect matching $M_\mathcal{P}$ in $G$ as follows:  For each chain $C_k = [u_{1}, \dots, u_{m_k}]$, we construct a path in $G$: match $s_k$ to $u_{1} \in \treesetbase{V_2}$. Then match $u_{i} \in \treesetbase{V_1}$ to $u_{i+1} \in \treesetbase{V_2}$ for $i=1, \dots, m_k-1$. Finally, match $u_{m_k} \in \treesetbase{V_1}$ to one of the available destination nodes $d_j \in \destsetbase$. Since we have $p$ chains and $p$ source/destination nodes, and every tree node is in exactly one chain, this process uses all $t+p$ nodes in $V_1$ and $V_2$, forming a perfect matching. The weight of this matching is given by:
+    Let $\mathcal{P} = \{C_1, \dots, C_p\}$ be a valid partition of the nodes of $T$ into $p$ chains. We can construct a perfect matching $M_\mathcal{P}$ in $G$ as follows:  For each chain $C_k = [u_{1}, \dots, u_{m_k}]$, we construct a path in $G$: match \draft{$s_k$} to $u_{1} \in \treesetbase{V_2}$. Then match $u_{i} \in \treesetbase{V_1}$ to $u_{i+1} \in \treesetbase{V_2}$ for $i=1, \dots, m_k-1$. Finally, match $u_{m_k} \in \treesetbase{V_1}$ to one of the available destination nodes $d_j \in \destsetbase$. Since we have $p$ chains and $p$ source/destination nodes, and every tree node is in exactly one chain, this process uses all $t+p$ nodes in $V_1$ and $V_2$, forming a perfect matching. The weight of this matching is given by:
     \begin{align*}
         W(M_\mathcal{P}) &= \sum_{(u,v) \in M_\mathcal{P}} w(u,v) \\
         &= p + |\{ (u_i, u_j) \in M_\mathcal{P} \mid u_i \in \treesetbase{V_1}, u_j \in \treesetbase{V_2}, \equivset(u_i) \neq \equivset(u_j) \}|

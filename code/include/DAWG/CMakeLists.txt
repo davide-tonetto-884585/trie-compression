@@ -1,0 +1,3 @@
+set(DAWG_SOURCES DAWG.hpp)
+
+add_library(DAWG OBJECT ${DAWG_SOURCES})

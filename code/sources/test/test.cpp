@@ -1,5 +1,5 @@
 #include <iostream>
-#include "DAWG.hpp"
+#include <DAWG.hpp>
 
 int main()
 {
