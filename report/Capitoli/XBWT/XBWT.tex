@@ -184,7 +184,7 @@ Once the suffixes in $S_{12}$ are sorted, the algorithm proceeds to sort the suf
 
 Finally, the sorted orders of the suffixes in $S_0$ and $S_{12}$ are merged to obtain the complete suffix array of the original string. This merging process can be performed in linear time, ensuring the overall efficiency of the algorithm.
 
-\subsection{PathSort Algorithm}
+\subsection{PathSort Algorithm} \label{sec:pathSort}
 
 The pseudocode of the pathSort algorithm is shown in \cref{alg:pathSort}. As we can see, the algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees. 
 Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the upward subpaths of the tree starting at nodes in levels $\not\equiv j \pmod{3}$, then sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the two sets of sorted subpaths by exploiting their lexicographic names. $j$ is chosen in such a way that the number of nodes of the shrunk tree whose level is $\equiv j \pmod{3}$ is at least $t/3$ so that a constant fraction of upward paths are ensured to be dropped at each recursive step.

@@ -1,33 +1,192 @@
 \chapter{Min-Weight Perfect Bipartite Matching} \label{chp:min_weight_perfect_bipartite_matching}
-\alessio{Ricorda sempre un cappello introduttivo ad ogni capitolo}
 
-\section{Problem definition}
-Given a weighted bipartite graph $G = (V, E)$ \draft{(remember that a bipartite graph is a graph whose vertices can be divided into two disjoint sets $V_1$ and $V_2$ such that every edge connects a vertex in $V_1$ to a vertex in $V_2$)}, let's define the concept of a matching. \alessio{Non hai mai spiegato cos'è un grafo bipartito, quindi non posso ricordarlo :)}
-\begin{definition}[Matching] \label{def:matching}
-    \draft{Given a generic graph $G = (V, E)$, }A matching $M \draft{\sout{\in}} \draft{\subseteq} E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. \draft{\sout{In other words, a matching is a set of edges such that no two edges share a common vertex}}
-\end{definition}
-\draft{In other words, a matching is a set of edges such that no two edges share a common vertex}
-If a vertex $v$ has no edge of $M$ incident to it then $v$ is said to be exposed (or unmatched). A matching is perfect if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
+\section{Introduction and Motivation}
+In this chapter, we delve into the problem of finding a minimum-weight perfect matching in a bipartite graph (MWPBM problem), a fundamental challenge in combinatorial optimization with wide-ranging applications. This problem, often referred to as the assignment problem, seeks to pair elements from two distinct sets in the most efficient way possible, minimizing the total cost of the pairings. The principles and algorithms discussed here are not only of theoretical importance but also have practical relevance in fields such as logistics, scheduling, and resource allocation.
+
+Our approach is to partition the tree nodes into chains and apply Run-Length Encoding (RLE), a compression technique that stores sequences of identical data as a single value and a count. The key challenge is to create partitions that maximize the effectiveness of RLE. We prove that this optimization problem can be reduced to the MWPBM problem. By modeling our partitioning problem as a bipartite graph, we can use efficient algorithms for MWPBM to find the optimal representation and achieve a higher compression ratio.
+
+\section{Bipartite Graph} 
+\begin{definition} \label{def:bipartite}
+    A graph $G=(V,E)$ is called \textit{bipartite} if its vertex set $V$ can be partitioned into two disjoint subsets $V=V_1 \cup V_2$ such that every edge in $E$ has the form $(v_1,v_2)$ where $v_1\in V_1$ and $v_2 \in V_2$.
+\end{definition} 
+
+In other words, the vertices of the graph can be divided into two separate groups such that all edges connect a vertex from the first group to a vertex from the second group. An example of a bipartite graph is shown in \cref{fig:bipartite_graph_example}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Immagini/matching_example.png}
-    \caption{Example of a \draft{perfect matching} in a bipartite graph. \alessio{Però ci sono dei nodi exposed, quindi non è perfect. Farei 3 subfigure: un non matching, un matching non perfect, un matching perfect. La legenda la puoi spiegare poi nella caption.}}
-    \label{fig:matching_example}
+    \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}] 
+        \node[main] (2s) {$x_1$}; 
+        \node[main] (1s) [below of=2s] {$x_2$};
+        \node[main] (4s) [below of=1s] {$x_3$};
+        \node[main] (3d) [right=2cm of 2s] {$x_4$};
+        \node[main] (2d) [below of=3d] {$x_5$}; 
+        \node[main] (1d) [below of=2d] {$x_6$};
+        \node[main] (4d) [below of=1d] {$x_7$};
+        \draw[->] (1s) -- (3d);
+        \draw[->] (1s) -- (2d);
+        \draw[->] (4s) -- (3d);
+        \draw[->] (2s) -- (4d);
+        \draw[->] (4s) -- (4d);
+        \draw[->] (2s) -- (1d);
+    \end{tikzpicture}     
+    \caption[Example of a bipartite graph]{Example of a bipartite graph $G=(V, E)$ where $V_1=\{x_1,x_2,x_3\}$, $V_2=\{x_4,x_5,x_6,x_7\}$ and $E=\{(x_1,x_6),(x_1,x_7),(x_2,x_4),(x_2,x_5),(x_3,x_4),(x_3,x_7)\}$.}
+    \label{fig:bipartite_graph_example}
 \end{figure}
+
+
+\section{Problem Definition}
+Given a weighted bipartite graph $G = (V, E)$ (\cref{def:bipartite}), let's define the concept of a matching. 
+
+\begin{definition}[Matching] \label{def:matching}
+    Given a bipartite graph $G = (V, E)$, a matching $M \subseteq E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$.
+\end{definition}
+
+In other words, a matching is a set of edges such that no two edges share a common vertex. If a vertex $v$ has no edge of $M$ incident to it, then $v$ is said to be exposed (or unmatched). A matching is \textbf{perfect} if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
+
+\begin{example}
+    In \cref{fig:matching_examples_style2}, we illustrate three distinct scenarios. Subfigure (a) depicts a set of edges that does not constitute a valid matching, as vertex $u_1$ is incident to more than one edge, namely $(u_1, v_1)$ and $(u_1, v_2)$, violating the definition of a matching. Subfigure (b) presents a valid, yet non-perfect matching; here, vertices $u_3$ and $v_3$ are exposed, meaning they are not incident to any edge in the matching. Finally, subfigure (c) shows a perfect matching, where every vertex in the graph is incident to exactly one edge in the matching, satisfying the condition $|M| = |V_1| = |V_2| = 3$.
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+                \node[main] (u1) {$u_1$};
+                \node[main] (u2) [below of=u1] {$u_2$};
+                \node[main] (u3) [below of=u2] {$u_3$};
+                \node[main] (v1) [right=2cm of u1] {$v_1$};
+                \node[main] (v2) [below of=v1] {$v_2$};
+                \node[main] (v3) [below of=v2] {$v_3$};
+                \draw[->] (u1) -- (v1);
+                \draw[->] (u1) -- (v2);
+                \draw[->] (u2) -- (v2);
+                \draw[->] (u3) -- (v3);
+                \draw[->, red] (u1) -- (v1);
+                \draw[->, red] (u1) -- (v2);
+            \end{tikzpicture}
+            \caption{Not a matching}
+            \label{fig:not_a_matching_style2}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.3\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+                \node[main] (u1) {$u_1$};
+                \node[main] (u2) [below of=u1] {$u_2$};
+                \node[main] (u3) [below of=u2] {$u_3$};
+                \node[main] (v1) [right=2cm of u1] {$v_1$};
+                \node[main] (v2) [below of=v1] {$v_2$};
+                \node[main] (v3) [below of=v2] {$v_3$};
+                \draw[->] (u1) -- (v1);
+                \draw[->] (u1) -- (v2);
+                \draw[->] (u2) -- (v2);
+                \draw[->] (u3) -- (v3);
+                \draw[->, red] (u1) -- (v1);
+                \draw[->, red] (u2) -- (v2);
+            \end{tikzpicture}
+            \caption{A non-perfect matching}
+            \label{fig:non_perfect_matching_style2}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.3\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+                \node[main] (u1) {$u_1$};
+                \node[main] (u2) [below of=u1] {$u_2$};
+                \node[main] (u3) [below of=u2] {$u_3$};
+                \node[main] (v1) [right=2cm of u1] {$v_1$};
+                \node[main] (v2) [below of=v1] {$v_2$};
+                \node[main] (v3) [below of=v2] {$v_3$};
+                \draw[->] (u1) -- (v1);
+                \draw[->] (u1) -- (v2);
+                \draw[->] (u2) -- (v2);
+                \draw[->] (u3) -- (v3);
+                \draw[->, red] (u1) -- (v1);
+                \draw[->, red] (u2) -- (v2);
+                \draw[->, red] (u3) -- (v3);
+            \end{tikzpicture}
+            \caption{A perfect matching}
+            \label{fig:perfect_matching_style2}
+        \end{subfigure}
+        \caption{Examples of a non-matching (a), a non-perfect matching (b), and a perfect matching (c) in a bipartite graph. The edges in the set $M$ are highlighted in red.}
+        \label{fig:matching_examples_style2}
+    \end{figure}
+\end{example}
 
 The problem of finding a minimum weight perfect matching in a bipartite graph is a well-known problem in combinatorial optimization. The problem can be formulated as follows: 
 
-\begin{definition}[Minimum weight perfect matching in bipartite graphs (\textsc{MWPBM})] \label{def:mwpbm}
-    Given a weighted bipartite graph $G = (V, E)$, \draft{where $V = V_1 \cup V_2$ and $V_1 \cap V_2 = \emptyset$}, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized. \draft{The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. This problem is also called \textbf{the assignment problem}}.
+\begin{definition}[Minimum weight perfect matching in bipartite graphs] \label{def:mwpbm}
+    Given a weighted bipartite graph $G = (V, E)$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized.
 \end{definition}
-\alessio{La parte sui nodi $V_1$ e $V_2$ è nella definizione di grafo bipartito, per cui spostiamola nella definizione.}
-\alessio{La parte sui pesi si può spiegare fuori dalla definizione, dato che non è relativa al problema ma al grafo. Occhio che qua usi $e$ per indicare un arco, ma prima usavi $e$ per indicare il numero di archi in un grafo. $e$ ci sta meglio qua a mio parere, prima scegli se usare $m$ (se è un simbolo libero) o direttamente $|E|$}
 
+The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. We define the weight of a matching $M$ as follows:
+\begin{equation}
+    w(M) = \sum_{e \in M} w(e)
+\end{equation}
+
+\begin{example}
+    Consider the weighted bipartite graph in \cref{fig:mwpbm_example}. The goal is to find a perfect matching with the minimum possible total weight. Both subfigures show a valid perfect matching; however, only one of them has the minimum weight.
+    \begin{itemize}
+        \item Subfigure (a) shows the perfect matching $M_a = \{(u_1, v_2), (u_2, v_1), (u_3, v_3)\}$. Its total weight is $w(M_a) = w(u_1, v_2) + w(u_2, v_1) + w(u_3, v_3) = 2 + 1 + 1 = 4$. This is a valid perfect matching, but it is not optimal.
+        \item Subfigure (b) shows the perfect matching $M_b = \{(u_1, v_1), (u_2, v_2), (u_3, v_3)\}$. Its total weight is $w(M_b) = w(u_1, v_1) + w(u_2, v_2) + w(u_3, v_3) = 1 + 1 + 1 = 3$.
+    \end{itemize}
+    Since $w(M_b) < w(M_a)$, the matching in (b) is a minimum weight perfect matching for this graph, while the matching in (a) is a non-minimum perfect matching.
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+                \node[main] (u1) {$u_1$};
+                \node[main] (u2) [below of=u1] {$u_2$};
+                \node[main] (u3) [below of=u2] {$u_3$};
+                \node[main] (v1) [right=2cm of u1] {$v_1$};
+                \node[main] (v2) [below of=v1] {$v_2$};
+                \node[main] (v3) [below of=v2] {$v_3$};
+                \draw[->] (u1) -- (v1);
+                \draw[->, dashed] (u1) -- (v2);
+                \draw[->] (u2) -- (v1);
+                \draw[->] (u2) -- (v2); 
+                \draw[->] (u3) -- (v3); 
+                \draw[->, dashed, red] (u1) -- (v2);
+                \draw[->, red] (u2) -- (v1);
+                \draw[->, red] (u3) -- (v3);
+            \end{tikzpicture}
+            \caption{A non-minimum perfect matching.}
+            \label{fig:mwpbm_non_perfect}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+                \node[main] (u1) {$u_1$};
+                \node[main] (u2) [below of=u1] {$u_2$};
+                \node[main] (u3) [below of=u2] {$u_3$};
+                \node[main] (v1) [right=2cm of u1] {$v_1$};
+                \node[main] (v2) [below of=v1] {$v_2$};
+                \node[main] (v3) [below of=v2] {$v_3$};
+                \draw[->] (u1) -- (v1);
+                \draw[->, dashed] (u1) -- (v2);
+                \draw[->] (u2) -- (v1);
+                \draw[->] (u2) -- (v2); 
+                \draw[->] (u3) -- (v3); 
+                \draw[->, red] (u1) -- (v1);
+                \draw[->, red] (u2) -- (v2);
+                \draw[->, red] (u3) -- (v3);
+            \end{tikzpicture}
+            \caption{A minimum perfect matching.}
+            \label{fig:mwpbm_perfect}
+        \end{subfigure}
+        \caption{Example of a non-minimum perfect matching (a) and minimum perfect matching (b) in a weighted bipartite graph. Dashed edges have weight 2 while solid edges 1. The edges in a matching are highlighted in red.}
+        \label{fig:mwpbm_example}
+    \end{figure}
+\end{example}
+
+% \alessio{La parte sui pesi si può spiegare fuori dalla definizione, dato che non è relativa al problema ma al grafo. Occhio che qua usi $e$ per indicare un arco, ma prima usavi $e$ per indicare il numero di archi in un grafo. $e$ ci sta meglio qua a mio parere, prima scegli se usare $m$ (se è un simbolo libero) o direttamente $|E|$}
+
+\begin{comment}
 \section{The existence of perfect matchings in bipartite graphs}
-In this section \draft{we introduce} two theorems that state\draft{\sout{s}} a condition for the existence of perfect matchings in bipartite graphs \draft{\sout{are introduced}}. These theorems will be useful in the following chapter to proof our reduction \cite{viswanath2004perfect}. \alessio{Specifica se la condizione è sufficiente e/o necessaria}
-
+In this section, we introduce two theorems that state a condition for the existence of perfect matchings in bipartite graphs. These theorems will be useful in the following chapter to prove our reduction \cite{viswanath2004perfect}. \alessio{Specifica se la condizione è sufficiente e/o necessaria}
 \subsection{The Tutte matrix and its determinant}
+
 Let's start with the definition of the \textbf{Tutte matrix} of a bipartite graph.
 \begin{definition}[Tutte matrix] \label{def:tutte_matrix}
     The Tutte matrix of bipartite graph $G = (U, V, E)$ is an $n \times n$ matrix $M$ with the entry at row $i$ and column $j$
@@ -74,7 +233,7 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
     \text{Det}(M) = \sum_{\pi \in P} (-1)^{sgn(\pi)} \prod_{i=1}^{n} x_{i,\pi(i)}
     $$
 
-    where $P$ is the set of perfect matchings in $G$. This is clearly zero if $P = \emptyset$, i.e., if $G$ has no perfect matching. If $G$ has a perfect matching, there is \draft{at least} a $\pi \in P$ and the term corresponding to $\pi$ is
+    where $P$ is the set of perfect matchings in $G$. This is zero if $P = \emptyset$, i.e., if $G$ has no perfect matching. If $G$ has a perfect matching, there is \draft{at least} a $\pi \in P$ and the term corresponding to $\pi$ is
 
     $$
     \prod_{i=1}^{n} x_{i,\pi(i)} \neq 0.
@@ -82,27 +241,27 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
 
     Additionally, there is no other term in the summation that contains the same set of variables. Therefore, this term is not cancelled by any other term. So in this case, $\text{Det}(M) \neq 0$.
 \end{proof}
+\end{comment}
 
-\subsection{\draft{\sout{The}} Hall's Marriage Theorem}
-Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching in a bipartite graph that saturates one side of the partition. It's often stated in the context of finding pairings (like marriages) between two sets of entities.
+\section{Hall's Marriage Theorem}
+Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching in a bipartite graph that saturates one side of the partition. It's often stated in the context of finding pairings (like marriages) between two sets of entities. This theorem will be crucial in proving the correctness of our reduction from the tree partitioning problem to the minimum weight perfect bipartite matching problem. Specifically, we will use it to show that our constructed bipartite graph always admits a perfect matching, ensuring that our reduction is valid.
     
 \begin{definition}[Neighborhood] \label{def:neighborhood}
-For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the \draft{sub}set of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
-\[ N(W) = \{ v \in V_2 \mid \exists u \in W \text{ \draft{\sout{such that} $\land$} } \{u, v\} \in E \} \]
+For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the subset of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
+\[ N(W) = \{ v \in V_2 \mid \exists u \in W \text{ $\land$ } \{u, v\} \in E \} \]
 \end{definition}
 
 \begin{theorem}[Hall's Marriage Theorem \cite{hall1935representatives}] \label{thm:halls_marriage_theorem}
-Let \draft{$G = (V_1 \cup V_2, E)$ be a bipartite graph}. \alessio{Adatta la notazione a quella che hai scelto prima}.
-There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
-\[ |N(W)| \geq |W| \]
-\draft{\sout{This condition is known as \textbf{Hall's condition}.}}
+    Let $G = (V, E)$ be a bipartite graph. There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
+    $$|N(W)| \geq |W|$$
 \end{theorem}
-\draft{This condition is known as \textbf{Hall's condition}.}
+
+This condition is known as \textbf{Hall's condition}.
 
 In simpler terms, a matching that covers all vertices in $V_1$ exists if and only if every group of vertices chosen from $V_1$ collectively has at least as many neighbors in $V_2$ as there are vertices in the chosen group.
 
-\section{Problem formulation}
-The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e. an optimization problem in which the variables are restricted to integer values, and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
+\section{Problem Formulation}
+The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e., an optimization problem in which the variables are restricted to integer values, and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
 
 \begin{equation}
     \begin{aligned}
@@ -115,7 +274,7 @@ The problem of finding a minimum weight perfect matching in a bipartite graph ca
 
 Notice that any solution to this integer program corresponds to a matching and therefore this is a valid formulation of the minimum weight perfect matching problem in bipartite graphs.
 
-The linear program relaxation of the above integer program is as follows:
+The linear program relaxation $P$ of the above integer program is as follows:
 
 \begin{equation}
     \begin{aligned}
@@ -126,36 +285,42 @@ The linear program relaxation of the above integer program is as follows:
     \end{aligned}
 \end{equation}
 
-The set of feasible solutions to the constraints in \draft{(P)} \alessio{Cos'é (P)?} forms a polytope. When optimizing a linear constraint over a polytope, the optimum will be achieved at one of the ``corner'' or extreme points of the polytope. An extreme point $x$ of a set $Q$ is an element $x \in Q$ that cannot be expressed as $\lambda y + (1 - \lambda) z$ with $0 < \lambda < 1$, $y, z \in Q$, and $y \neq z$. (This concept will be formalized and discussed in more detail when we cover polyhedral theory \alessio{Fai una ref a dove ne parli})
+The set of feasible solutions to the constraints in P forms a polytope. When optimizing a linear constraint over a polytope, the optimum will be achieved at one of the ``corner'' or extreme points of the polytope. An extreme point $x$ of a set $Q$ is an element $x \in Q$ that cannot be expressed as $\lambda y + (1 - \lambda) z$ with $0 < \lambda < 1$, $y, z \in Q$, and $y \neq z$.
 
 In general, even if all the coefficients of the constraint matrix in a linear program are either 0 or 1, the extreme points of a linear program are not guaranteed to all have integral coordinates. This is not surprising since the general integer programming problem is NP-hard, while linear programming is solvable in polynomial time. Consequently, there is no guarantee that the value $Z_{IP}$ of an integer program is equal to the value $Z_{LP}$ of its LP relaxation. However, since the integer program is more constrained than the relaxation, we always have $Z_{IP} \geq Z_{LP}$, implying that $Z_{LP}$ is a lower bound on $Z_{IP}$ for a minimization problem. Moreover, if an optimal solution to a linear programming relaxation is integral, then it must also be an optimal solution to the integer program.
 
 In our problem, the constraint matrix has a special form that leads to the following result: 
 
 \begin{theorem}
-    Any extreme point of ($P$) is a $0-1$ vector, hence, it is the incidence vector of a perfect matching.
+    Any extreme point of $P$ is a $0-1$ vector; hence, it is the incidence vector of a perfect matching.
 \end{theorem}
 
 Consequently, the polytope
 
 \begin{equation}
     \begin{aligned}
-        P = \{ x: & \sum_{j \in V_2} x_{ij} = 1, \quad \forall i \in V_1, \\
+        \{ x: & \sum_{j \in V_2} x_{ij} = 1, \quad \forall i \in V_1, \\
         & \sum_{i \in V_1} x_{ij} = 1, \quad \forall j \in V_2, \\
         & 0 \leq x_{ij} \leq 1, \quad \forall (i, j) \in E \}
     \end{aligned}
 \end{equation}
 
-is called the bipartite perfect matching polytope. 
+is called the bipartite perfect matching polytope (see Lecture notes by \cite{goemans2009matching}). 
 
-\section{Solutions to the problem}
+\section{Proposed Solutions} \label{sec:mwpbm_solutions}
 There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955 \cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the assignment problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$, but later Dinic and Kronrod \cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
 
-The Hungarian method is a powerful algorithm, however, \draft{\sout{the algorithm} it} is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve \draft{\sout{the problem of finding a minimum weight perfect matching in a bipartite graph} this problem}. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time,  where $n,m$ and $W$ denote the number of vertices, number of edges, and largest magnitude of a cost; costs are assumed to be integral. \draft{The algorithms work by scaling}. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^w)$ time, where $w$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
+The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time,  where $n,m$ and $W$ denote the number of vertices, number of edges, and largest magnitude of a cost; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^w)$ time, where $w$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
-In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a new solution to the Minimum-Cost Flow problem that works in almost-linear time, precisely in $O(m^{1+o(1)})$ time. The minimum-cost flow problem is a classic combinatorial graph problem that find\draft{s} numerous applications in engineering and scientific computing. This result is important also for our problem, since the maximum weight perfect matching problem can be reduced to the minimum-cost flow problem, allowing to solve the problem in almost-linear time.
+In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a new solution to the 
+Minimum Cost Flow problem that works in almost-linear time, precisely in 
+$O(m^{1+o(1)})$ time. The minimum-cost flow problem is a classic combinatorial 
+graph problem with numerous applications in engineering and scientific computing. 
+This result is important for our problem since the maximum weight perfect 
+matching problem can be reduced to minimum-cost flow, enabling an almost-linear 
+time solution.
 
-\section{Implementation used in this work}
+\section{Implementation}
 \davide{Da completare una volta deciso come procedere}
 
-In this section, we will present an implementation of the Gabow and Tarjan algorithm to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The algorithm is based on scaling and is a generalization of the Hungarian method. The algorithm works by scaling the edge weights and then finding a perfect matching in the scaled graph. 
+In this section, we will present an implementation of the Gabow and Tarjan algorithm to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The algorithm is based on scaling and is a generalization of the Hungarian method. The algorithm works by scaling the edge weights and then finding a perfect matching in the scaled graph.
