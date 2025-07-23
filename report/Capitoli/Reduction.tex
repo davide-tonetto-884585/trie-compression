@@ -1,7 +1,7 @@
 \section{Reducing the Chains-Division Problem to the Assignment Problem}
 In this section, we will show how we can reduce the problem of finding the optimal partition of the nodes of a labeled tree $T$ given their equivalence classes into $p$ chains to the Minimum Weight Perfect Bipartite Matching problem (see \cref{def:mwpbm}). We define $\equivset$ as the set of equivalence classes of the nodes of $T$, and $t$ as the number of nodes of the tree. This reduction will allow us to solve the problem in polynomial time, as shown in the previous chapter.
 
-In particular we show that, given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists. In turn, a perfect matching with minimum weight allows us to retrieve the optimal partition of the nodes of $T$ into $p$ chains such that the run-length encoding of each chain is minimized.
+In particular, we show that, given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists. In turn, a perfect matching with minimum weight enables us to retrieve the optimal partition of the nodes in $T$ into $p$ chains, such that the run-length encoding of each chain is minimized.
 
 Then, we will show how to optimize the reduction by introducing some constraints that will allow us to reduce the number of edges in the bipartite graph, and we will also show how to move from the Minimum Weight Perfect Bipartite Matching problem to the more studied Maximum Weight Perfect Bipartite Matching problem without losing generality.
 
@@ -82,7 +82,7 @@ Now, we will show how to construct a bipartite graph that allows us to solve the
     \end{enumerate}
 \end{definition}
 
-Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition, because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{ex:reduction_vertices}.
+Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{ex:reduction_vertices}.
 
 Notice also that when we talk about the same $\treeset{1}$ node placed in $\treeset{2}$, we are referring to the corresponding node in $\treeset{2}$ that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets $\treeset{1}$ and $\treeset{2}$. In \cref{fig:bipartite_structure,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 \begin{example}[Vertices] \label{ex:reduction_vertices}
@@ -208,11 +208,11 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
 \end{example}
 
 \begin{example}[Edges]
-    Let's see a small example for each case, consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, for each source, $p$ edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$.
+    Let's see a small example for each case. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, for each source, $p$ edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$.
 
-    In \cref{fig:reduction_small_examples}-(b), there is an example for the tree nodes' edges. For each node in $\treeset{1}$, edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$, after the corresponding node in $\treeset{2}$ (coming after the node itself in the ordering), and edges with weight $0$ are created and connected to the first node with the same class in $\treeset{2}$ after the corresponding node in $\treeset{2}$. As we can see from the image, we consider the first node in $\treeset{1}$ labelled $A$ that is connected to the node labelled $B$ with weight $1$, and to the node labelled $C$ with weight $1$, and to the second node labelled $A$ in $V_2$ with weight $0$.
+    In \cref{fig:reduction_small_examples}-(b), there is an example for the tree nodes' edges. For each node in $\treeset{1}$, edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$ after the corresponding node in $\treeset{2}$ (coming after the node itself in the ordering), and edges with weight $0$ are created and connected to the first node with the same class in $\treeset{2}$ after the corresponding node in $\treeset{2}$. As we can see from the image, we consider the first node in $\treeset{1}$ labelled $A$ that is connected to the node labelled $B$ with weight $1$, and to the node labelled $C$ with weight $1$, and to the second node labelled $A$ in $V_2$ with weight $0$.
 
-    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labelled $A$, which is connected to node labelled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $V_1$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
+    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labeled $A$, which is connected to node labeled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $V_1$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
 
     \begin{figure}[H]
         \centering
@@ -346,7 +346,7 @@ In this section, we present the proof of the correctness of the reduction introd
 \end{lemma}
 
 \begin{proof}
-    To minimize the run-length encoding of the chains, we note that the minimum cost of a chain is $1$. Consequently, the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater than or equal to the cardinality of the set of equivalence classes $\equivset$ This is because if we partition them into $p = |\equivset|$ chains, the cost will be equal to $|\equivset|$, since each chain contains only nodes belonging to the same class. Conversely, if we partition them into $p < |\equivset|$ chains, the cost will be greater than or equal to $|\equivset|$, since we will need to include at least two nodes from different classes within a single chain.
+    To minimize the run-length encoding of the chains, we note that the minimum cost of a chain is $1$. Consequently, the optimal cost of the \textit{CHAINS-DIVISION} problem for the tree $T$ is always greater than or equal to the cardinality of the set of equivalence classes $\equivset$ This is because if we partition them into $p = |\equivset|$ chains, the cost will be equal to $|\equivset|$, since each chain contains only nodes belonging to the same class. Conversely, if we partition them into $p < |\equivset|$ chains, the cost will be greater than or equal to $|\equivset|$ since we will need to include at least two nodes from different classes within a single chain.
 \end{proof}
 
 \begin{claim} \label{claim:p_less_than_E}
@@ -441,12 +441,12 @@ Dimostrando questo, puoi dire che ogni nodo aggiunge sempre almeno un nodo in pi
 
 \begin{comment}
     \begin{proof}
-        The proof comes from the construction of the bipartite graph $G$ and from theorem \cref{thm:perfect_matching_existence}. We are going to proof that the bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has a Tutte matrix (\cref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
+        The proof comes from the construction of the bipartite graph $G$ and from theorem \cref{thm:perfect_matching_existence}. We are going to prove that the bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has a Tutte matrix (\cref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
 
-        We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
+        We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also, each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
     \end{proof}
 
-    In \cref{fig:tutte_matrix_ex} the Tutte matrix for the bipartite graph in \cref{fig:reduction_example}-(a) is shown.
+    In \cref{fig:tutte_matrix_ex}, the Tutte matrix for the bipartite graph in \cref{fig:reduction_example}-(a) is shown.
 
     \begin{figure}
         \centering
@@ -703,7 +703,7 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
     \alessio{Anche per quelli dopo metti un ``In other words'', quindi qua sarebbe qualcosa tipo: source $s_i$ is connected only to the tree node $u_{j_i} \in V_2$.}
 
     \begin{proof}
-        Since the source nodes are needed to distinguish the chains as starting points, we need that each source is connected to at \draft{least one node} \alessio{Così dici che una sorgente può essere connessa a più nodi, ma è connessa a ``exactly one node''} in $V_2$ coming from the tree $T$. Having the sources connected to the first $p$ nodes with distinct equivalence class in $V_2$ is not necessary since allows us just to invert the chains starting from each source and so it is redundant. We can connect each source to the \draft{\sout{smaller} smallest} node in $V_2$ coming from the tree $T$ that is not connected to any other source since we need to connect each source to at least one node in $V_2$ coming from the tree $T$ and this will allow us to distinguish the chains.
+        Since the source nodes are needed to distinguish the chains as starting points, we need that each source is connected to at \draft{least one node} \alessio{Così dici che una sorgente può essere connessa a più nodi, ma è connessa a ``exactly one node''} in $V_2$ coming from the tree $T$. Having the sources connected to the first $p$ nodes with distinct equivalence class in $V_2$ is not necessary since it allows us just to invert the chains starting from each source, and so it is redundant. We can connect each source to the \draft{\sout{smaller} smallest} node in $V_2$ coming from the tree $T$ that is not connected to any other source since we need to connect each source to at least one node in $V_2$ coming from the tree $T$ and this will allow us to distinguish the chains.
         \alessio{Qui dovresti anche dire che $|N(W)| \geq |W|$ vale ancora, per il perfect matching. È abbastanza triviale dato che c'è una relazione 1 a 1.}
     \end{proof}
 
@@ -736,7 +736,7 @@ Some changes can be made to the reduction in order to optimize it and to reduce 
     In \cref{fig:heuristics_example}-(a) the removed edges are shown in red.
 \end{itemize}
 
-In \cref{fig:heuristics_example}-(b) we can see the resulting bipartite graph for the example shown in previous section after the optimizations.
+In \cref{fig:heuristics_example}-(b), we can see the resulting bipartite graph for the example shown in the previous section after the optimizations.
 
 \begin{figure}[H]
     \centering
@@ -826,7 +826,7 @@ In \cref{fig:heuristics_example}-(b) we can see the resulting bipartite graph fo
         \end{tikzpicture} \\
     (a) & (b) \\
     \end{tabular}
-    \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics showed. In (a), the edges removed are shown in green for \cref{lemma:sources_optimization}, blue for \cref{lemma:tree_optimization_1}, and red for \cref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics applied. Dashed edges weigh $1$, while solid edges weigh $0$. \alessio{Invertirei la notazione degli archi: dashed (semi-trasparente) logicamente ha peso 0, mentre solid (si vede bene) ha peso 1.}}
+    \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics shown. In (a), the edges removed are shown in green for \cref{lemma:sources_optimization}, blue for \cref{lemma:tree_optimization_1}, and red for \cref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics applied. Dashed edges weigh $1$, while solid edges weigh $0$. \alessio{Invertirei la notazione degli archi: dashed (semi-trasparente) logicamente ha peso 0, mentre solid (si vede bene) ha peso 1.}}
     \label{fig:heuristics_example}
 \end{figure}
 
