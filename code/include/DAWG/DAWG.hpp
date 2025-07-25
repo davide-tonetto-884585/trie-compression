@@ -3,10 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include <unordered_map>
 #include <algorithm>
 #include <functional>
-#include <stack>
 #include <stdexcept>
 #include <string>
 #include <cstdint>
@@ -17,23 +15,22 @@
 const int NIL_TRANSITION_SORT_VAL = -1;
 const int DEAD_TARGET_SORT_VAL = -2;
 
-class DAWG;
-
 /**
  * @brief Represents a single state in the DAWG.
  *
  * Each state has a unique ID, a flag indicating if it's a final state,
  * and a map of transitions to other states.
  */
+template<typename LabelType = char>
 struct State
 {
     class Builder
     {
     private:
-        std::vector<std::pair<char, size_t>> pending_transitions;
+        std::vector<std::pair<LabelType, uint64_t>> pending_transitions;
 
     public:
-        Builder &add_transition(char symbol, size_t target_id)
+        Builder &add_transition(LabelType symbol, uint64_t target_id)
         {
             pending_transitions.emplace_back(symbol, target_id);
             return *this;
@@ -54,12 +51,12 @@ struct State
     };
 
     // Helper method to find transition (replaces map's operator[])
-    size_t *find_transition(char symbol)
+    uint64_t *find_transition(LabelType symbol)
     {
         auto it = std::lower_bound(
             m_transitions.begin(),
             m_transitions.end(),
-            std::make_pair(symbol, size_t(0)),
+            std::make_pair(symbol, uint64_t(0)),
             [](const auto &a, const auto &b)
             {
                 return a.first < b.first;
@@ -75,10 +72,10 @@ struct State
     }
 
     // Getter methods for private fields
-    size_t get_id() const { return m_id; }
+    uint64_t get_id() const { return m_id; }
     bool is_final() const { return m_transitions.empty(); }
-    const std::vector<std::pair<char, size_t>>& get_transitions() const { return m_transitions; }
-    std::vector<std::pair<char, size_t>>& get_transitions() { return m_transitions; }
+    const std::vector<std::pair<LabelType, uint64_t>>& get_transitions() const { return m_transitions; }
+    std::vector<std::pair<LabelType, uint64_t>>& get_transitions() { return m_transitions; }
 
     /**
      * @brief Get the height of the state.
@@ -92,7 +89,7 @@ struct State
      * This is used during the minimization process.
      * @return The equivalence class ID.
      */
-    size_t get_equivalence_class() const { return m_equivalence_class; }
+    uint64_t get_equivalence_class() const { return m_equivalence_class; }
 
     /**
      * @brief Construct a new State object.
@@ -100,28 +97,29 @@ struct State
      * @param _id The unique identifier for the state.
      * @param _is_final Whether the state is a final state.
      */
-    State(size_t _id)
+    State(uint64_t _id)
         : m_id(_id), m_height(-1), m_equivalence_class(-1) {}
 
 private:
-    size_t m_id;
-    std::vector<std::pair<char, size_t>> m_transitions;
+    uint64_t m_id;
+    std::vector<std::pair<LabelType, uint64_t>> m_transitions;
     
     int64_t m_height;         // Cached height of the state.
-    size_t m_equivalence_class; // Equivalence class ID used in minimization.
+    int64_t m_equivalence_class; // Equivalence class ID used in minimization.
 
-    friend class DAWG;
-    friend class TreeDAWG;
+    template<typename T> friend class DAWG;
+    template<typename T> friend class TreeDAWG;
 };
 
 /**
  * @brief A class to represent a Deterministic Acyclic Word Graph (DAWG).
  */
+template<typename LabelType = char>
 class DAWG
 {
 protected:
-    std::vector<State> m_nodes;
-    size_t m_initial_state_id;
+    std::vector<State<LabelType>> m_nodes;
+    uint64_t m_initial_state_id;
 
 private:
     /**
@@ -131,9 +129,9 @@ private:
      * @param visited_path_flags A vector to keep track of visited nodes to detect cycles.
      * @return The height of the node, or a special value indicating a cycle or non-final path.
      */
-    int64_t calculate_height_dfs(size_t node_id, std::vector<int> &visited_path_flags)
+    int64_t calculate_height_dfs(uint64_t node_id, std::vector<int> &visited_path_flags)
     {
-        State &node = m_nodes[node_id];
+        State<LabelType> &node = m_nodes[node_id];
         if (node.m_height != -1)
             return node.m_height;
         visited_path_flags[node_id] = 1; // Mark as visiting
@@ -172,13 +170,13 @@ private:
      * @param max_val The maximum possible value for get_value.
      * @return A list of new blocks, where each block contains nodes with the same value.
      */
-    std::vector<std::vector<size_t>> counting_sort_block(
-        const std::vector<size_t> &block,
-        std::function<int(size_t)> get_value, // Function to get the sorting value for a nodeId
+    std::vector<std::vector<uint64_t>> counting_sort_block(
+        const std::vector<uint64_t> &block,
+        std::function<int(uint64_t)> get_value, // Function to get the sorting value for a nodeId
         int min_val,                          // Minimum possible value for getValue
         int max_val)                          // Maximum possible value for getValue
     {
-        std::vector<std::vector<size_t>> new_blocks;
+        std::vector<std::vector<uint64_t>> new_blocks;
         if (block.empty())
             return new_blocks;
         if (min_val > max_val)
@@ -189,9 +187,9 @@ private:
         }
 
         int range = max_val - min_val + 1;
-        std::vector<std::vector<size_t>> buckets(range);
+        std::vector<std::vector<uint64_t>> buckets(range);
 
-        for (size_t node_id : block)
+        for (uint64_t node_id : block)
         {
             int sort_value = get_value(node_id);
             // Ensure the sort value is within the expected range for the buckets
@@ -227,23 +225,34 @@ public:
      * @brief Constructor for the DAWG class with a specified initial state.
      * @param set_initial_state_id The ID of the initial state.
      */
-    DAWG(size_t set_initial_state_id) : m_initial_state_id(set_initial_state_id) {}
+    DAWG(uint64_t set_initial_state_id) : m_initial_state_id(set_initial_state_id) {}
 
-    State& operator[](size_t id) {
+    State<LabelType>& operator[](uint64_t id) {
         if (id >= m_nodes.size()) {
             throw std::out_of_range("State ID " + std::to_string(id) + " is out of range. Maximum ID: " + std::to_string(m_nodes.size() - 1));
         }
         return m_nodes[id];
     }
     
-    const State& operator[](size_t id) const {
+    const State<LabelType>& operator[](uint64_t id) const {
         if (id >= m_nodes.size()) {
             throw std::out_of_range("State ID " + std::to_string(id) + " is out of range. Maximum ID: " + std::to_string(m_nodes.size() - 1));
         }
         return m_nodes[id];
     }
     
-    size_t get_num_nodes() const {
+    // Iterator support for range-based for loops
+    auto begin() { return m_nodes.begin(); }
+    auto end() { return m_nodes.end(); }
+    auto begin() const { return m_nodes.begin(); }
+    auto end() const { return m_nodes.end(); }
+    
+    // Alternative: explicit iterator types
+    using iterator = typename std::vector<State<LabelType>>::iterator;
+    using const_iterator = typename std::vector<State<LabelType>>::const_iterator;
+
+        
+    uint64_t get_num_nodes() const {
         return m_nodes.size();
     }
 
@@ -252,16 +261,16 @@ public:
      * @param is_final Whether the new node is a final state.
      * @return The ID of the newly created node.
      */
-    size_t add_node()
+    uint64_t add_node()
     {
-        size_t id = m_nodes.size();
+        uint64_t id = m_nodes.size();
         m_nodes.emplace_back(id);
         return id;
     }
 
-    void configure_state(size_t state_id, std::initializer_list<std::pair<char, size_t>> transitions)
+    void configure_state(uint64_t state_id, std::initializer_list<std::pair<LabelType, uint64_t>> transitions)
     {
-        State::Builder builder;
+        typename State<LabelType>::Builder builder;
         for (const auto &[symbol, target] : transitions)
         {
             builder.add_transition(symbol, target);
@@ -270,11 +279,15 @@ public:
         builder.build_into(m_nodes[state_id]);
     }
 
+    uint64_t get_initial_state_id() const {
+        return m_initial_state_id;
+    }
+
     /**
      * @brief Sets the initial state of the DAWG.
      * @param node_id The ID of the node to be set as the initial state.
      */
-    virtual void set_initial_state(size_t node_id)
+    virtual void set_initial_state(uint64_t node_id)
     {
         if (node_id < m_nodes.size())
         {
@@ -298,7 +311,7 @@ public:
             node.m_height = -1;
         int64_t max_h = -1;
         std::vector<int> visited_path_flags(m_nodes.size(), 0); // 0: unvisited, 1: visiting, 2: visited
-        for (size_t i = 0; i < m_nodes.size(); ++i)
+        for (uint64_t i = 0; i < m_nodes.size(); ++i)
         {
             if (m_nodes[i].m_height == -1)
             {
@@ -318,13 +331,12 @@ public:
      * This implementation is based on Revuz's algorithm for DAWGs minimization (DOI: 10.1016/0304-3975(92)90142-3).
      * It groups states into equivalence classes.
      * @param is_tree A boolean indicating if the DAWG is a tree, to use the optimized height calculation.
-     * @return An unordered_map from original state ID to the representative state ID of its equivalence class.
      */
-    std::unordered_map<size_t, size_t> minimize()
+    void minimize()
     {
         int64_t max_total_height = compute_all_heights();
 
-        std::vector<std::vector<size_t>> states_by_height(max_total_height + 1);
+        std::vector<std::vector<uint64_t>> states_by_height(max_total_height + 1);
         for (const auto &node : m_nodes)
         {
             if (node.m_height >= 0)
@@ -333,11 +345,11 @@ public:
             }
         }
 
-        size_t next_global_eq_class_id = 0;
+        int64_t next_global_eq_class_id = 0;
 
         if (max_total_height >= 0 && !states_by_height[0].empty())
         {
-            for (size_t node_id : states_by_height[0])
+            for (uint64_t node_id : states_by_height[0])
             {
                 m_nodes[node_id].m_equivalence_class = next_global_eq_class_id;
             }
@@ -346,28 +358,28 @@ public:
 
         // Cache for sorted transition vectors (for efficient k-th access)
         // for nodes in the current height level.
-        std::vector<std::vector<std::pair<char, size_t>>> node_sorted_transitions_cache(m_nodes.size());
+        std::vector<std::vector<std::pair<LabelType, uint64_t>>> node_sorted_transitions_cache(m_nodes.size());
 
-        for (size_t h = 1; h <= static_cast<size_t>(max_total_height); ++h)
+        for (uint64_t h = 1; h <= static_cast<uint64_t>(max_total_height); ++h)
         {
             if (states_by_height[h].empty())
                 continue;
 
-            for (size_t node_id : states_by_height[h])
+            for (uint64_t node_id : states_by_height[h])
             {
                 node_sorted_transitions_cache[node_id].assign(
                     m_nodes[node_id].m_transitions.begin(),
                     m_nodes[node_id].m_transitions.end());
             }
 
-            std::vector<std::vector<size_t>> h_partitions;
+            std::vector<std::vector<uint64_t>> h_partitions;
             if (!states_by_height[h].empty())
             {
                 h_partitions.push_back(states_by_height[h]);
             }
 
             // 1. Partition by is_final
-            std::vector<std::vector<size_t>> p_after_is_final;
+            std::vector<std::vector<uint64_t>> p_after_is_final;
             for (auto &block : h_partitions)
             {
                 if (block.size() <= 1)
@@ -375,7 +387,7 @@ public:
                     p_after_is_final.push_back(block);
                     continue;
                 }
-                auto get_is_final_val = [&](size_t node_id)
+                auto get_is_final_val = [&](uint64_t node_id)
                 { return m_nodes[node_id].is_final() ? 1 : 0; };
                 auto new_sub_blocks = counting_sort_block(block, get_is_final_val, 0, 1); // min=0, max=1 for bool
                 for (auto &sub_block : new_sub_blocks)
@@ -383,16 +395,16 @@ public:
             }
             h_partitions = p_after_is_final;
 
-            size_t max_k_transitions_for_h = 0;
-            for (size_t node_id : states_by_height[h])
+            uint64_t max_k_transitions_for_h = 0;
+            for (uint64_t node_id : states_by_height[h])
             {
                 max_k_transitions_for_h = std::max(max_k_transitions_for_h, node_sorted_transitions_cache[node_id].size());
             }
 
-            for (size_t k = 0; k < max_k_transitions_for_h; ++k)
+            for (uint64_t k = 0; k < max_k_transitions_for_h; ++k)
             { // For the k-th transition
                 // 2a. Partition by the character of the k-th transition
-                std::vector<std::vector<size_t>> p_after_char;
+                std::vector<std::vector<uint64_t>> p_after_char;
                 int min_val_char = NIL_TRANSITION_SORT_VAL; // -1
                 int max_val_char = 255;                     // Max value for unsigned char
 
@@ -403,7 +415,7 @@ public:
                         p_after_char.push_back(block);
                         continue;
                     }
-                    auto get_kth_char_val = [&](size_t node_id)
+                    auto get_kth_char_val = [&](uint64_t node_id)
                     {
                         if (k < node_sorted_transitions_cache[node_id].size())
                         {
@@ -416,7 +428,7 @@ public:
                     int current_block_min_char = max_val_char + 1;
                     int current_block_max_char = min_val_char - 1;
                     bool has_values_char = false;
-                    for (size_t node_id : block)
+                    for (uint64_t node_id : block)
                     {
                         int val = get_kth_char_val(node_id);
                         current_block_min_char = std::min(current_block_min_char, val);
@@ -436,7 +448,7 @@ public:
                 h_partitions = p_after_char;
 
                 // 2b. Partition by the equivalence class of the k-th transition target
-                std::vector<std::vector<size_t>> p_after_target_class;
+                std::vector<std::vector<uint64_t>> p_after_target_class;
                 // Theoretical range for target classes: DEAD_TARGET_SORT_VAL (-2), NIL_TRANSITION_SORT_VAL (-1), 0 ... next_global_eq_class_id-1
                 int min_val_target_overall = DEAD_TARGET_SORT_VAL;
                 int max_val_target_overall = (next_global_eq_class_id == 0) ? DEAD_TARGET_SORT_VAL : static_cast<int>(next_global_eq_class_id) - 1;
@@ -453,11 +465,11 @@ public:
                         continue;
                     }
 
-                    auto get_kth_target_eq_class_val = [&](size_t node_id)
+                    auto get_kth_target_eq_class_val = [&](uint64_t node_id)
                     {
                         if (k < node_sorted_transitions_cache[node_id].size())
                         {
-                            size_t target_node_id = node_sorted_transitions_cache[node_id][k].second;
+                            uint64_t target_node_id = node_sorted_transitions_cache[node_id][k].second;
                             if (m_nodes[target_node_id].m_height < 0)
                             { // Target is a "dead state"
                                 return DEAD_TARGET_SORT_VAL;
@@ -470,7 +482,7 @@ public:
                     int current_block_min_target_class = max_val_target_overall + 1; // Initialize to find the effective min
                     int current_block_max_target_class = min_val_target_overall - 1; // Initialize to find the effective max
                     bool has_values_target = false;
-                    for (size_t node_id : block)
+                    for (uint64_t node_id : block)
                     {
                         int val = get_kth_target_eq_class_val(node_id);
                         current_block_min_target_class = std::min(current_block_min_target_class, val);
@@ -494,7 +506,7 @@ public:
             {
                 if (!final_block.empty())
                 {
-                    for (size_t node_id : final_block)
+                    for (uint64_t node_id : final_block)
                     {
                         m_nodes[node_id].m_equivalence_class = next_global_eq_class_id;
                     }
@@ -503,7 +515,7 @@ public:
             }
         }
 
-        std::unordered_map<size_t, size_t> result;
+        /* std::unordered_map<uint64_t, uint64_t> result;
         for (const auto &node : m_nodes)
         {
             if (node.m_height >= 0)
@@ -515,7 +527,7 @@ public:
                 result[node.m_id] = -1; // Special class for non-useful nodes
             }
         }
-        return result;
+        return result; */
     }
 };
 

@@ -1,8 +1,9 @@
 #ifndef TREE_DAWG_HPP
 #define TREE_DAWG_HPP
 
-#include "DAWG.hpp"
 #include <stack>
+#include "DAWG.hpp"
+#include "../LabeledTree/LabeledTree.hpp"
 
 /**
  * @brief TreeDAWG is a specialized subclass of DAWG optimized for tree structures.
@@ -11,20 +12,33 @@
  * tree-optimized implementation that avoids cycle detection overhead and uses
  * post-order traversal for better performance on tree structures.
  */
-class TreeDAWG : public DAWG
+template<typename LabelType = char>
+class TreeDAWG : public DAWG<LabelType>
 {
 public:
+    // Using declarations to access base class members
+    using DAWG<LabelType>::m_nodes;
+    using DAWG<LabelType>::m_initial_state_id;
+    using DAWG<LabelType>::get_num_nodes;
+    
     /**
      * @brief Default constructor for the TreeDAWG class.
      */
-    TreeDAWG() : DAWG() {}
+    TreeDAWG() : DAWG<LabelType>() {}
+
+    /**
+     * @brief 
+     */
+    TreeDAWG(const LabeledTree<LabelType> &tree) {
+        
+    }
 
     /**
      * @brief Sets the initial state, ensuring it's a valid tree root (no incoming transitions).
      * @param node_id The ID of the node to set as initial state.
      * @throws std::invalid_argument if the node has incoming transitions.
      */
-    void set_initial_state(size_t node_id) override
+    void set_initial_state(uint64_t node_id) override
     {
         // First validate that the node exists
         if (node_id >= get_num_nodes())
@@ -45,22 +59,22 @@ public:
      * It uses an iterative post-order traversal to avoid stack overflow on deep trees.
      * @return The maximum height of any node in the tree.
      */
-    int64_t compute_all_heights()
+    int64_t compute_all_heights() override
     {
         for (auto &node : m_nodes)
             node.m_height = -1;
 
         int64_t max_h = -1;
         // compute height starting from root
-        std::stack<size_t> dfs_stack;
-        std::stack<size_t> processing_stack; // post-order stack
+        std::stack<uint64_t> dfs_stack;
+        std::stack<uint64_t> processing_stack; // post-order stack
 
         dfs_stack.push(m_initial_state_id);
 
         std::vector<bool> visited(m_nodes.size(), false);
         while (!dfs_stack.empty())
         {
-            size_t current_node_id = dfs_stack.top();
+            uint64_t current_node_id = dfs_stack.top();
             dfs_stack.pop();
 
             if (visited[current_node_id])
@@ -80,10 +94,10 @@ public:
 
         while (!processing_stack.empty())
         {
-            size_t node_id = processing_stack.top();
+            uint64_t node_id = processing_stack.top();
             processing_stack.pop();
 
-            State &node = m_nodes[node_id];
+            State<LabelType> &node = m_nodes[node_id];
 
             if (node.m_height != -1)
                 continue;
@@ -117,10 +131,10 @@ private:
      * @param node_id The ID of the node to validate.
      * @throws std::invalid_argument if the node has incoming transitions.
      */
-    void validate_is_root(size_t node_id)
+    void validate_is_root(uint64_t node_id)
     {
-        size_t num_nodes = get_num_nodes();
-        for (size_t i = 0; i < num_nodes; ++i)
+        uint64_t num_nodes = get_num_nodes();
+        for (uint64_t i = 0; i < num_nodes; ++i)
         {
             if (i == node_id)
                 continue; // Skip self
