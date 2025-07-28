@@ -7,6 +7,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <sstream>
 #include <cstdint>
 
 // Special values used in sorting to represent the absence of a transition
@@ -21,7 +22,7 @@ const int DEAD_TARGET_SORT_VAL = -2;
  * Each state has a unique ID, a flag indicating if it's a final state,
  * and a map of transitions to other states.
  */
-template<typename LabelType = char>
+template <typename LabelType = char>
 struct State
 {
     class Builder
@@ -60,9 +61,8 @@ struct State
             [](const auto &a, const auto &b)
             {
                 return a.first < b.first;
-            }
-        );
-            
+            });
+
         if (it != m_transitions.end() && it->first == symbol)
         {
             return &(it->second);
@@ -74,8 +74,8 @@ struct State
     // Getter methods for private fields
     uint64_t get_id() const { return m_id; }
     bool is_final() const { return m_transitions.empty(); }
-    const std::vector<std::pair<LabelType, uint64_t>>& get_transitions() const { return m_transitions; }
-    std::vector<std::pair<LabelType, uint64_t>>& get_transitions() { return m_transitions; }
+    const std::vector<std::pair<LabelType, uint64_t>> &get_transitions() const { return m_transitions; }
+    std::vector<std::pair<LabelType, uint64_t>> &get_transitions() { return m_transitions; }
 
     /**
      * @brief Get the height of the state.
@@ -103,18 +103,20 @@ struct State
 private:
     uint64_t m_id;
     std::vector<std::pair<LabelType, uint64_t>> m_transitions;
-    
-    int64_t m_height;         // Cached height of the state.
+
+    int64_t m_height;            // Cached height of the state.
     int64_t m_equivalence_class; // Equivalence class ID used in minimization.
 
-    template<typename T> friend class DAWG;
-    template<typename T> friend class TreeDAWG;
+    template <typename T>
+    friend class DAWG;
+    template <typename T>
+    friend class TreeDAWG;
 };
 
 /**
  * @brief A class to represent a Deterministic Acyclic Word Graph (DAWG).
  */
-template<typename LabelType = char>
+template <typename LabelType = char>
 class DAWG
 {
 protected:
@@ -173,8 +175,8 @@ private:
     std::vector<std::vector<uint64_t>> counting_sort_block(
         const std::vector<uint64_t> &block,
         std::function<int(uint64_t)> get_value, // Function to get the sorting value for a nodeId
-        int min_val,                          // Minimum possible value for getValue
-        int max_val)                          // Maximum possible value for getValue
+        int min_val,                            // Minimum possible value for getValue
+        int max_val)                            // Maximum possible value for getValue
     {
         std::vector<std::vector<uint64_t>> new_blocks;
         if (block.empty())
@@ -227,32 +229,36 @@ public:
      */
     DAWG(uint64_t set_initial_state_id) : m_initial_state_id(set_initial_state_id) {}
 
-    State<LabelType>& operator[](uint64_t id) {
-        if (id >= m_nodes.size()) {
+    State<LabelType> &operator[](uint64_t id)
+    {
+        if (id >= m_nodes.size())
+        {
             throw std::out_of_range("State ID " + std::to_string(id) + " is out of range. Maximum ID: " + std::to_string(m_nodes.size() - 1));
         }
         return m_nodes[id];
     }
-    
-    const State<LabelType>& operator[](uint64_t id) const {
-        if (id >= m_nodes.size()) {
+
+    const State<LabelType> &operator[](uint64_t id) const
+    {
+        if (id >= m_nodes.size())
+        {
             throw std::out_of_range("State ID " + std::to_string(id) + " is out of range. Maximum ID: " + std::to_string(m_nodes.size() - 1));
         }
         return m_nodes[id];
     }
-    
+
     // Iterator support for range-based for loops
     auto begin() { return m_nodes.begin(); }
     auto end() { return m_nodes.end(); }
     auto begin() const { return m_nodes.begin(); }
     auto end() const { return m_nodes.end(); }
-    
+
     // Alternative: explicit iterator types
     using iterator = typename std::vector<State<LabelType>>::iterator;
     using const_iterator = typename std::vector<State<LabelType>>::const_iterator;
 
-        
-    uint64_t get_num_nodes() const {
+    uint64_t get_num_nodes() const
+    {
         return m_nodes.size();
     }
 
@@ -279,7 +285,8 @@ public:
         builder.build_into(m_nodes[state_id]);
     }
 
-    uint64_t get_initial_state_id() const {
+    uint64_t get_initial_state_id() const
+    {
         return m_initial_state_id;
     }
 
@@ -297,6 +304,26 @@ public:
         {
             throw std::out_of_range("Attempt to set non-existent initial state with ID " + std::to_string(node_id));
         }
+    }
+
+    /**
+     * @brief Converts the DAWG to a string representation.
+     * @return A string representation of the DAWG.
+     */
+    virtual std::string to_string() const
+    {
+        std::stringstream ss;
+        for (const auto &node : *this)
+        {
+            ss << "Node " << node.get_id()
+               << " (id: " << node.get_id()
+               << ", class: " << node.get_equivalence_class()
+               << ", height: " << node.get_height()
+               << ", is_root: " << (node.get_id() == get_initial_state_id() ? "yes" : "no")
+               << ", is_final: " << (node.is_final() ? "yes" : "no")
+               << ", transitions: " << node.get_transitions().size() << ")" << std::endl;
+        }
+        return ss.str();
     }
 
     /**
@@ -398,7 +425,7 @@ public:
             uint64_t max_k_transitions_for_h = 0;
             for (uint64_t node_id : states_by_height[h])
             {
-                max_k_transitions_for_h = std::max(max_k_transitions_for_h, node_sorted_transitions_cache[node_id].size());
+                max_k_transitions_for_h = std::max(max_k_transitions_for_h, static_cast<uint64_t>(node_sorted_transitions_cache[node_id].size()));
             }
 
             for (uint64_t k = 0; k < max_k_transitions_for_h; ++k)

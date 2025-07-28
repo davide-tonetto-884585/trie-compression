@@ -48,12 +48,12 @@ Note that, following the XBWT definition, two sibling nodes are comparable. The 
     \end{itemize}
     Total RLE cost: $1 + 3 = 4$
     
-    This example demonstrates how grouping nodes of the same equivalence class together in chains minimizes the total run-length encoding cost. The optimal solution can be found by reducing this problem to the \textsc{MWPBM} problem as described in this chapter.
+    This example demonstrates how grouping nodes of the same equivalence class in chains minimizes the total run-length encoding cost. The optimal solution can be found by reducing this problem to the \textsc{MWPBM} problem as described in this chapter.
 \end{example}
 
 \begin{comment}
 \subsection{Reduction idea}
-The intuition behind the reduction is the following: given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists. In turn, a perfect matching with minimum weight allows us to retrieve the optimal partition of the nodes of $T$ into $p$ chains such that the run-length encoding of each chain is minimized.
+The intuition behind the reduction is the following: given a tree $T$ and the number of chains $p$, we can construct a bipartite graph $G = (V, E)$ in which a perfect matching (\cref{def:matching}) always exists. In turn, a perfect matching with minimum weight enables us to retrieve the optimal partition of the nodes in $T$ into $p$ chains, such that the run-length encoding of each chain is minimized.
 
 In the following sections we will show how to construct the bipartite graph $G$ and proof that $G$ constructed as defined in \cref{def:bip_construction} always allows to find a perfect matching and the weight of the matching is the minimum run length encoding of the optimal partition of the nodes of $T$ into $p$ chains.
 
@@ -82,7 +82,7 @@ Now, we will show how to construct a bipartite graph that allows us to solve the
     \end{enumerate}
 \end{definition}
 
-Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{ex:reduction_vertices}.
+Notice that it is important to consider the order of the nodes of the two sets $V_1$ and $V_2$ as stated in the definition, because we will need to connect the source nodes to the destination nodes in a way that will allow us to find the optimal partition of the nodes of the tree. An example of the node structure is shown in \cref{ex:reduction_vertices}.
 
 Notice also that when we talk about the same $\treeset{1}$ node placed in $\treeset{2}$, we are referring to the corresponding node in $\treeset{2}$ that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets $\treeset{1}$ and $\treeset{2}$. In \cref{fig:bipartite_structure,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 \begin{example}[Vertices] \label{ex:reduction_vertices}
@@ -208,11 +208,11 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
 \end{example}
 
 \begin{example}[Edges]
-    Let's see a small example for each case. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, for each source, $p$ edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$.
+    Let's see a small example for each case. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, for each source, $p$ edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence classes in $\treeset{2}$.
 
     In \cref{fig:reduction_small_examples}-(b), there is an example for the tree nodes' edges. For each node in $\treeset{1}$, edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$ after the corresponding node in $\treeset{2}$ (coming after the node itself in the ordering), and edges with weight $0$ are created and connected to the first node with the same class in $\treeset{2}$ after the corresponding node in $\treeset{2}$. As we can see from the image, we consider the first node in $\treeset{1}$ labelled $A$ that is connected to the node labelled $B$ with weight $1$, and to the node labelled $C$ with weight $1$, and to the second node labelled $A$ in $V_2$ with weight $0$.
 
-    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labeled $A$, which is connected to node labeled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $V_1$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
+    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labeled $A$, which is connected to a node labeled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $V_1$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
 
     \begin{figure}[H]
         \centering
@@ -228,14 +228,19 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
                 \node[source] (1s) {$s_1$};
                 \node[source] (2s) [below of=1s] {$s_2$};
                 \node[main] (3s) [below of=2s] {A};
+                \node[right=0cm of 3s] {$\cdots$};
                 \node[main] (4s) [below of=3s] {A};
+                \node[right=0cm of 4s] {$\cdots$};
                 \node[main] (5s) [below of=4s] {B};
+                \node[right=0cm of 5s] {$\cdots$};
                 \node (dots_s) [below of=5s] {\vdots}; % Vertical dots
 
                 % Right column (destinations)
                 \node[main] (1d) [right=2.5cm of 3s] {A};
                 \node[main] (2d) [below of=1d] {A};
+                \node[left=0cm of 2d] {$\cdots$};
                 \node[main] (3d) [below of=2d] {B};
+                \node[left=0cm of 3d] {$\cdots$};
                 \node (dots_d) [below of=3d] {\vdots}; % Vertical dots
 
                 % Arrows
@@ -260,16 +265,23 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
                 \node (dots_s_top) {\vdots};
                 \node[main] (3s) [below of=dots_s_top] {A};
                 \node[main] (4s) [below of=3s] {B};
+                \node[right=0cm of 4s] {$\cdots$};
                 \node[main] (5s) [below of=4s] {A};
+                \node[right=0cm of 5s] {$\cdots$};
                 \node[main] (6s) [below of=5s] {C};
+                \node[right=0cm of 6s] {$\cdots$};
                 \node (dots_s_bottom) [below of=6s] {\vdots};
 
                 % Right column (destinations)
                 \node (dots_d_top) [right=2.5cm of dots_s_top] {\vdots};
                 \node[main] (1d) [below of=dots_d_top] {A};
+                \node[left=0cm of 1d] {$\cdots$};
                 \node[main] (2d) [below of=1d] {B};
+                \node[left=0cm of 2d] {$\cdots$};
                 \node[main] (3d) [below of=2d] {A};
+                \node[left=0cm of 3d] {$\cdots$};
                 \node[main] (4d) [below of=3d] {C};
+                \node[left=0cm of 4d] {$\cdots$};
                 \node (dots_d_bottom) [below of=4d] {\vdots};
 
                 % Arrows
@@ -297,9 +309,13 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
                 % Right column (bipartite graph destinations)
                 \node (dots_d_top) [right=2.5cm of dots_s_top] {\vdots};
                 \node[main] (5d) [below of=dots_d_top] {A};
+                \node[left=0cm of 5d] {$\cdots$};
                 \node[main] (6d) [below of=5d] {B};
+                \node[left=0cm of 6d] {$\cdots$};
                 \node[dest] (8d) [below of=6d] {$d_1$};
+                \node[left=0cm of 8d] {$\cdots$};
                 \node[dest] (9d) [below of=8d] {$d_2$};
+                \node[left=0cm of 9d] {$\cdots$};
 
                 % Arrows
                 \draw[red, ->] (7s) -- (6d);
@@ -325,7 +341,7 @@ Before we present the proof of the correctness of the reduction, let us state th
 \end{theorem}
 
 \begin{proof}
-    The $O(t (p + 1))$ edges come from the tree nodes, the $O(p^2)$ edges come from the sources since each source node is connected to $p$ nodes, and the $O(tp)$ edges come from the destination nodes since in the worst case we have $t$ distinct equivalence class and so all the nodes are connected to the destination nodes. 
+    The $O(t (p + 1))$ edges come from the tree nodes, the $O(p^2)$ edges come from the sources since each source node is connected to $p$ nodes, and the $O(tp)$ edges come from the destination nodes since in the worst case we have $t$ distinct equivalence classes meaning that all the nodes are connected to the destination nodes. 
 \end{proof}
 
 \subsection{Proof of Correctness}
@@ -388,7 +404,8 @@ In other words, every node in $V_1$ is connected to at least another node in $V_
     
     By construction, $u_i$ is connected to $v_{i+1}$. This holds whether $v_{i+1}$ is the next node in the same equivalence class or one of the first $p$ nodes in a different class. Thus, $v_{i+1} \in N(\{u_i\})$.
 
-    From \cref{lemma:greater_nodes}, any neighbor $v_k$ of $u_j$ must have $k > j$. Since $i < j$, we have $i+1 \leq j$. This means $v_{i+1}$ cannot be a neighbor of $u_j$. Therefore, $v_{i+1} \in N(\{u_i\})$ but $v_{i+1} \notin N(\{u_j\})$, which proves that $N(\{u_i\}) \not\subseteq N(\{u_j\})$.
+    From \cref{lemma:greater_nodes}, any neighbor $v_k$ of $u_j$ must have $k > j$. Since $i < j$, we have $i+1 \leq j$.
+    This means $v_{i+1}$ cannot be a neighbor of $u_j$, as $i + 1 < k$. Therefore, $v_{i+1} \in N(\{u_i\})$ but $v_{i+1} \notin N(\{u_j\})$, which proves that $N(\{u_i\}) \not\subseteq N(\{u_j\})$.
 \end{proof}
 
 \begin{lemma} \label{lemma:distinct_neighborhoods_2}
@@ -397,14 +414,14 @@ In other words, every node in $V_1$ is connected to at least another node in $V_
 \begin{proof}
     Since $u_j$ is not the last node of its equivalence class, by construction, it must be connected to the first node $v_k \in \treeset{2}$ with $k > j$ such that $\equivsetfunc{v_k} = \equivsetfunc{u_j}$. Therefore, $v_k \in N(\{u_j\})$.
 
-    By construction, it follows that $u_i$ cannot be connected to $v_k$. This is due to the existence of another node $v_l \in \treeset{2}$ with $l < k$, such that $\equivsetfunc{v_l} = \equivsetfunc{u_k}$. Consequently, we conclude that $v_k \notin N(\{u_i\})$, as the edges of $u_i$ connect to nodes in $\treeset{2}$, all of which belong to distinct classes.
+    By construction, it follows that $u_i$ cannot be connected to $v_k$. This is due to the existence of another node $v_l \in \treeset{2}$ with $i < l \leq j$, such that $\equivsetfunc{v_l} = \equivsetfunc{u_k}$. Consequently, we conclude that $v_k \notin N(\{u_i\})$, as the edges of $u_i$ connect to nodes in $\treeset{2}$, all of which belong to distinct classes.
 
     In summary, we have identified a node $v_k$ that is included in $N({u_j})$ but excluded from $N({u_i})$, thus proving that $N({u_j}) \not\subseteq N({u_i})$.
 \end{proof}
 
+\begin{comment}
 \alessio{Non so se sia abbastanza questo claim, forse andrebbe dimostrato in entrambe le direzioni, quindi $N(\{u_i\}) \not\subseteq N(\{u_j\})$ e $N(\{u_j\}) \not\subseteq N(\{u_i\})$. In pratica la dimostrazione è la stessa ma va spiegata bene. A questo punto no so se il Lemma 4 serva, dato che deriva fa questa proprietà. Quindi in pratica il nodo sopra sarà connesso a nodi sopra il nodo sotto, mentre il nodo sotto sarà connesso ad altri nodi più sotto.
 Dimostrando questo, puoi dire che ogni nodo aggiunge sempre almeno un nodo in più a $N(W)$, che sarà quindi almeno uguale a $|W|$. Occhio che però questo vale solo per i nodi che non sono gli ultimi della loro classe.} \davide{dovrei aver dimostrato le due strade e aggiunto nel lemma dell'esistenza del matching il caso in cui $u_j$ è l'ultimo nodo della sua classe.}
-\begin{comment}
 \begin{claim} \label{claim:prev_not_subset}
     For any pair of distinct nodes $u_i, u_j \in \treeset{1}$ with $i < j$, then we have that $N(\{u_i\}) \not\subseteq N(\{u_j\})$.
 \end{claim}
@@ -423,27 +440,32 @@ Dimostrando questo, puoi dire che ogni nodo aggiunge sempre almeno un nodo in pi
     \begin{enumerate}[leftmargin=25pt]
         \item $W \subseteq \sourceset$: Let $W$ be a subset of $S$ of size $k$. By construction, every source node $s_i \in \sourceset$ is connected to the same set of $p$ nodes in $V_2$, which are the first $p$ nodes with distinct equivalence classes in the ordering. Therefore, for any non-empty $W \subseteq \sourceset$, the neighborhood $N(W)$ consists of exactly these $p$ nodes, so $|N(W)| = p$. From \cref{lemma:optimal_cost} and \cref{claim:p_less_than_E}, we only consider instances where $p \leq |\equivset|$, ensuring that at least $p$ such nodes exist. Since $|\sourceset|=p$, we have $|W| = k \leq p$. Thus, $|N(W)| \geq |W|$.
         
-        \item $W \subseteq \treeset{1}$: Let $W = \{u_{i_1}, \dots, u_{i_k}\} \subseteq \treeset{1}$ with $i_1 < i_2 < \dots < i_k$. We analyze two sub-cases:
+        \item $W \subseteq \treeset{1}$: Let $W = \{u_{i_1}, \dots, u_{i_k}\} \subseteq \treeset{1}$ with $i_1 < i_2 < \dots < i_k$. We analyze two subcases:
 
-        \textbf{Case 1: No node in $W$ is the last of its class.}
+        \textbf{Case A: No node in $W$ is the last of its class.}
         By \cref{lemma:distinct_neighborhoods,lemma:distinct_neighborhoods_2}, for any two nodes $u_a, u_b \in W$ with $a < b$, we have both $N(\{u_a\}) \not\subseteq N(\{u_b\})$ and $N(\{u_b\}) \not\subseteq N(\{u_a\})$. This implies that each node in $W$ contributes at least one unique neighbor to the total neighborhood $N(W)$. Therefore, $|N(W)| \geq |W|$.
 
-        \textbf{Case 2: At least one node in $W$ is the last of its class.}
+        \textbf{Case B: At least one node in $W$ is the last of its class.}
         Let $u_{j} \in W$ be a node that is the last of its equivalence class. By construction, $u_{j}$ is connected to all $p$ destination nodes $\destset$, which means $\destset \subseteq N(W)$ and thus $|N(W)| \geq p$.
 
         For such a node $u_j$, its neighborhood $N(\{u_j\})$ may be a subset of $N(\{u_a\})$ for some $u_a \in W$ with $a < j$, since \cref{lemma:distinct_neighborhoods_2} does not apply. However, the reverse is not true, as \cref{lemma:distinct_neighborhoods} guarantees $N(\{u_a\}) \not\subseteq N(\{u_j\})$. This asymmetry ensures that $N(\{u_a\})$ always contributes at least one neighbor not present in $N(\{u_j\})$. This property, combined with the fact that all nodes that are last of their class are connected to the $p$ destination nodes, is sufficient to guarantee that $|N(W)| \ge |W|$ since $p \geq 2$.
 
         In both cases, Hall's condition $|N(W)| \geq |W|$ is satisfied for any $W \subseteq \treeset{1}$.
         
-        \item $W=W_S \cup W_U$, where $W_S \subseteq \sourceset, W_U \subseteq \treeset{1}$: We have $|N(W)| \geq |W|$ as a derivation from the previous cases and \cref{lemma:greater_nodes}.
+        \item $W=W_S \cup W_U$, where $W_S \subseteq \sourceset, W_U \subseteq \treeset{1}$: The neighborhood of $W_S$ consists of $p$ nodes, as established in case 1 ($W \subseteq \sourceset$). By \cref{lemma:greater_nodes}, the neighbors of any node in $W_U$ appear later in the node ordering than the node itself. Since all nodes in $\treeset{1}$ are ordered after the source nodes, the neighbors of $W_U$ are distinct from the neighbors of $W_S$. Specifically, $N(W_S)$ consists of the first $p$ nodes with distinct equivalence classes.
+        
+        We now analyze two subcases for nodes in $W_U$: If $W_U$ contains a node $u_i \in \treeset{1}$ that is not the last of its equivalence class, then there exists at least one node $v_j \in \treeset{2}$ with $i < j$ and $\equivsetfunc{u_i} = \equivsetfunc{v_j}$ that is connected to $u_i$ but not to any source node. This contributes additional neighbors to $N(W)$, ensuring $|N(W)| \geq |W|$.
+        If $W_U$ contains a node $u_i \in \treeset{1}$ that is the last of its equivalence class, then by construction, $u_i$ is connected to all destination nodes. This guarantees $|N(W)| \geq |W|$.
+        
+        In both subcases, Hall's condition $|N(W)| \geq |W|$ is satisfied.
     \end{enumerate}
 \end{proof}
 
 \begin{comment}
     \begin{proof}
-        The proof comes from the construction of the bipartite graph $G$ and from theorem \cref{thm:perfect_matching_existence}. We are going to prove that the bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has a Tutte matrix (\cref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
+        The proof comes from the construction of the bipartite graph $G$ and from \cref{thm:perfect_matching_existence}. We are going to prove that the bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has a Tutte matrix (\cref{def:tutte_matrix}) with determinant different from $0$ and so a perfect matching for $G$ exists.
 
-        We know that a $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also, each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
+        We know that an $n \times n$ matrix $M$ has $Det(M) \neq 0$ if and only if it has full rank ($rank(M) = n$), or equivalently if it has $n$ linearly independent rows or columns. We can see that the bipartite graph $G$ has $2t + 2p$ nodes and $O(t (p + 1) + p^2 + tp)$ edges, and so the Tutte matrix of $G$ will have $2t + 2p$ rows and $2t + 2p$ columns. The columns of $M$ are all independent since each node of $G$ in $V_1$ is connected only to nodes in $V_2$ that are greater than $u$ in the ordering. Also, each node is connected to at least one node in $V_2$ and at most $p + 1$ distinct nodes with distinct class in $V_2$. Those conditions on the edges are sufficient to get a full rank matrix and so a perfect matching for $G$ exists.
     \end{proof}
 
     In \cref{fig:tutte_matrix_ex}, the Tutte matrix for the bipartite graph in \cref{fig:reduction_example}-(a) is shown.
@@ -688,54 +710,203 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
     \end{figure}
 \end{example}
 
-
 \subsection{Heuristics and Improvements}
 Some changes can be made to the reduction in order to optimize it and to reduce the number of edges in the bipartite graph. Here are some of the improvements that can be made.
-
-\alessio{Gli itemize tanto lunghi sarebbero da evitare. Sarebbe meglio usare le susubsection. Però se organizzi tutto a Lemma + proof va benissimo così senza ulteriori suddivisioni (basta mettere il nome al lemma). Aggiungerei un piccolo esempio singolo, con Figure, dopo ogni proof per far vedere l'ottimizzazione.}
-\begin{itemize}
-    \item \textbf{Sources' edges optimization}:
-    \begin{lemma} \label{lemma:sources_optimization}
-        The sources' edges can be optimized by connecting each source only to the \draft{\sout{smaller} smallest}  node (considering the order of the nodes) in $V_2$ coming from the tree $T$ that is not connected to any other source.
-    \end{lemma}
-    \alessio{`Smaller' implica una comparazione: A is smaller than B. `Smallest' è assoluto. Quando usi `the' è sempre seguito da `-est' (smallest in questo caso). ``The smaller'' si può dire se hai due elementi, ma qui sono generalmente di più, quindi `smallest' è più corretto (\url{https://forum.wordreference.com/threads/the-smaller-of-which.31214/post-230801})}
     
-    \alessio{Anche per quelli dopo metti un ``In other words'', quindi qua sarebbe qualcosa tipo: source $s_i$ is connected only to the tree node $u_{j_i} \in V_2$.}
+\begin{lemma}[Sources' edges optimization] \label{lemma:sources_optimization}
+    The sources' edges can be optimized by connecting each source only to the smallest node in $\treeset{2}$ that is not connected to any other source.
+\end{lemma}
 
-    \begin{proof}
-        Since the source nodes are needed to distinguish the chains as starting points, we need that each source is connected to at \draft{least one node} \alessio{Così dici che una sorgente può essere connessa a più nodi, ma è connessa a ``exactly one node''} in $V_2$ coming from the tree $T$. Having the sources connected to the first $p$ nodes with distinct equivalence class in $V_2$ is not necessary since it allows us just to invert the chains starting from each source, and so it is redundant. We can connect each source to the \draft{\sout{smaller} smallest} node in $V_2$ coming from the tree $T$ that is not connected to any other source since we need to connect each source to at least one node in $V_2$ coming from the tree $T$ and this will allow us to distinguish the chains.
-        \alessio{Qui dovresti anche dire che $|N(W)| \geq |W|$ vale ancora, per il perfect matching. È abbastanza triviale dato che c'è una relazione 1 a 1.}
-    \end{proof}
+\begin{proof}
+    Since the source nodes are needed to distinguish the chains as starting points, we need that each source is connected to exactly one node in $\treeset{2}$. Having the sources connected to the first $p$ nodes with distinct equivalence classes in $\treeset{2}$ is not necessary since it allows us just to invert the chains starting from each source, and so it is redundant. 
 
-    This will reduce the number of edges coming from the sources from $O(p^2)$ to $O(p)$. In \cref{fig:heuristics_example}-(a) the removed edges are shown in green. \alessio{$O$ o $\Theta$? Anzi, forse non serve neanche questa notazione perché sono \underline{esattamente} $p$ e $p^2$, senza costanti o termini nascosti.}
-    \item \textbf{Tree nodes' edges optimization 1}:
-    \begin{lemma} \label{lemma:tree_optimization_1}
-        The tree nodes' edges can be optimized by removing the edges of tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$.
-    \end{lemma}
+    Moreover, Hall's condition $|N(W)| \geq |W|$ still holds for any subset $W \subseteq V_1$ in the optimized graph. This follows trivially from the fact that case 1 of \cref{lemma:matching_existence} still guarantees that $|N(W)| \geq |W|$ for any subset $W \subseteq \sourceset$.
+\end{proof}
 
-    \begin{proof}
-        \alessio{Scrivi da qualche parte che questo segue direttamente dal Lemma precedente (con ref).}
-        From \draft{\sout{d} D}efinition \cref{def:matching} we know that a matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. In other words, a matching is a set of edges such that no two edges share a common vertex. Given that, in all the solutions to the problem all sources will be connected to exactly one node in $V_2$ coming from the tree $T$ and so we can remove the edges of the tree nodes that are connected to nodes in $V_2$ already linked to a source node in $V_1$ since they will not be part of the final matching.
-    \end{proof}
+\begin{example}
+    Consider the bipartite graph shown in \cref{fig:source_optimization}. The red solid arrows represent edges with weight 1, while the red dashed arrows represent edges that can be optimized away according to \cref{lemma:sources_optimization}.
 
-    This will reduce the number of edges by a factor of $O(p - 1)$. In \cref{fig:heuristics_example}-(a) the removed edges are shown in blue.
-    \alessio{Il fattore è esattamente $p-1$, non $O(...)$}
+    In this example, we can observe the application of the optimization rule:
+    \begin{itemize}
+        \item The first tree node $A$ has a solid edge to the first destination node $A$ and a dashed edge to destination node $B$ to be removed. This since source $s_1$ is already connected to node $A$.
+        \item Similarly, the second source node $s_2$ has a dashed edge to the first destination node $A$, which can be removed because $s_1$ is already connected to node $A$ with the same weight.
+    \end{itemize}
 
-    \item \textbf{Tree nodes' edges optimization 2}:
-    \begin{lemma} \label{lemma:tree_optimization_2}
-        The tree nodes' edges can be optimized by removing the edges with weight $1$ starting from a node $u \in V_1$ to a node $v \in V_2$ if the node $u$ has another edge with weight $0$ connected to a node $z \in V_2$ such that $z < v$ in the ordering of the nodes.
-    \end{lemma}
+    After applying the optimization, only the solid edges remain, resulting in a reduced bipartite graph that maintains the same optimal matching cost while having fewer edges to consider during the matching algorithm.
+    \begin{figure}[H]
+        \centering
+        \tikzset{main/.style = {draw, circle, thick, minimum size=8mm, inner sep=0pt}}
+        \begin{tikzpicture}[node distance=10mm, auto=center]
+            \tikzstyle{main} = [circle, draw, minimum size=0.8cm, font=\small]
+            \tikzstyle{source} = [circle, draw, minimum size=0.8cm, font=\small, fill=green!20]
+            \tikzstyle{dest} = [circle, draw, minimum size=0.8cm, font=\small, fill=blue!20]
+            
+            % Left column (sources)
+            \node[source] (1s) {$s_1$};
+            \node[source] (2s) [below of=1s] {$s_2$};
+            \node[main] (3s) [below of=2s] {A};
+            \node[right=0cm of 3s] {$\cdots$};
+            \node[main] (4s) [below of=3s] {A};
+            \node[right=0cm of 4s] {$\cdots$};
+            \node[main] (5s) [below of=4s] {B};
+            \node[right=0cm of 5s] {$\cdots$};
+            \node (dots_s) [below of=5s] {\vdots}; % Vertical dots
 
-    \begin{proof}
-        Since every time we have an edge with weight $0$ between two nodes \draft{\sout{of $V_1$ and $V_2$}} \alessio{Essendo bipartito è sempre vero, non serve specificarlo.} it means that those two nodes have the same equivalence class and so there is no need to add additional cost trying to connect that node to nodes with different classes coming after in the ordering, as that would only increase the cost without providing any benefit to the solution. \alessio{Frase lunghissima, tagliala un po'.} Also, we know that connecting nodes with the same class is always the best choice for optimizing the run length encoding of each chain.
-        \alessio{Questa dimostrazione non mi convince. Non hai mai dimostrato effettivamente che questo approccio "greedy" è sempre il migliore, soprattutto perché gli approcci greedy sono sempre pericolosi (vedi knapsack, rod cutting, money change, etc...). La questione è che: se da un nodo con valore 1 voglio connettermi ad un nodo con valore 3, ma prima c'è un altro nodo con valore 1, tanto vale passarci che comunque ci sarà un collegamento tra quello nuovo e li 3 (da dimostrare). In questo modo, prendendo quel nodo, il costo della mia catena aumenta di 0, quindi non peggiora, e il coto di un altra catena potrebbe non aumentare, quindi togliamo una scelta ovviamente errata.} 
-        
-        \alessio{La frase finale sembra suggerire che basta prendere sempre gli archi con peso 0 (che esistono sempre per costruzione) ma se fai così ti perdi dei nodi. E.g, usando le posizioni dei nodi dell'albero 1-based index, hai $s_1 \to 1 \to 3 \to 5 \to D$ e $s_2 \to 2 \to 6 \to D$, saltando la posizione 4.}
-    \end{proof}
+            % Right column (destinations)
+            \node[main] (1d) [right=2.5cm of 3s] {A};
+            \node[main] (2d) [below of=1d] {A};
+            \node[left=0cm of 2d] {$\cdots$};
+            \node[main] (3d) [below of=2d] {B};
+            \node[left=0cm of 3d] {$\cdots$};
+            \node (dots_d) [below of=3d] {\vdots}; % Vertical dots
 
-    In \cref{fig:heuristics_example}-(a) the removed edges are shown in red.
-\end{itemize}
+            % Arrows
+            \draw[red, ->] (1s) -- (1d);
+            \draw[red, dashed, ->] (1s) -- (3d);
+            \draw[red, dashed, ->] (2s) -- (1d);
+            \draw[red, ->] (2s) -- (3d);
+        \end{tikzpicture}
+        \caption{Bipartite graph after applying Sources' edges optimization. Dashed edges from the original graph have been removed according to \cref{lemma:sources_optimization}, reducing the number of edges while preserving optimality. Red edges have weight $1$.}
+        \label{fig:source_optimization}
+    \end{figure}
+\end{example}
 
+This will reduce the number of edges coming from the sources from $p^2$ to $p$.
+
+\begin{lemma}[Tree nodes' edges optimization 1] \label{lemma:tree_optimization_1}
+    The tree nodes' edges can be optimized by removing the edges of the nodes in $\treeset{1}$ that are connected to nodes in $\treeset{2}$ already linked to a source node in $V_1$.
+\end{lemma}
+
+\begin{proof}
+    This optimization follows directly from \cref{lemma:sources_optimization}.
+    From \cref{def:matching} we know that a matching $M \in E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$. In other words, a matching is a set of edges such that no two edges share a common vertex. Given that, in all the solutions to the problem, all sources will be connected to exactly one node in $\treeset{2}$. Therefore, we can remove the edges of the nodes in $\treeset{1}$ that are connected to nodes in $\treeset{2}$ already linked to a source node in $V_1$ since they will not be part of the final matching.
+\end{proof}
+
+\begin{example}
+    Consider the bipartite graph shown in \cref{fig:tree_optimization_1}. The red arrows represent edges with weight $1$, while green arrows represent edges with weight $0$. Dashed edges represent edges that can be optimized away according to \cref{lemma:tree_optimization_1}.
+
+    In particular, in \cref{fig:tree_optimization_1}, we can observe that the dashed edge from the first node $A$ in $\treeset{1}$ can be optimized away since it is connected to $B$ in $\treeset{2}$, which is already linked to a source node in $V_1$.
+    \begin{figure}[H]
+        \tikzset{main/.style = {draw, circle, thick, minimum size=8mm, inner sep=0pt}}
+        \centering
+        \begin{tikzpicture}[node distance=10mm, auto=center]
+            \tikzstyle{main} = [circle, draw, minimum size=0.8cm, font=\small]
+            \tikzstyle{source} = [circle, draw, minimum size=0.8cm, font=\small, fill=green!20]
+            \tikzstyle{dest} = [circle, draw, minimum size=0.8cm, font=\small, fill=blue!20]
+            
+            % Left column (sources)
+            \node[source] (1s) {$s_1$};
+            \node[source] (2s) [below of=1s] {$s_2$};
+            \node[main] (3s) [below of=2s] {A};
+            \node[main] (4s) [below of=3s] {A};
+            \node[right=0cm of 4s] {$\cdots$};
+            \node[main] (5s) [below of=4s] {B};
+            \node[right=0cm of 5s] {$\cdots$};
+            \node[main] (6s) [below of=5s] {C};
+            \node[right=0cm of 6s] {$\cdots$};
+            \node (dots_s) [below of=6s] {\vdots}; % Vertical dots
+
+            % Right column (destinations)
+            \node[main] (1d) [right=2.5cm of 3s] {A};
+            \node[main] (2d) [below of=1d] {A};
+            \node[main] (3d) [below of=2d] {B};
+            \node[left=0cm of 3d] {$\cdots$};
+            \node[main] (4d) [below of=3d] {C};
+            \node[left=0cm of 4d] {$\cdots$};
+            \node (dots_d) [below of=4d] {\vdots}; % Vertical dots
+
+            % Arrows
+            \draw[red, ->] (1s) -- (1d);
+            \draw[red, ->] (2s) -- (3d);
+            \draw[green, ->] (3s) -- (2d);
+            \draw[red, ->, dashed] (3s) -- (3d);
+            \draw[red, ->] (3s) -- (4d);
+
+        \end{tikzpicture}
+        \caption{Bipartite graph after applying tree nodes' edges optimization 1. Dashed edges from the original graph have been removed according to \cref{lemma:tree_optimization_1}, reducing the number of edges while preserving optimality. Red edges have weight $1$, while green edges have weight $0$.}
+        \label{fig:tree_optimization_1}
+    \end{figure}
+\end{example}
+
+This will reduce the number of edges by a factor of $p-1$.
+
+\begin{lemma}[Tree nodes' edges optimization 2] \label{lemma:tree_optimization_2}
+    Edges of nodes in $\treeset{1}$ can be optimized by removing the edges with weight $1$ starting from a node $u \in \treeset{1}$ to a node $v \in \treeset{2}$ if the node $u$ has another edge with weight $0$ connected to a node $z \in \treeset{2}$ such that $z \prec v$ in the ordering of the nodes.
+\end{lemma}
+
+\begin{proof}
+    Let $M$ be any perfect matching. Suppose $M$ contains an edge $(u, v)$ that satisfies the conditions of the lemma, i.e., $u \in \treeset{1}$, $v \in \treeset{2}$, $w(u,v) = 1$, and there exists an edge $(u, z)$ with $w(u,z) = 0$ for some $z \in \treeset{2}$ with $z \prec v$.
+
+    We will show that this edge $(u,v)$ is not necessary for an optimal solution. Since $M$ is a perfect matching, $z$ must be matched with some node $u' \in \treeset{1}$, so $(u',z) \in M$. Note that $u' \neq u$ and that $u' \prec z$ for \cref{lemma:greater_nodes}.
+
+    Consider an alternative matching $M' = (M \setminus \{(u,v), (u',z)\}) \cup \{(u,z), (u'',v)\}$. This is a valid perfect matching where $u$ is matched with $z$, and $u'' \in \treeset{1}$ is matched with $v$. By construction and from \cref{lemma:greater_nodes} we know that $u \prec u' \preceq u'' \prec v$.
+    
+    The weight of this new matching is $W(M') = W(M) - w(u,v) - w(u',z) + w(u,z) + w(u'',v)$.
+    By substituting the known weights $w(u,v)=1$ and $w(u,z)=0$, we get:
+    $W(M') = W(M) - 1 - w(u',z) + 0 + w(u'',v) = W(M) + (w(u'',v) - w(u',z)) - 1$.
+
+    The construction of the graph ensures that for any node $u'' \in \treeset{1}$, the cost of connecting to $v$ is either the same or one greater than connecting to a preceding node $z$. That is, $w(u'',v) - w(u',z) \in \{-1, 1\}$. This property arises from the problem reduction, where moving to a subsequent node in the ordering can at most increment the cost by one.
+    
+    Therefore, $w(u'',v) - w(u',z) \le 1$, which implies $W(M') \leq W(M)$. Thus, the edge $(u,v)$ can be removed from the graph without affecting the weight of the optimal solution.
+
+    Finally, we need to prove that \cref{lemma:matching_existence} still holds. The proof follows from showing that the two fundamental neighborhood properties remain valid after edge removal:
+    \begin{enumerate}[leftmargin=25pt]
+        \item \cref{lemma:distinct_neighborhoods} remains valid because it relies on the fact that each node $u_i \in \treeset{1}$ is connected to $v_{i+1} \in \treeset{2}$. The edge $(u,v)$ we remove cannot be this critical edge $(u_i,v_{i+1})$ since, by our optimization condition, there exists a node $z \prec v$ connected to $u$ with weight 0; the edge $(u_i,v_{i+1})$ is always the first valid connection for $u_i$ in the ordering. Therefore, $v$ cannot be $v_{i+1}$ for the node $u$.
+        \item \cref{lemma:distinct_neighborhoods_2} is preserved because it concerns edges between nodes of the same equivalence class. Our optimization only removes an edge when there exists a better alternative to a preceding node, meaning that the same-class connectivity pattern is unaffected by this edge removal.
+        \item The edge removal does not affect source and destination nodes' connections, as we only remove tree node edges.
+    \end{enumerate}
+
+    Since both \cref{lemma:distinct_neighborhoods,lemma:distinct_neighborhoods_2} remain valid and the source and destination connectivity is preserved, all conditions required by \cref{lemma:matching_existence} continue to hold, ensuring the existence of a perfect matching in the optimized graph.
+
+    \alessio{La questione è che: se da un nodo con valore 1 voglio connettermi ad un nodo con valore 3, ma prima c'è un altro nodo con valore 1, tanto vale pasó che comunque ci sarà un collegamento tra quello nuovo e li 3 (da dimostrare). In questo modo, prendendo quel nodo, il costo della mia catena aumenta di 0, quindi non peggiora, e il coto di un altra catena potrebbe non aumentare, quindi togliamo una scelta ovviamente errata.} \davide{ho provato a renderla più generale. così mi sembra funzionare}
+\end{proof}
+
+\begin{example}
+    Consider the bipartite graph in \cref{fig:tree_optimization_2}. The red arrows represent edges with weight $1$, while green arrows represent edges with weight $0$. Dashed edges represent edges that can be optimized away according to \cref{lemma:tree_optimization_2}.
+
+    In this case, we can observe the application of the optimization rule: The edge $(A, C)$ is removed from the graph, as it is not necessary for an optimal solution. This is because the node $A$ has another edge with weight $0$ connected to a node $B$ with $B \prec C$.
+    \begin{figure}[H]
+        \tikzset{main/.style = {draw, circle, thick, minimum size=8mm, inner sep=0pt}}
+        \centering
+        \begin{tikzpicture}[node distance=10mm, auto=center]
+            \tikzstyle{main} = [circle, draw, minimum size=0.8cm, font=\small]
+            \tikzstyle{source} = [circle, draw, minimum size=0.8cm, font=\small, fill=green!20]
+            \tikzstyle{dest} = [circle, draw, minimum size=0.8cm, font=\small, fill=blue!20]
+
+            % Left column (tree nodes)
+            \node (dots_s_top) {\vdots};
+            \node[main] (3s) [below of=dots_s_top] {A};
+            \node[main] (4s) [below of=3s] {B};
+            \node[right=0cm of 4s] {$\cdots$};
+            \node[main] (5s) [below of=4s] {A};
+            \node[right=0cm of 5s] {$\cdots$};
+            \node[main] (6s) [below of=5s] {C};
+            \node[right=0cm of 6s] {$\cdots$};
+            \node (dots_s_bottom) [below of=6s] {\vdots};
+
+            % Right column (destinations)
+            \node (dots_d_top) [right=2.5cm of dots_s_top] {\vdots};
+            \node[main] (1d) [below of=dots_d_top] {A};
+            \node[left=0cm of 1d] {$\cdots$};
+            \node[main] (2d) [below of=1d] {B};
+            \node[left=0cm of 2d] {$\cdots$};
+            \node[main] (3d) [below of=2d] {A};
+            \node[left=0cm of 3d] {$\cdots$};
+            \node[main] (4d) [below of=3d] {C};
+            \node[left=0cm of 4d] {$\cdots$};
+            \node (dots_d_bottom) [below of=4d] {\vdots};
+
+            % Arrows
+            \draw[red, ->] (3s) -- (2d);
+            \draw[red, dashed, ->] (3s) -- (4d);
+            \draw[green, ->] (3s) -- (3d);
+        \end{tikzpicture}
+        \caption{Bipartite graph after applying tree nodes' edges optimization 2. Dashed edges from the original graph have been removed according to \cref{lemma:tree_optimization_2}, reducing the number of edges while preserving optimality. Red edges have weight $1$, while green edges have weight $0$.}
+        \label{fig:tree_optimization_2}
+    \end{figure}
+\end{example}
+
+\begin{comment}
 In \cref{fig:heuristics_example}-(b), we can see the resulting bipartite graph for the example shown in the previous section after the optimizations.
 
 \begin{figure}[H]
@@ -826,9 +997,10 @@ In \cref{fig:heuristics_example}-(b), we can see the resulting bipartite graph f
         \end{tikzpicture} \\
     (a) & (b) \\
     \end{tabular}
-    \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics shown. In (a), the edges removed are shown in green for \cref{lemma:sources_optimization}, blue for \cref{lemma:tree_optimization_1}, and red for \cref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics applied. Dashed edges weigh $1$, while solid edges weigh $0$. \alessio{Invertirei la notazione degli archi: dashed (semi-trasparente) logicamente ha peso 0, mentre solid (si vede bene) ha peso 1.}}
+    \caption[Reduction heuristics example]{Example of a reduction for the sorted nodes' equivalency classes $E = \{1,2,1,3,1,2,2\}$ applying also the heuristics shown. In (a), the edges removed are shown in green for \cref{lemma:sources_optimization}, blue for \cref{lemma:tree_optimization_1}, and red for \cref{lemma:tree_optimization_2}. In (b), we have the resulting bipartite graph after the heuristics are applied. Dashed edges weigh $1$, while solid edges weigh $0$. \alessio{Invertirei la notazione degli archi: dashed (semi-trasparente) logicamente ha peso 0, mentre solid (si vede bene) ha peso 1.}}
     \label{fig:heuristics_example}
 \end{figure}
+\end{comment}
 
 \subsection{Moving to Maximum weight perfect bipartite matching}
 In this section, we will discuss how to slightly modify the reduction process to move from a minimum weight perfect bipartite matching problem to a maximum weight perfect bipartite matching problem. This will be helpful in solving the problem more efficiently by using some known algorithms to solve the maximum weight perfect bipartite matching problem.

@@ -1,6 +1,33 @@
 #include <iostream>
-#include <TreeDAWG.hpp> 
+#include <TreeDAWG.hpp>
 #include <unordered_map>
+#include <string>
+
+// Function to convert tree structure to balanced parentheses
+std::string tree_to_balanced_parentheses(const TreeDAWG<char> &tree_dawg)
+{
+    std::string result;
+
+    // Helper function for DFS traversal
+    std::function<void(size_t, char)> dfs = [&](size_t node_id, char label)
+    {
+        result += '(';
+        result += label;
+
+        // Get transitions and sort them for consistent output
+        const auto &transitions = tree_dawg[node_id].get_transitions();
+        for (const auto &[transition_label, target_id] : transitions)
+        {
+            dfs(target_id, transition_label);
+        }
+
+        result += ')';
+    };
+
+    // Start DFS from the initial state with label 'A'
+    dfs(tree_dawg.get_initial_state_id(), 'A');
+    return result;
+}
 
 int main()
 {
@@ -21,8 +48,6 @@ int main()
     char_to_id['l'] = tree_dawg.add_node();
     char_to_id['m'] = tree_dawg.add_node();
 
-    tree_dawg.set_initial_state(char_to_id['a']);
-
     // Use configure_state for the tree as well
     tree_dawg.configure_state(char_to_id['a'], {{'0', char_to_id['b']}, {'1', char_to_id['c']}});
     tree_dawg.configure_state(char_to_id['b'], {{'0', char_to_id['d']}, {'1', char_to_id['e']}});
@@ -31,67 +56,34 @@ int main()
     tree_dawg.configure_state(char_to_id['f'], {{'0', char_to_id['l']}, {'1', char_to_id['m']}});
     // Final states (e, g, h, i, l, m) already set during add_node
 
+    tree_dawg.set_initial_state(char_to_id['a']);
+
+    // Print as balanced parentheses
+    std::string balanced_parentheses = tree_to_balanced_parentheses(tree_dawg);
+    std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
+
     // Run minimization
     tree_dawg.minimize(); // Assuming it's a tree
 
-    std::cout << "Iterating over all nodes using range-based for loop:" << std::endl;
-    for (const auto &node : tree_dawg)
-    {
-        // Find the character that corresponds to this node ID
-        char node_char = '?';
-        for (const auto &mapping : char_to_id)
-        {
-            if (mapping.second == node.get_id())
-            {
-                node_char = mapping.first;
-                break;
-            }
-        }
+    // Print DAWG information using to_string method
+    std::cout << tree_dawg.to_string();
 
-        std::cout << "Node " << node.get_id()
-                  << " (char '" << node_char 
-                  << "', id: " << node.get_id()
-                  << ", class: " << node.get_equivalence_class()
-                  << ", height: " << node.get_height()
-                  << ", is_root: " << (node.get_id() == tree_dawg.get_initial_state_id() ? "yes" : "no")
-                  << ", is_final: " << (node.is_final() ? "yes" : "no")
-                  << ", transitions: " << node.get_transitions().size() << ")" << std::endl;
-    }
+    std::cout << "--------------------" << std::endl;
 
-    std::cout << "\n=== Testing with different label types ===" << std::endl;
-    
-    // Test with integer labels
-    TreeDAWG<int> int_dawg;
-    auto node1 = int_dawg.add_node();
-    auto node2 = int_dawg.add_node();
-    auto node3 = int_dawg.add_node();
-    
-    int_dawg.set_initial_state(node1);
-    int_dawg.configure_state(node1, {{100, node2}, {200, node3}});
-    
-    std::cout << "Integer DAWG created with " << int_dawg.get_num_nodes() << " nodes" << std::endl;
-    for (const auto &node : int_dawg) {
-        std::cout << "Node " << node.get_id() << " has " << node.get_transitions().size() << " transitions" << std::endl;
-        for (const auto &[label, target] : node.get_transitions()) {
-            std::cout << "  Transition: " << label << " -> " << target << std::endl;
-        }
-    }
-    
-    // Test with string labels
-    TreeDAWG<std::string> string_dawg;
-    auto str_node1 = string_dawg.add_node();
-    auto str_node2 = string_dawg.add_node();
-    
-    string_dawg.set_initial_state(str_node1);
-    string_dawg.configure_state(str_node1, {{"hello", str_node2}});
-    
-    std::cout << "\nString DAWG created with " << string_dawg.get_num_nodes() << " nodes" << std::endl;
-    for (const auto &node : string_dawg) {
-        std::cout << "Node " << node.get_id() << " has " << node.get_transitions().size() << " transitions" << std::endl;
-        for (const auto &[label, target] : node.get_transitions()) {
-            std::cout << "  Transition: \"" << label << "\" -> " << target << std::endl;
-        }
-    }
+    // test with generated trees
+    std::string str = "(A(0(0(0)(1))(1))(1(0(0)(1))(1)))";
+    str = "(A(B(D(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(a))(E(B(D(a))(a)(E(C(C(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b)))(C(D(c))(b)(D(c)))(B(D(b)))(B(D(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(b)))(C(D(c))(b)(D(c)))(B(D(b))))";
+
+    LabeledTree<char> tree(str, [](const std::string &s)
+                           { return s[0]; });
+    TreeDAWG<char> tree_dawg2(tree);
+
+    // Print as balanced parentheses
+    balanced_parentheses = tree_to_balanced_parentheses(tree_dawg2);
+    std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
+
+    tree_dawg2.minimize();
+    std::cout << tree_dawg2.to_string();
 
     return 0;
 }

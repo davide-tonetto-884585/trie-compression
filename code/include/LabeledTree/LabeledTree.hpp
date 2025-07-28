@@ -13,92 +13,92 @@ template <typename LabelType>
 class Node
 {
 private:
-    LabelType label;
-    std::vector<Node *> children;
-    Node *parent;
+    LabelType m_label;
+    std::vector<Node *> m_children;
+    Node *m_parent;
 
 public:
-    Node(LabelType lbl, Node *prnt = nullptr, std::vector<Node *> children = {}) : label(lbl), parent(prnt), children(children) {}
+    Node(LabelType lbl, Node *prnt = nullptr, std::vector<Node *> children = {}) : m_label(lbl), m_children(children), m_parent(prnt) {}
 
     ~Node()
     {
-        for (auto child : children)
+        for (auto child : m_children)
             delete child;
     }
 
-    bool isRoot() const
+    bool is_root() const
     {
-        return parent == nullptr;
+        return m_parent == nullptr;
     }
 
-    bool isLeaf() const
+    bool is_leaf() const
     {
-        return children.empty();
+        return m_children.empty();
     }
 
-    unsigned int getLevel() const
+    unsigned int get_level() const
     {
         unsigned int level = 0;
-        Node *current = parent;
+        Node *current = m_parent;
         while (current)
         {
             level++;
-            current = current->parent;
+            current = current->m_parent;
         }
         return level;
     }
 
-    unsigned int getDepth() const
+    unsigned int get_depth() const
     {
         unsigned int maxDepth = 0;
-        for (const auto &child : children)
+        for (const auto &child : m_children)
         {
-            maxDepth = std::max(maxDepth, child->getDepth());
+            maxDepth = std::max(maxDepth, child->get_depth());
         }
         return maxDepth + 1;
     }
 
-    LabelType getLabel() const
+    LabelType get_label() const
     {
-        return label;
+        return m_label;
     }
 
-    const std::vector<Node *> &getChildren() const
+    const std::vector<Node *> &get_children() const
     {
-        return children;
+        return m_children;
     }
 
-    Node * getParent() const
+    Node * get_parent() const
     {
-        return parent;
+        return m_parent;
     }
 
-    bool isRightmost() const
+    bool is_rightmost() const
     {
-        if (parent)
+        if (m_parent)
         {
-            const auto &siblings = parent->children;
+            const auto &siblings = m_parent->m_children;
             return siblings.back() == this;
         }
         return false;
     }
 
-    void pushBackChild(LabelType lbl)
+    void push_back_child(LabelType lbl)
     {
         auto child = new Node(lbl, this);
-        children.push_back(child);
+        m_children.push_back(child);
     }
 
-    void pushBackChild(Node *child)
+    void push_back_child(Node *child)
     {
-        child->parent = this;
-        children.push_back(child);
+        child->m_parent = this;
+        m_children.push_back(child);
     }
 
-    void prependChild(Node *child)
+    void prepend_child(Node *child)
     {
-        child->parent = this;
-        children.insert(children.begin(), child);
+        child->m_parent = this;
+        m_children.insert(m_children.begin(), child);
     }
 };
 
@@ -126,7 +126,7 @@ public:
     LabeledTree(const LabeledTree &other)
     {
         // recursively copy the tree
-        root = copyTree(other.root);
+        root = copy_tree(other.root);
     }
 
     ~LabeledTree()
@@ -142,58 +142,58 @@ public:
         }
 
         delete root;
-        root = copyTree(other.root);
+        root = copy_tree(other.root);
 
         return *this;
     }
 
-    Node<LabelType> *getRoot() const
+    Node<LabelType> *get_root() const
     {
         return root;
     }
 
-    unsigned int getDepth() const
+    unsigned int get_depth() const
     {
-        return root ? root->getDepth() : 0;
+        return root ? root->get_depth() : 0;
     }
 
-    void setRoot(Node<LabelType> *newRoot)
+    void set_root(Node<LabelType> *newRoot)
     {
         root = newRoot;
     }
 
-    std::vector<Node<LabelType> *> getNodes() const
+    std::vector<Node<LabelType> *> get_nodes() const
     {
         std::vector<Node<LabelType> *> nodes;
-        collectNodes(root, nodes);
+        collect_nodes(root, nodes);
         return nodes;
     }
 
-    std::string toString() const
+    std::string to_string() const
     {
         std::ostringstream oss;
-        toStringHelper(root, oss);
+        to_string_helper(root, oss);
         return oss.str();
     }
 
 private:
-    Node<LabelType> *copyTree(Node<LabelType> *node)
+    Node<LabelType> *copy_tree(Node<LabelType> *node)
     {
         if (!node)
         {
             return nullptr;
         }
 
-        auto newNode = new Node<LabelType>(node->getLabel());
-        for (const auto &child : node->getChildren())
+        auto newNode = new Node<LabelType>(node->get_label());
+        for (const auto &child : node->get_children())
         {
-            newNode->pushBackChild(copyTree(child));
+            newNode->push_back_child(copy_tree(child));
         }
 
         return newNode;
     }
 
-    bool areParenthesesBalanced(const std::string &str)
+    bool are_parentheses_balanced(const std::string &str)
     {
         int balance = 0;
         for (char ch : str)
@@ -215,7 +215,7 @@ private:
     }
 
     // Recursive function to validate the tree structure
-    bool isValidTree(const std::string &str, unsigned int &pos)
+    bool is_valid_tree(const std::string &str, unsigned int &pos)
     {
         if (pos >= str.length())
         {
@@ -243,7 +243,7 @@ private:
         // Recursively check for child nodes
         while (pos < str.length() && str[pos] == '(')
         {
-            if (!isValidTree(str, pos))
+            if (!is_valid_tree(str, pos))
             {
                 return false;
             }
@@ -262,7 +262,7 @@ private:
     Node<LabelType> *fromString(const std::string &str, std::function<LabelType(const std::string &)> strToLabel)
     {
         unsigned int pos = 0;
-        if (str.empty() || (!areParenthesesBalanced(str) || !isValidTree(str, pos)))
+        if (str.empty() || (!are_parentheses_balanced(str) || !is_valid_tree(str, pos)))
         {
             throw std::invalid_argument("Invalid tree string. Error at position: " + std::to_string(pos));
         }
@@ -298,8 +298,8 @@ private:
                 else
                 {
                     currentNode = nodeStack.top();
-                    currentNode->pushBackChild(label);
-                    nodeStack.push(currentNode->getChildren().back());
+                    currentNode->push_back_child(label);
+                    nodeStack.push(currentNode->get_children().back());
                 }
             }
         }
@@ -307,28 +307,28 @@ private:
         return root;
     }
 
-    void collectNodes(Node<LabelType> *node, std::vector<Node<LabelType> *> &nodes) const
+    void collect_nodes(Node<LabelType> *node, std::vector<Node<LabelType> *> &nodes) const
     {
         nodes.push_back(node);
-        for (const auto &child : node->getChildren())
+        for (const auto &child : node->get_children())
         {
-            collectNodes(child, nodes);
+            collect_nodes(child, nodes);
         }
     }
 
-    void toStringHelper(const Node<LabelType> *node, std::ostringstream &oss) const
+    void to_string_helper(const Node<LabelType> *node, std::ostringstream &oss) const
     {
         if (!node)
             return;
 
         oss << '(';
-        oss << node->getLabel();
-        if (!node->isLeaf())
+        oss << node->get_label();
+        if (!node->is_leaf())
         {
-            const auto &children = node->getChildren();
+            const auto &children = node->get_children();
             for (size_t i = 0; i < children.size(); ++i)
             {
-                toStringHelper(children[i], oss);
+                to_string_helper(children[i], oss);
             }
         }
         oss << ')';

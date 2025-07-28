@@ -27,10 +27,45 @@ public:
     TreeDAWG() : DAWG<LabelType>() {}
 
     /**
-     * @brief 
+     * @brief Constructor from LabeledTree for the TreeDAWG class.
      */
     TreeDAWG(const LabeledTree<LabelType> &tree) {
+        auto nodes = tree.get_nodes();
         
+        // Create a mapping from tree nodes to DAWG node IDs
+        std::unordered_map<Node<LabelType>*, uint64_t> node_to_id;
+        
+        // First pass: create all DAWG nodes
+        for (const auto &node : nodes) {
+            uint64_t dawg_node_id = this->add_node();
+            node_to_id[node] = dawg_node_id;
+        }
+        
+        // Second pass: add transitions between nodes
+        for (const auto &tree_node : nodes) {
+            uint64_t current_id = node_to_id[tree_node];
+            
+            // Create transitions for each child
+            std::vector<std::pair<LabelType, uint64_t>> transitions;
+            for (const auto &child : tree_node->get_children()) {
+                uint64_t child_id = node_to_id[child];
+                transitions.emplace_back(child->get_label(), child_id);
+            }
+            
+            // Configure the state with its transitions
+            if (!transitions.empty()) {
+                typename State<LabelType>::Builder builder;
+                for (const auto &[label, target_id] : transitions) {
+                    builder.add_transition(label, target_id);
+                }
+                builder.build_into(this->m_nodes[current_id]);
+            }
+        }
+        
+        // Set the root as the initial state
+        if (tree.get_root() != nullptr) {
+            this->set_initial_state(node_to_id[tree.get_root()]);
+        }
     }
 
     /**
