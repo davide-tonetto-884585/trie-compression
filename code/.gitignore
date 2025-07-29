@@ -1,2 +1,3 @@
 __pycache__
-*.json
+*/generated_trees
+generated_trees

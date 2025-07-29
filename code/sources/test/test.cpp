@@ -2,6 +2,7 @@
 #include <TreeDAWG.hpp>
 #include <unordered_map>
 #include <string>
+#include <fstream>
 
 // Function to convert tree structure to balanced parentheses
 std::string tree_to_balanced_parentheses(const TreeDAWG<char> &tree_dawg)
@@ -71,16 +72,33 @@ int main()
     std::cout << "--------------------" << std::endl;
 
     // test with generated trees
-    std::string str = "(A(0(0(0)(1))(1))(1(0(0)(1))(1)))";
-    str = "(A(B(D(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(a))(E(B(D(a))(a)(E(C(C(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b)))(C(D(c))(b)(D(c)))(B(D(b)))(B(D(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(b)))(C(D(c))(b)(D(c)))(B(D(b))))";
+    std::string str = "(A(B(D(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(a))(E(B(D(a))(a)(E(C(C(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b)))(C(D(c))(b)(D(c)))(B(D(b)))(B(D(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(b)))(C(D(c))(b)(D(c)))(B(D(b))))";
+    // str = "(a(b(c(b(c(x)(y)(z))))))";
+
+    std::string filename = "tree_generator/generated_trees/tree_bf4_t5_rp40_td4-6_letters8_mn1000000_s42.txt";
+
+    // Read input string from file
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        getline(inputFile, str);
+        inputFile.close();
+    }
+    else
+    {
+        std::cerr << "Unable to open file: " << filename << std::endl;
+        return 1;
+    }
 
     LabeledTree<char> tree(str, [](const std::string &s)
                            { return s[0]; });
+
+    std::cout << "Building DAWG from tree..." << std::endl;
     TreeDAWG<char> tree_dawg2(tree);
 
     // Print as balanced parentheses
-    balanced_parentheses = tree_to_balanced_parentheses(tree_dawg2);
-    std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
+    // balanced_parentheses = tree_to_balanced_parentheses(tree_dawg2);
+    // std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
 
     tree_dawg2.minimize();
     std::cout << tree_dawg2.to_string();

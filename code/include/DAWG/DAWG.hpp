@@ -313,6 +313,7 @@ public:
     virtual std::string to_string() const
     {
         std::stringstream ss;
+        uint64_t max_eq_class = 0;
         for (const auto &node : *this)
         {
             ss << "Node " << node.get_id()
@@ -322,7 +323,15 @@ public:
                << ", is_root: " << (node.get_id() == get_initial_state_id() ? "yes" : "no")
                << ", is_final: " << (node.is_final() ? "yes" : "no")
                << ", transitions: " << node.get_transitions().size() << ")" << std::endl;
+
+            if (node.get_equivalence_class() > max_eq_class)
+            {
+                max_eq_class = node.get_equivalence_class();
+            }
         }
+
+        ss << "Max equivalence class: " << max_eq_class << std::endl;
+
         return ss.str();
     }
 

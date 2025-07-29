@@ -20,12 +20,6 @@ private:
 public:
     Node(LabelType lbl, Node *prnt = nullptr, std::vector<Node *> children = {}) : m_label(lbl), m_children(children), m_parent(prnt) {}
 
-    ~Node()
-    {
-        for (auto child : m_children)
-            delete child;
-    }
-
     bool is_root() const
     {
         return m_parent == nullptr;
@@ -68,7 +62,7 @@ public:
         return m_children;
     }
 
-    Node * get_parent() const
+    Node *get_parent() const
     {
         return m_parent;
     }
@@ -131,7 +125,11 @@ public:
 
     ~LabeledTree()
     {
-        delete root;
+        auto nodes = this->get_nodes();
+        for (auto node : nodes)
+        {
+            delete node;
+        }
     }
 
     LabeledTree &operator=(const LabeledTree &other)
@@ -193,76 +191,68 @@ private:
         return newNode;
     }
 
-    bool are_parentheses_balanced(const std::string &str)
+    bool validate_tree(const std::string &str)
     {
-        int balance = 0;
-        for (char ch : str)
-        {
-            if (ch == '(')
-            {
-                ++balance;
-            }
-            else if (ch == ')')
-            {
-                --balance;
-                if (balance < 0)
-                {
-                    return false; // More closing than opening
+        if (str.empty()) return false;
+
+        enum StateType { START_NODE, CHECK_LABEL, CHECK_CLOSING };
+
+        struct State {
+            StateType type;
+            State(StateType t) : type(t) {}
+        };
+
+        std::stack<State> stack;
+        stack.push(State(START_NODE));
+
+        size_t final_pos = 0;
+        size_t cur_pos = 0;
+        while (!stack.empty()) {
+            State current = stack.top();
+            stack.pop();
+
+            if (cur_pos >= str.length()) return false;
+
+            switch (current.type) {
+                case START_NODE: {
+                    if (str[cur_pos] != '(') return false;
+                    stack.push(State(CHECK_LABEL));
+                    ++cur_pos;
+                    break;
+                }
+                case CHECK_LABEL: {
+                    size_t label_start = cur_pos;
+                    while (cur_pos < str.length() && std::isalnum(str[cur_pos])) {
+                        cur_pos++;
+                    }
+                    if (label_start == cur_pos) return false;
+                    stack.push(State(CHECK_CLOSING));
+                    break;
+                }
+                case CHECK_CLOSING: {
+                    if (cur_pos >= str.length()) return false;
+
+                    if (str[cur_pos] == '(') {
+                        stack.push(State(CHECK_CLOSING)); 
+                        stack.push(State(START_NODE));
+                    } else if (str[cur_pos] == ')') {
+                        final_pos = ++cur_pos;
+                    } else {
+                        return false;
+                    }
+
+                    break;
                 }
             }
         }
-        return balance == 0; // Should be zero if balanced
-    }
 
-    // Recursive function to validate the tree structure
-    bool is_valid_tree(const std::string &str, unsigned int &pos)
-    {
-        if (pos >= str.length())
-        {
-            return false;
-        }
-
-        // Expecting an opening parenthesis
-        if (str[pos] != '(')
-        {
-            return false;
-        }
-        ++pos;
-
-        // Expecting a node label consisting of alphanumeric characters
-        size_t label_start = pos;
-        while (pos < str.length() && std::isalnum(str[pos]))
-        {
-            ++pos;
-        }
-        if (label_start == pos)
-        {
-            return false; // No valid label found
-        }
-
-        // Recursively check for child nodes
-        while (pos < str.length() && str[pos] == '(')
-        {
-            if (!is_valid_tree(str, pos))
-            {
-                return false;
-            }
-        }
-
-        // Expecting a closing parenthesis
-        if (pos >= str.length() || str[pos] != ')')
-        {
-            return false;
-        }
-        ++pos;
-
-        return true;
+        return final_pos == str.length();
     }
 
     Node<LabelType> *fromString(const std::string &str, std::function<LabelType(const std::string &)> strToLabel)
     {
         unsigned int pos = 0;
-        if (str.empty() || (!are_parentheses_balanced(str) || !is_valid_tree(str, pos)))
+        if (str.empty() || !validate_tree(str))
         {
             throw std::invalid_argument("Invalid tree string. Error at position: " + std::to_string(pos));
         }
@@ -309,10 +299,20 @@ private:
 
     void collect_nodes(Node<LabelType> *node, std::vector<Node<LabelType> *> &nodes) const
     {
-        nodes.push_back(node);
-        for (const auto &child : node->get_children())
-        {
-            collect_nodes(child, nodes);
+        if (!node) return;
+
+        std::stack<Node<LabelType> *> stack;
+        stack.push(node);
+
+        while (!stack.empty()) {
+            Node<LabelType> *current = stack.top();
+            stack.pop();
+            nodes.push_back(current);
+
+            const auto &children = current->get_children();
+            for (auto it = children.rbegin(); it != children.rend(); ++it) {
+                stack.push(*it);
+            }
         }
     }
 
