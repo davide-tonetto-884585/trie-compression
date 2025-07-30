@@ -13,8 +13,8 @@
 // Special values used in sorting to represent the absence of a transition
 // or a transition to a "dead state".
 // These values must be outside the range of normal equivalence classes (which are >= 0).
-const int NIL_TRANSITION_SORT_VAL = -1;
-const int DEAD_TARGET_SORT_VAL = -2;
+const int64_t NIL_TRANSITION_SORT_VAL = -1;
+const int64_t DEAD_TARGET_SORT_VAL = -2;
 
 /**
  * @brief Represents a single state in the DAWG.
@@ -25,18 +25,42 @@ const int DEAD_TARGET_SORT_VAL = -2;
 template <typename LabelType = char>
 struct State
 {
+    static_assert(std::is_integral<LabelType>::value, "LabelType must be an integral type.");
+
+    /**
+     * @brief A builder class for efficiently constructing the transitions of a State.
+     *
+     * The Builder pattern is used here to allow for the efficient addition of multiple
+     * transitions. Transitions are collected and then sorted once when the `build_into`
+     * method is called, which is more performant than adding and sorting them one by one.
+     */
     class Builder
     {
     private:
         std::vector<std::pair<LabelType, uint64_t>> pending_transitions;
 
     public:
+        /**
+         * @brief Adds a transition to the pending list.
+         *
+         * @param symbol The label for the transition.
+         * @param target_id The ID of the target state.
+         * @return A reference to the Builder object for method chaining.
+         */
         Builder &add_transition(LabelType symbol, uint64_t target_id)
         {
             pending_transitions.emplace_back(symbol, target_id);
             return *this;
         }
 
+        /**
+         * @brief Finalizes the state's transitions.
+         *
+         * Moves the collected transitions into the provided state and sorts them by label.
+         * This method should be called after all transitions have been added.
+         *
+         * @param state The state to build the transitions into.
+         */
         void build_into(State &state)
         {
             state.m_transitions = std::move(pending_transitions);
@@ -51,7 +75,17 @@ struct State
         }
     };
 
-    // Helper method to find transition (replaces map's operator[])
+    /** */
+    /**
+     * @brief Finds the target state ID for a given transition symbol.
+     *
+     * This method performs a binary search on the sorted list of transitions to find the
+     * target state associated with the given symbol. This is more efficient than a linear scan,
+     * especially for states with many transitions.
+     *
+     * @param symbol The label of the transition to find.
+     * @return A pointer to the target state ID if the transition exists, otherwise `nullptr`.
+     */
     uint64_t *find_transition(LabelType symbol)
     {
         auto it = std::lower_bound(
@@ -71,10 +105,29 @@ struct State
         return nullptr;
     }
 
-    // Getter methods for private fields
+    /**
+     * @brief Gets the unique ID of the state.
+     * @return The state's ID.
+     */
     uint64_t get_id() const { return m_id; }
+
+    /**
+     * @brief Checks if the state is a final state.
+     * A state is considered final if it has no outgoing transitions.
+     * @return `true` if the state is final, `false` otherwise.
+     */
     bool is_final() const { return m_transitions.empty(); }
+
+    /**
+     * @brief Gets a constant reference to the state's transitions.
+     * @return A constant reference to the vector of transitions.
+     */
     const std::vector<std::pair<LabelType, uint64_t>> &get_transitions() const { return m_transitions; }
+
+    /**
+     * @brief Gets a mutable reference to the state's transitions.
+     * @return A mutable reference to the vector of transitions.
+     */
     std::vector<std::pair<LabelType, uint64_t>> &get_transitions() { return m_transitions; }
 
     /**
@@ -115,6 +168,12 @@ private:
 
 /**
  * @brief A class to represent a Deterministic Acyclic Word Graph (DAWG).
+ *
+ * This class provides the core functionality for creating, manipulating, and minimizing a DAWG.
+ * It supports generic label types for transitions, allowing it to be used for various data types.
+ * The DAWG is composed of states (nodes) connected by transitions, each labeled with a symbol.
+ * It includes methods for adding states, configuring transitions, computing state heights, and
+ * performing minimization using a partition refinement algorithm.
  */
 template <typename LabelType = char>
 class DAWG
@@ -131,7 +190,7 @@ private:
      * @param visited_path_flags A vector to keep track of visited nodes to detect cycles.
      * @return The height of the node, or a special value indicating a cycle or non-final path.
      */
-    int64_t calculate_height_dfs(uint64_t node_id, std::vector<int> &visited_path_flags)
+    int64_t calculate_height_dfs(uint64_t node_id, std::vector<int64_t> &visited_path_flags)
     {
         State<LabelType> &node = m_nodes[node_id];
         if (node.m_height != -1)
@@ -164,19 +223,24 @@ private:
     }
 
     /**
-     * @brief Performs a counting sort on a block of nodes.
+     * @brief Performs a counting sort on a block of nodes based on a given value function.
+     *
+     * This function sorts a given block of node IDs into sub-blocks, where each sub-block
+     * contains nodes that have the same value according to the `get_value` function.
+     * It is a key component of the partition refinement process in the `minimize` method.
      *
      * @param block The list of node IDs to sort.
-     * @param get_value A function to extract the sorting value from a node ID.
-     * @param min_val The minimum possible value for get_value.
-     * @param max_val The maximum possible value for get_value.
+     * @param get_value A function that takes a node ID and returns its sorting value.
+     * @param min_val The minimum possible value that `get_value` can return.
+     * @param max_val The maximum possible value that `get_value` can return.
      * @return A list of new blocks, where each block contains nodes with the same value.
+     * @throws std::out_of_range if a sort value is outside the specified [min_val, max_val] range.
      */
     std::vector<std::vector<uint64_t>> counting_sort_block(
         const std::vector<uint64_t> &block,
-        std::function<int(uint64_t)> get_value, // Function to get the sorting value for a nodeId
-        int min_val,                            // Minimum possible value for getValue
-        int max_val)                            // Maximum possible value for getValue
+        std::function<int64_t(uint64_t)> get_value, // Function to get the sorting value for a nodeId
+        int64_t min_val,                            // Minimum possible value for getValue
+        int64_t max_val)                            // Maximum possible value for getValue
     {
         std::vector<std::vector<uint64_t>> new_blocks;
         if (block.empty())
@@ -188,21 +252,16 @@ private:
             return new_blocks;
         }
 
-        int range = max_val - min_val + 1;
+        int64_t range = max_val - min_val + 1;
         std::vector<std::vector<uint64_t>> buckets(range);
 
         for (uint64_t node_id : block)
         {
-            int sort_value = get_value(node_id);
+            int64_t sort_value = get_value(node_id);
             // Ensure the sort value is within the expected range for the buckets
             if (sort_value < min_val || sort_value > max_val)
             {
-                // This would indicate a problem with the min_val/max_val logic
-                // or with the values returned by getValue. For robustness, one could
-                // have an "overflow" bucket or handle the error.
-                // For now, we assume that getValue returns values in the range [min_val, max_val].
-                // Or, more simply, if it happens, we print an error and do not split.
-                throw std::out_of_range("Sort value " + std::to_string(node_id) + " out of range [" + std::to_string(min_val) + ", " + std::to_string(max_val) + "]");
+                throw std::out_of_range("Sort value " + std::to_string(sort_value) + " out of range [" + std::to_string(min_val) + ", " + std::to_string(max_val) + "]");
             }
             buckets[sort_value - min_val].push_back(node_id);
         }
@@ -220,6 +279,8 @@ private:
 public:
     /**
      * @brief Default constructor for the DAWG class.
+     *
+     * Initializes an empty DAWG with a default initial state ID of 0.
      */
     DAWG() : m_initial_state_id(0) {}
 
@@ -229,6 +290,12 @@ public:
      */
     DAWG(uint64_t set_initial_state_id) : m_initial_state_id(set_initial_state_id) {}
 
+    /**
+     * @brief Accesses the state at the given ID.
+     * @param id The ID of the state to access.
+     * @return A reference to the state at the given ID.
+     * @throws std::out_of_range if the ID is out of range.
+     */
     State<LabelType> &operator[](uint64_t id)
     {
         if (id >= m_nodes.size())
@@ -238,6 +305,12 @@ public:
         return m_nodes[id];
     }
 
+    /**
+     * @brief Accesses the state at the given ID.
+     * @param id The ID of the state to access.
+     * @return A const reference to the state at the given ID.
+     * @throws std::out_of_range if the ID is out of range.
+     */
     const State<LabelType> &operator[](uint64_t id) const
     {
         if (id >= m_nodes.size())
@@ -257,6 +330,10 @@ public:
     using iterator = typename std::vector<State<LabelType>>::iterator;
     using const_iterator = typename std::vector<State<LabelType>>::const_iterator;
 
+    /**
+     * @brief Returns the number of nodes in the DAWG.
+     * @return The number of nodes.
+     */
     uint64_t get_num_nodes() const
     {
         return m_nodes.size();
@@ -274,6 +351,15 @@ public:
         return id;
     }
 
+    /**
+     * @brief Configures the transitions for a given state using an initializer list.
+     *
+     * This method provides a convenient way to define all transitions for a state at once.
+     * It uses a `State::Builder` to efficiently add and sort the transitions.
+     *
+     * @param state_id The ID of the state to configure.
+     * @param transitions An initializer list of pairs, where each pair contains a label and a target state ID.
+     */
     void configure_state(uint64_t state_id, std::initializer_list<std::pair<LabelType, uint64_t>> transitions)
     {
         typename State<LabelType>::Builder builder;
@@ -285,6 +371,11 @@ public:
         builder.build_into(m_nodes[state_id]);
     }
 
+    /**
+     * @brief Gets the ID of the initial state of the DAWG.
+     *
+     * @return The ID of the initial state.
+     */
     uint64_t get_initial_state_id() const
     {
         return m_initial_state_id;
@@ -341,12 +432,12 @@ public:
      * This version handles general DAGs and includes cycle detection.
      * @return The maximum height found among all nodes, or -3 if a cycle is detected.
      */
-    virtual int64_t compute_all_heights()
+    virtual int64_t compute_all_heights() //TODO: make iterative instead
     {
         for (auto &node : m_nodes)
             node.m_height = -1;
         int64_t max_h = -1;
-        std::vector<int> visited_path_flags(m_nodes.size(), 0); // 0: unvisited, 1: visiting, 2: visited
+        std::vector<int64_t> visited_path_flags(m_nodes.size(), 0); // 0: unvisited, 1: visiting, 2: visited
         for (uint64_t i = 0; i < m_nodes.size(); ++i)
         {
             if (m_nodes[i].m_height == -1)
@@ -364,9 +455,13 @@ public:
 
     /**
      * @brief Minimizes the DAWG using a partition refinement algorithm.
-     * This implementation is based on Revuz's algorithm for DAWGs minimization (DOI: 10.1016/0304-3975(92)90142-3).
-     * It groups states into equivalence classes.
-     * @param is_tree A boolean indicating if the DAWG is a tree, to use the optimized height calculation.
+     *
+     * This implementation is based on Revuz's algorithm for DAWG minimization.
+     * It groups states into equivalence classes by iteratively refining partitions of states.
+     * The process starts by partitioning states by their height, then by their final status,
+     * and then by their transition labels and target equivalence classes.
+     * This ensures that states with the same behavior are grouped into the same equivalence class,
+     * resulting in a minimal DAWG.
      */
     void minimize()
     {
@@ -392,21 +487,10 @@ public:
             next_global_eq_class_id++;
         }
 
-        // Cache for sorted transition vectors (for efficient k-th access)
-        // for nodes in the current height level.
-        std::vector<std::vector<std::pair<LabelType, uint64_t>>> node_sorted_transitions_cache(m_nodes.size());
-
         for (uint64_t h = 1; h <= static_cast<uint64_t>(max_total_height); ++h)
         {
             if (states_by_height[h].empty())
                 continue;
-
-            for (uint64_t node_id : states_by_height[h])
-            {
-                node_sorted_transitions_cache[node_id].assign(
-                    m_nodes[node_id].m_transitions.begin(),
-                    m_nodes[node_id].m_transitions.end());
-            }
 
             std::vector<std::vector<uint64_t>> h_partitions;
             if (!states_by_height[h].empty())
@@ -434,62 +518,65 @@ public:
             uint64_t max_k_transitions_for_h = 0;
             for (uint64_t node_id : states_by_height[h])
             {
-                max_k_transitions_for_h = std::max(max_k_transitions_for_h, static_cast<uint64_t>(node_sorted_transitions_cache[node_id].size()));
+                max_k_transitions_for_h = std::max(max_k_transitions_for_h, static_cast<uint64_t>(m_nodes[node_id].m_transitions.size()));
             }
 
             for (uint64_t k = 0; k < max_k_transitions_for_h; ++k)
-            { // For the k-th transition
+            {
+                // For the k-th transition
                 // 2a. Partition by the character of the k-th transition
-                std::vector<std::vector<uint64_t>> p_after_char;
-                int min_val_char = NIL_TRANSITION_SORT_VAL; // -1
-                int max_val_char = 255;                     // Max value for unsigned char
+                std::vector<std::vector<uint64_t>> p_after_label;
+                int64_t min_val_label = NIL_TRANSITION_SORT_VAL;                 // -1
+                int64_t max_val_label = std::numeric_limits<int64_t>::max() - 1; // Max value for int64_t
 
                 for (auto &block : h_partitions)
                 {
                     if (block.size() <= 1)
                     {
-                        p_after_char.push_back(block);
+                        p_after_label.push_back(block);
                         continue;
                     }
-                    auto get_kth_char_val = [&](uint64_t node_id)
+
+                    auto get_kth_label_val = [&](uint64_t node_id)
                     {
-                        if (k < node_sorted_transitions_cache[node_id].size())
+                        if (k < m_nodes[node_id].m_transitions.size())
                         {
-                            return static_cast<int>(static_cast<unsigned char>(node_sorted_transitions_cache[node_id][k].first));
+                            return static_cast<int64_t>(m_nodes[node_id].m_transitions[k].first);
                         }
                         return NIL_TRANSITION_SORT_VAL;
                     };
 
                     // Determine the effective range of values in the current block to optimize countingSort
-                    int current_block_min_char = max_val_char + 1;
-                    int current_block_max_char = min_val_char - 1;
-                    bool has_values_char = false;
+                    int64_t current_block_min_label = max_val_label + 1;
+                    int64_t current_block_max_label = min_val_label - 1;
+                    bool has_values_label = false;
                     for (uint64_t node_id : block)
                     {
-                        int val = get_kth_char_val(node_id);
-                        current_block_min_char = std::min(current_block_min_char, val);
-                        current_block_max_char = std::max(current_block_max_char, val);
-                        has_values_char = true;
+                        int64_t val = get_kth_label_val(node_id);
+                        current_block_min_label = std::min(current_block_min_label, val);
+                        current_block_max_label = std::max(current_block_max_label, val);
+                        has_values_label = true;
                     }
-                    if (!has_values_char)
+                    if (!has_values_label)
                     {
-                        p_after_char.push_back(block);
+                        p_after_label.push_back(block);
                         continue;
                     }
 
-                    auto new_sub_blocks = counting_sort_block(block, get_kth_char_val, current_block_min_char, current_block_max_char);
+                    auto new_sub_blocks = counting_sort_block(block, get_kth_label_val, current_block_min_label, current_block_max_label);
                     for (auto &sub_block : new_sub_blocks)
-                        p_after_char.push_back(sub_block);
+                        p_after_label.push_back(sub_block);
                 }
-                h_partitions = p_after_char;
+                h_partitions = p_after_label;
 
                 // 2b. Partition by the equivalence class of the k-th transition target
                 std::vector<std::vector<uint64_t>> p_after_target_class;
                 // Theoretical range for target classes: DEAD_TARGET_SORT_VAL (-2), NIL_TRANSITION_SORT_VAL (-1), 0 ... next_global_eq_class_id-1
-                int min_val_target_overall = DEAD_TARGET_SORT_VAL;
-                int max_val_target_overall = (next_global_eq_class_id == 0) ? DEAD_TARGET_SORT_VAL : static_cast<int>(next_global_eq_class_id) - 1;
+                int64_t min_val_target_overall = DEAD_TARGET_SORT_VAL;
+                int64_t max_val_target_overall = (next_global_eq_class_id == 0) ? DEAD_TARGET_SORT_VAL : static_cast<int64_t>(next_global_eq_class_id) - 1;
                 if (next_global_eq_class_id == 0)
-                { // If Pi_0 was empty and no classes were created
+                {
+                    // If Pi_0 was empty and no classes were created
                     max_val_target_overall = std::max(NIL_TRANSITION_SORT_VAL, DEAD_TARGET_SORT_VAL);
                 }
 
@@ -503,28 +590,30 @@ public:
 
                     auto get_kth_target_eq_class_val = [&](uint64_t node_id)
                     {
-                        if (k < node_sorted_transitions_cache[node_id].size())
+                        if (k < m_nodes[node_id].m_transitions.size())
                         {
-                            uint64_t target_node_id = node_sorted_transitions_cache[node_id][k].second;
+                            uint64_t target_node_id = m_nodes[node_id].m_transitions[k].second;
                             if (m_nodes[target_node_id].m_height < 0)
-                            { // Target is a "dead state"
+                            {
+                                // Target is a "dead state"
                                 return DEAD_TARGET_SORT_VAL;
                             }
-                            return static_cast<int>(m_nodes[target_node_id].m_equivalence_class); // Class already finalized
+                            return m_nodes[target_node_id].m_equivalence_class; // Class already finalized
                         }
                         return NIL_TRANSITION_SORT_VAL; // No k-th transition
                     };
 
-                    int current_block_min_target_class = max_val_target_overall + 1; // Initialize to find the effective min
-                    int current_block_max_target_class = min_val_target_overall - 1; // Initialize to find the effective max
+                    int64_t current_block_min_target_class = max_val_target_overall + 1; // Initialize to find the effective min
+                    int64_t current_block_max_target_class = min_val_target_overall - 1; // Initialize to find the effective max
                     bool has_values_target = false;
                     for (uint64_t node_id : block)
                     {
-                        int val = get_kth_target_eq_class_val(node_id);
+                        int64_t val = get_kth_target_eq_class_val(node_id);
                         current_block_min_target_class = std::min(current_block_min_target_class, val);
                         current_block_max_target_class = std::max(current_block_max_target_class, val);
                         has_values_target = true;
                     }
+
                     if (!has_values_target)
                     {
                         p_after_target_class.push_back(block);
@@ -550,20 +639,6 @@ public:
                 }
             }
         }
-
-        /* std::unordered_map<uint64_t, uint64_t> result;
-        for (const auto &node : m_nodes)
-        {
-            if (node.m_height >= 0)
-            {
-                result[node.m_id] = node.m_equivalence_class;
-            }
-            else
-            {
-                result[node.m_id] = -1; // Special class for non-useful nodes
-            }
-        }
-        return result; */
     }
 };
 

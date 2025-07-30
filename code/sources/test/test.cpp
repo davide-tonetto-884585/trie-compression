@@ -101,7 +101,7 @@ int main()
     // std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
 
     tree_dawg2.minimize();
-    std::cout << tree_dawg2.to_string();
+    // std::cout << tree_dawg2.to_string();
 
     return 0;
 }
