@@ -13,8 +13,8 @@
 // Special values used in sorting to represent the absence of a transition
 // or a transition to a "dead state".
 // These values must be outside the range of normal equivalence classes (which are >= 0).
-const int64_t NIL_TRANSITION_SORT_VAL = -1;
-const int64_t DEAD_TARGET_SORT_VAL = -2;
+constexpr int64_t NIL_TRANSITION_SORT_VAL = -1;
+constexpr int64_t DEAD_TARGET_SORT_VAL = -2;
 
 /**
  * @brief Represents a single state in the DAWG.
@@ -41,15 +41,29 @@ struct State
 
     public:
         /**
-         * @brief Adds a transition to the pending list.
+         * @brief Adds a transition to the pending list using perfect forwarding.
          *
-         * @param symbol The label for the transition.
-         * @param target_id The ID of the target state.
+         * This templated version uses perfect forwarding to preserve value categories
+         * and avoid unnecessary copies. It forwards the arguments directly to emplace_back,
+         * allowing for optimal performance when adding transitions.
+         *
+         * @tparam Label The type of the transition symbol (deduced automatically)
+         * @tparam Target The type of the target state ID (deduced automatically)
+         * @param symbol The label for the transition (forwarded perfectly)
+         * @param target_id The ID of the target state (forwarded perfectly)
          * @return A reference to the Builder object for method chaining.
+         *
+         * @note This method preserves value categories:
+         *       - Lvalues are copied
+         *       - Rvalues (temporaries) are moved
+         *       This optimization is particularly beneficial for complex LabelType objects.
          */
-        Builder &add_transition(LabelType symbol, uint64_t target_id)
+        template <typename Label, typename Target>
+        Builder &add_transition(Label &&symbol, Target &&target_id)
         {
-            pending_transitions.emplace_back(symbol, target_id);
+            pending_transitions.emplace_back(
+                std::forward<Label>(symbol),
+                std::forward<Target>(target_id));
             return *this;
         }
 
@@ -68,7 +82,7 @@ struct State
             std::sort(
                 state.m_transitions.begin(),
                 state.m_transitions.end(),
-                [](const auto &a, const auto &b)
+                [](const auto &a, const auto &b) constexpr
                 {
                     return a.first < b.first;
                 });
@@ -92,7 +106,7 @@ struct State
             m_transitions.begin(),
             m_transitions.end(),
             std::make_pair(symbol, uint64_t(0)),
-            [](const auto &a, const auto &b)
+            [](const auto &a, const auto &b) constexpr
             {
                 return a.first < b.first;
             });
@@ -109,14 +123,14 @@ struct State
      * @brief Gets the unique ID of the state.
      * @return The state's ID.
      */
-    uint64_t get_id() const { return m_id; }
+    constexpr uint64_t get_id() const { return m_id; }
 
     /**
      * @brief Checks if the state is a final state.
      * A state is considered final if it has no outgoing transitions.
      * @return `true` if the state is final, `false` otherwise.
      */
-    bool is_final() const { return m_transitions.empty(); }
+    constexpr bool is_final() const { return m_transitions.empty(); }
 
     /**
      * @brief Gets a constant reference to the state's transitions.
@@ -135,14 +149,14 @@ struct State
      * The height is the length of the longest path to a final state.
      * @return The height of the state.
      */
-    int64_t get_height() const { return m_height; }
+    constexpr int64_t get_height() const { return m_height; }
 
     /**
      * @brief Get the equivalence class of the state.
      * This is used during the minimization process.
      * @return The equivalence class ID.
      */
-    uint64_t get_equivalence_class() const { return m_equivalence_class; }
+    constexpr uint64_t get_equivalence_class() const { return m_equivalence_class; }
 
     /**
      * @brief Construct a new State object.
@@ -150,7 +164,7 @@ struct State
      * @param _id The unique identifier for the state.
      * @param _is_final Whether the state is a final state.
      */
-    State(uint64_t _id)
+    constexpr State(uint64_t _id)
         : m_id(_id), m_height(-1), m_equivalence_class(-1) {}
 
 private:
@@ -160,22 +174,25 @@ private:
     int64_t m_height;            // Cached height of the state.
     int64_t m_equivalence_class; // Equivalence class ID used in minimization.
 
-    template <typename T>
+    template <typename Derived, typename Label>
     friend class DAWG;
     template <typename T>
     friend class TreeDAWG;
 };
 
 /**
- * @brief A class to represent a Deterministic Acyclic Word Graph (DAWG).
+ * @brief A class to represent a Deterministic Acyclic Word Graph (DAWG) using CRTP.
  *
  * This class provides the core functionality for creating, manipulating, and minimizing a DAWG.
  * It supports generic label types for transitions, allowing it to be used for various data types.
  * The DAWG is composed of states (nodes) connected by transitions, each labeled with a symbol.
  * It includes methods for adding states, configuring transitions, computing state heights, and
  * performing minimization using a partition refinement algorithm.
+ *
+ * @tparam Derived The derived class type (CRTP parameter)
+ * @tparam LabelType The type used for transition labels
  */
-template <typename LabelType = char>
+template <typename Derived, typename LabelType = char>
 class DAWG
 {
 protected:
@@ -276,6 +293,81 @@ private:
         return new_blocks;
     }
 
+    /**
+     * @brief Default implementation for setting the initial state.
+     * @param node_id The ID of the node to be set as the initial state.
+     */
+    void
+    set_initial_state_impl(uint64_t node_id)
+    {
+        if (node_id < m_nodes.size())
+        {
+            m_initial_state_id = node_id;
+        }
+        else
+        {
+            throw std::out_of_range("Attempt to set non-existent initial state with ID " + std::to_string(node_id));
+        }
+    }
+
+    /**
+     * @brief Default implementation for converting the DAWG to a string representation.
+     * @return A string representation of the DAWG.
+     */
+    std::string
+    to_string_impl() const
+    {
+        std::stringstream ss;
+        uint64_t max_eq_class = 0;
+        for (const auto &node : *this)
+        {
+            ss << "Node " << node.get_id()
+               << " (id: " << node.get_id()
+               << ", class: " << node.get_equivalence_class()
+               << ", height: " << node.get_height()
+               << ", is_root: " << (node.get_id() == get_initial_state_id() ? "yes" : "no")
+               << ", is_final: " << (node.is_final() ? "yes" : "no")
+               << ", transitions: " << node.get_transitions().size() << ")" << std::endl;
+
+            if (node.get_equivalence_class() > max_eq_class)
+            {
+                max_eq_class = node.get_equivalence_class();
+            }
+        }
+
+        ss << "Max equivalence class: " << max_eq_class << std::endl;
+
+        return ss.str();
+    }
+
+    /**
+     * @brief Default implementation for computing the height of all nodes in the DAWG.
+     * The height is the length of the longest path from a node to any final state.
+     * This version handles general DAGs and includes cycle detection.
+     * @return The maximum height found among all nodes, or -3 if a cycle is detected.
+     */
+    int64_t
+    compute_all_heights_impl() // TODO: make iterative instead
+    {
+        for (auto &node : m_nodes)
+            node.m_height = -1;
+        int64_t max_h = -1;
+        std::vector<int64_t> visited_path_flags(m_nodes.size(), 0); // 0: unvisited, 1: visiting, 2: visited
+        for (uint64_t i = 0; i < m_nodes.size(); ++i)
+        {
+            if (m_nodes[i].m_height == -1)
+            {
+                int64_t h_node = calculate_height_dfs(i, visited_path_flags);
+                max_h = std::max(max_h, h_node);
+            }
+            else
+            {
+                max_h = std::max(max_h, m_nodes[i].m_height);
+            }
+        }
+        return max_h;
+    }
+
 public:
     /**
      * @brief Default constructor for the DAWG class.
@@ -334,7 +426,7 @@ public:
      * @brief Returns the number of nodes in the DAWG.
      * @return The number of nodes.
      */
-    uint64_t get_num_nodes() const
+    constexpr uint64_t get_num_nodes() const
     {
         return m_nodes.size();
     }
@@ -376,7 +468,7 @@ public:
      *
      * @return The ID of the initial state.
      */
-    uint64_t get_initial_state_id() const
+    constexpr uint64_t get_initial_state_id() const
     {
         return m_initial_state_id;
     }
@@ -385,45 +477,18 @@ public:
      * @brief Sets the initial state of the DAWG.
      * @param node_id The ID of the node to be set as the initial state.
      */
-    virtual void set_initial_state(uint64_t node_id)
+    void set_initial_state(uint64_t node_id)
     {
-        if (node_id < m_nodes.size())
-        {
-            m_initial_state_id = node_id;
-        }
-        else
-        {
-            throw std::out_of_range("Attempt to set non-existent initial state with ID " + std::to_string(node_id));
-        }
+        static_cast<Derived *>(this)->set_initial_state_impl(node_id);
     }
 
     /**
      * @brief Converts the DAWG to a string representation.
      * @return A string representation of the DAWG.
      */
-    virtual std::string to_string() const
+    std::string to_string() const
     {
-        std::stringstream ss;
-        uint64_t max_eq_class = 0;
-        for (const auto &node : *this)
-        {
-            ss << "Node " << node.get_id()
-               << " (id: " << node.get_id()
-               << ", class: " << node.get_equivalence_class()
-               << ", height: " << node.get_height()
-               << ", is_root: " << (node.get_id() == get_initial_state_id() ? "yes" : "no")
-               << ", is_final: " << (node.is_final() ? "yes" : "no")
-               << ", transitions: " << node.get_transitions().size() << ")" << std::endl;
-
-            if (node.get_equivalence_class() > max_eq_class)
-            {
-                max_eq_class = node.get_equivalence_class();
-            }
-        }
-
-        ss << "Max equivalence class: " << max_eq_class << std::endl;
-
-        return ss.str();
+        return static_cast<const Derived *>(this)->to_string_impl();
     }
 
     /**
@@ -432,25 +497,9 @@ public:
      * This version handles general DAGs and includes cycle detection.
      * @return The maximum height found among all nodes, or -3 if a cycle is detected.
      */
-    virtual int64_t compute_all_heights() //TODO: make iterative instead
+    int64_t compute_all_heights()
     {
-        for (auto &node : m_nodes)
-            node.m_height = -1;
-        int64_t max_h = -1;
-        std::vector<int64_t> visited_path_flags(m_nodes.size(), 0); // 0: unvisited, 1: visiting, 2: visited
-        for (uint64_t i = 0; i < m_nodes.size(); ++i)
-        {
-            if (m_nodes[i].m_height == -1)
-            {
-                int64_t h_node = calculate_height_dfs(i, visited_path_flags);
-                max_h = std::max(max_h, h_node);
-            }
-            else
-            {
-                max_h = std::max(max_h, m_nodes[i].m_height);
-            }
-        }
-        return max_h;
+        return static_cast<Derived *>(this)->compute_all_heights_impl();
     }
 
     /**
@@ -507,7 +556,7 @@ public:
                     p_after_is_final.push_back(block);
                     continue;
                 }
-                auto get_is_final_val = [&](uint64_t node_id)
+                auto get_is_final_val = [this](uint64_t node_id) constexpr -> int
                 { return m_nodes[node_id].is_final() ? 1 : 0; };
                 auto new_sub_blocks = counting_sort_block(block, get_is_final_val, 0, 1); // min=0, max=1 for bool
                 for (auto &sub_block : new_sub_blocks)
@@ -526,8 +575,8 @@ public:
                 // For the k-th transition
                 // 2a. Partition by the character of the k-th transition
                 std::vector<std::vector<uint64_t>> p_after_label;
-                int64_t min_val_label = NIL_TRANSITION_SORT_VAL;                 // -1
-                int64_t max_val_label = std::numeric_limits<int64_t>::max() - 1; // Max value for int64_t
+                constexpr int64_t min_val_label = NIL_TRANSITION_SORT_VAL;                 // -1
+                constexpr int64_t max_val_label = std::numeric_limits<int64_t>::max() - 1; // Max value for int64_t
 
                 for (auto &block : h_partitions)
                 {
@@ -537,7 +586,7 @@ public:
                         continue;
                     }
 
-                    auto get_kth_label_val = [&](uint64_t node_id)
+                    auto get_kth_label_val = [this, k](uint64_t node_id) constexpr -> int64_t
                     {
                         if (k < m_nodes[node_id].m_transitions.size())
                         {
@@ -572,7 +621,7 @@ public:
                 // 2b. Partition by the equivalence class of the k-th transition target
                 std::vector<std::vector<uint64_t>> p_after_target_class;
                 // Theoretical range for target classes: DEAD_TARGET_SORT_VAL (-2), NIL_TRANSITION_SORT_VAL (-1), 0 ... next_global_eq_class_id-1
-                int64_t min_val_target_overall = DEAD_TARGET_SORT_VAL;
+                constexpr int64_t min_val_target_overall = DEAD_TARGET_SORT_VAL;
                 int64_t max_val_target_overall = (next_global_eq_class_id == 0) ? DEAD_TARGET_SORT_VAL : static_cast<int64_t>(next_global_eq_class_id) - 1;
                 if (next_global_eq_class_id == 0)
                 {
@@ -588,7 +637,7 @@ public:
                         continue;
                     }
 
-                    auto get_kth_target_eq_class_val = [&](uint64_t node_id)
+                    auto get_kth_target_eq_class_val = [this, k](uint64_t node_id) constexpr -> int64_t
                     {
                         if (k < m_nodes[node_id].m_transitions.size())
                         {
@@ -640,6 +689,28 @@ public:
             }
         }
     }
+};
+
+/**
+ *
+ *
+ * This class inherits from the CRTP base DAWG and provides all default implementations.
+ * Use this when you need a standalone DAWG without custom behavior.
+ */
+template <typename LabelType = char>
+class GenericDAWG : public DAWG<GenericDAWG<LabelType>, LabelType>
+{
+public:
+    /**
+     * @brief Default constructor for the ConcreteDAWG class.
+     */
+    GenericDAWG() : DAWG<GenericDAWG<LabelType>, LabelType>() {}
+
+    /**
+     * @brief Constructor for the ConcreteDAWG class with a specified initial state.
+     * @param set_initial_state_id The ID of the initial state.
+     */
+    GenericDAWG(uint64_t set_initial_state_id) : DAWG<GenericDAWG<LabelType>, LabelType>(set_initial_state_id) {}
 };
 
 #endif // DAWG_HPP

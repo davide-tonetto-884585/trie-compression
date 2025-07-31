@@ -12,68 +12,78 @@
  * tree-optimized implementation that avoids cycle detection overhead and uses
  * post-order traversal for better performance on tree structures.
  */
-template<typename LabelType = char>
-class TreeDAWG : public DAWG<LabelType>
+template <typename LabelType = char>
+class TreeDAWG : public DAWG<TreeDAWG<LabelType>, LabelType>
 {
+    friend class DAWG<TreeDAWG<LabelType>, LabelType>;
+
 public:
     // Using declarations to access base class members
-    using DAWG<LabelType>::m_nodes;
-    using DAWG<LabelType>::m_initial_state_id;
-    using DAWG<LabelType>::get_num_nodes;
-    
+    using DAWG<TreeDAWG<LabelType>, LabelType>::m_nodes;
+    using DAWG<TreeDAWG<LabelType>, LabelType>::m_initial_state_id;
+    using DAWG<TreeDAWG<LabelType>, LabelType>::get_num_nodes;
+
     /**
      * @brief Default constructor for the TreeDAWG class.
      */
-    TreeDAWG() : DAWG<LabelType>() {}
+    TreeDAWG() : DAWG<TreeDAWG<LabelType>, LabelType>() {}
 
     /**
      * @brief Constructor from LabeledTree for the TreeDAWG class.
      */
-    TreeDAWG(const LabeledTree<LabelType> &tree) {
+    TreeDAWG(const LabeledTree<LabelType> &tree)
+    {
         auto nodes = tree.get_nodes();
-        
+
         // Create a mapping from tree nodes to DAWG node IDs
-        std::unordered_map<Node<LabelType>*, uint64_t> node_to_id;
-        
+        std::unordered_map<std::shared_ptr<Node<LabelType>>, uint64_t> node_to_id;
+
         // First pass: create all DAWG nodes
-        for (const auto &node : nodes) {
+        for (const auto &node : nodes)
+        {
             uint64_t dawg_node_id = this->add_node();
             node_to_id[node] = dawg_node_id;
         }
-        
+
         // Second pass: add transitions between nodes
-        for (const auto &tree_node : nodes) {
+        for (const auto &tree_node : nodes)
+        {
             uint64_t current_id = node_to_id[tree_node];
-            
+
             // Create transitions for each child
             std::vector<std::pair<LabelType, uint64_t>> transitions;
-            for (const auto &child : tree_node->get_children()) {
+            for (const auto &child : tree_node->get_children())
+            {
                 uint64_t child_id = node_to_id[child];
                 transitions.emplace_back(child->get_label(), child_id);
             }
-            
+
             // Configure the state with its transitions
-            if (!transitions.empty()) {
+            if (!transitions.empty())
+            {
                 typename State<LabelType>::Builder builder;
-                for (const auto &[label, target_id] : transitions) {
+                for (const auto &[label, target_id] : transitions)
+                {
                     builder.add_transition(label, target_id);
                 }
                 builder.build_into(this->m_nodes[current_id]);
             }
         }
-        
+
         // Set the root as the initial state
-        if (tree.get_root() != nullptr) {
+        if (tree.get_root() != nullptr)
+        {
             this->set_initial_state(node_to_id[tree.get_root()]);
         }
     }
 
+private:
     /**
      * @brief Sets the initial state, ensuring it's a valid tree root (no incoming transitions).
      * @param node_id The ID of the node to set as initial state.
      * @throws std::invalid_argument if the node has incoming transitions.
      */
-    void set_initial_state(uint64_t node_id) override
+    void set_initial_state_impl(uint64_t node_id)
     {
         // First validate that the node exists
         if (node_id >= get_num_nodes())
@@ -94,7 +104,7 @@ public:
      * It uses an iterative post-order traversal to avoid stack overflow on deep trees.
      * @return The maximum height of any node in the tree.
      */
-    int64_t compute_all_heights() override
+    int64_t compute_all_heights_impl()
     {
         for (auto &node : m_nodes)
             node.m_height = -1;
@@ -160,7 +170,6 @@ public:
         return max_h;
     }
 
-private:
     /**
      * @brief Validates that a node has no incoming transitions (is a root).
      * @param node_id The ID of the node to validate.

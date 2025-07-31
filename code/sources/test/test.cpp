@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <fstream>
+#include <chrono>
 
 // Function to convert tree structure to balanced parentheses
 std::string tree_to_balanced_parentheses(const TreeDAWG<char> &tree_dawg)
@@ -100,7 +101,11 @@ int main()
     // balanced_parentheses = tree_to_balanced_parentheses(tree_dawg2);
     // std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
 
+    auto start_time = std::chrono::high_resolution_clock::now();
     tree_dawg2.minimize();
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "Minimization took: " << duration.count() << " ms" << std::endl;
     // std::cout << tree_dawg2.to_string();
 
     return 0;

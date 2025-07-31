@@ -30,6 +30,17 @@ else()
     message(WARNING "git not found. Cloning of submodules will not work.")
 endif()
 
+# Find Valgrind for memory testing
+# ------------------------------------------------------------------------------
+find_program(VALGRIND_EXECUTABLE valgrind)
+if(VALGRIND_EXECUTABLE)
+    message(STATUS "Valgrind found: ${VALGRIND_EXECUTABLE}")
+    set(VALGRIND_FOUND TRUE)
+else()
+    message(WARNING "Valgrind not found. Memory tests will not be available.")
+    set(VALGRIND_FOUND FALSE)
+endif()
+
 # Configure the compiler with the appropriate flags
 # ------------------------------------------------------------------------------
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
@@ -53,3 +64,7 @@ add_subdirectory(external)
 # ------------------------------------------------------------------------------
 add_subdirectory(include)
 add_subdirectory(sources)
+
+# Enable testing
+# ------------------------------------------------------------------------------
+enable_testing()

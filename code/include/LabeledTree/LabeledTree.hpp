@@ -15,22 +15,22 @@
  * @tparam LabelType The type of the label for each node.
  */
 template <typename LabelType>
-class Node
+class Node : public std::enable_shared_from_this<Node<LabelType>>
 {
 private:
-    LabelType m_label;              ///< The label of the node.
-    std::vector<Node *> m_children; ///< A vector of pointers to the children of the node.
-    Node *m_parent;                 ///< A pointer to the parent of the node.
+    LabelType m_label;                                      ///< The label of the node.
+    std::vector<std::shared_ptr<Node>> m_children;          ///< A vector of shared pointers to the children of the node.
+    std::weak_ptr<Node> m_parent;                           ///< A weak pointer to the parent of the node.
 
 public:
     /**
      * @brief Construct a new Node object.
      *
      * @param lbl The label of the node.
-     * @param prnt A pointer to the parent node. Defaults to nullptr.
-     * @param children A vector of pointers to the children nodes. Defaults to an empty vector.
+     * @param prnt A weak pointer to the parent node. Defaults to empty weak_ptr.
+     * @param children A vector of shared pointers to the children nodes. Defaults to an empty vector.
      */
-    Node(LabelType lbl, Node *prnt = nullptr, std::vector<Node *> children = {}) : m_label(lbl), m_children(children), m_parent(prnt) {}
+    Node(LabelType lbl, std::weak_ptr<Node> prnt = {}, std::vector<std::shared_ptr<Node>> children = {}) : m_label(lbl), m_children(children), m_parent(prnt) {}
 
     /**
      * @brief Checks if the node is a root.
@@ -39,7 +39,7 @@ public:
      */
     bool is_root() const
     {
-        return m_parent == nullptr;
+        return m_parent.expired();
     }
 
     /**
@@ -60,11 +60,11 @@ public:
     unsigned int get_level() const
     {
         unsigned int level = 0;
-        Node *current = m_parent;
+        auto current = m_parent.lock();
         while (current)
         {
             level++;
-            current = current->m_parent;
+            current = current->m_parent.lock();
         }
         return level;
     }
@@ -99,7 +99,7 @@ public:
      *
      * @return A const reference to the vector of children nodes.
      */
-    const std::vector<Node *> &get_children() const
+    const std::vector<std::shared_ptr<Node>> &get_children() const
     {
         return m_children;
     }
@@ -107,11 +107,11 @@ public:
     /**
      * @brief Gets the parent of the node.
      *
-     * @return A pointer to the parent node.
+     * @return A shared pointer to the parent node.
      */
-    Node *get_parent() const
+    std::shared_ptr<Node> get_parent() const
     {
-        return m_parent;
+        return m_parent.lock();
     }
 
     /**
@@ -121,10 +121,11 @@ public:
      */
     bool is_rightmost() const
     {
-        if (m_parent)
+        auto parent = m_parent.lock();
+        if (parent)
         {
-            const auto &siblings = m_parent->m_children;
-            return siblings.back() == this;
+            const auto &siblings = parent->m_children;
+            return siblings.back().get() == this;
         }
         return false;
     }
@@ -136,30 +137,38 @@ public:
      */
     void push_back_child(LabelType lbl)
     {
-        auto child = new Node(lbl, this);
+        auto child = std::make_shared<Node>(lbl, std::weak_ptr<Node>(this->shared_from_this()));
         m_children.push_back(child);
     }
 
     /**
      * @brief Adds an existing node as a child to this node.
      *
-     * @param child A pointer to the node to be added as a child.
+     * @param child A shared pointer to the node to be added as a child.
      */
-    void push_back_child(Node *child)
+    void push_back_child(std::shared_ptr<Node> child)
     {
-        child->m_parent = this;
+        child->m_parent = std::weak_ptr<Node>(this->shared_from_this());
         m_children.push_back(child);
     }
 
     /**
      * @brief Prepends an existing node as a child to this node.
      *
-     * @param child A pointer to the node to be prepended as a child.
+     * @param child A shared pointer to the node to be prepended as a child.
      */
-    void prepend_child(Node *child)
+    void prepend_child(std::shared_ptr<Node> child)
     {
-        child->m_parent = this;
+        child->m_parent = std::weak_ptr<Node>(this->shared_from_this());
         m_children.insert(m_children.begin(), child);
+    }
+
+    /**
+     * @brief Clears all children of this node.
+     */
+    void clear_children()
+    {
+        m_children.clear();
     }
 };
 
@@ -172,7 +181,7 @@ template <typename LabelType>
 class LabeledTree
 {
 private:
-    Node<LabelType> *root; ///< A pointer to the root node of the tree.
+    std::shared_ptr<Node<LabelType>> root; ///< A shared pointer to the root node of the tree.
 
 public:
     /**
@@ -187,7 +196,7 @@ public:
      */
     LabeledTree(LabelType rootLabel)
     {
-        root = new Node<LabelType>(rootLabel);
+        root = std::make_shared<Node<LabelType>>(rootLabel);
     }
 
     /**
@@ -204,9 +213,9 @@ public:
     /**
      * @brief Construct a new Labeled Tree object from a root node.
      *
-     * @param root A pointer to the root node.
+     * @param root A shared pointer to the root node.
      */
-    LabeledTree(Node<LabelType> *root) : root(root) {}
+    LabeledTree(std::shared_ptr<Node<LabelType>> root) : root(root) {}
 
     /**
      * @brief Copy constructor for the LabeledTree class.
@@ -224,10 +233,26 @@ public:
      */
     ~LabeledTree()
     {
-        auto nodes = this->get_nodes();
-        for (auto node : nodes)
-        {
-            delete node;
+        // For large trees, we need to manually break the structure to avoid
+        // stack overflow during recursive destruction of shared_ptrs
+        if (root) {
+            std::stack<std::shared_ptr<Node<LabelType>>> stack;
+            stack.push(root);
+            
+            while (!stack.empty()) {
+                auto current = stack.top();
+                stack.pop();
+                
+                // Add children to stack before clearing them
+                for (auto& child : current->get_children()) {
+                    stack.push(child);
+                }
+                
+                // Clear children to break references
+                current->clear_children();
+            }
+            
+            root.reset();
         }
     }
 
@@ -244,7 +269,6 @@ public:
             return *this;
         }
 
-        delete root;
         root = copy_tree(other.root);
 
         return *this;
@@ -253,9 +277,9 @@ public:
     /**
      * @brief Gets the root of the tree.
      *
-     * @return A pointer to the root node.
+     * @return A shared pointer to the root node.
      */
-    Node<LabelType> *get_root() const
+    std::shared_ptr<Node<LabelType>> get_root() const
     {
         return root;
     }
@@ -273,9 +297,9 @@ public:
     /**
      * @brief Sets the root of the tree.
      *
-     * @param newRoot A pointer to the new root node.
+     * @param newRoot A shared pointer to the new root node.
      */
-    void set_root(Node<LabelType> *newRoot)
+    void set_root(std::shared_ptr<Node<LabelType>> newRoot)
     {
         root = newRoot;
     }
@@ -283,11 +307,11 @@ public:
     /**
      * @brief Gets all nodes in the tree.
      *
-     * @return A vector of pointers to all nodes in the tree.
+     * @return A vector of shared pointers to all nodes in the tree.
      */
-    std::vector<Node<LabelType> *> get_nodes() const
+    std::vector<std::shared_ptr<Node<LabelType>>> get_nodes() const
     {
-        std::vector<Node<LabelType> *> nodes;
+        std::vector<std::shared_ptr<Node<LabelType>>> nodes;
         collect_nodes(root, nodes);
         return nodes;
     }
@@ -309,16 +333,16 @@ private:
      * @brief Recursively copies a tree.
      *
      * @param node The root of the tree to copy.
-     * @return A pointer to the root of the new tree.
+     * @return A shared pointer to the root of the new tree.
      */
-    Node<LabelType> *copy_tree(Node<LabelType> *node)
+    std::shared_ptr<Node<LabelType>> copy_tree(std::shared_ptr<Node<LabelType>> node)
     {
         if (!node)
         {
             return nullptr;
         }
 
-        auto newNode = new Node<LabelType>(node->get_label());
+        auto newNode = std::make_shared<Node<LabelType>>(node->get_label());
         for (const auto &child : node->get_children())
         {
             newNode->push_back_child(copy_tree(child));
@@ -396,9 +420,9 @@ private:
      *
      * @param str The string representation of the tree.
      * @param strToLabel A function to convert a string to a label.
-     * @return A pointer to the root of the created tree.
+     * @return A shared pointer to the root of the created tree.
      */
-    Node<LabelType> *fromString(const std::string &str, std::function<LabelType(const std::string &)> strToLabel)
+    std::shared_ptr<Node<LabelType>> fromString(const std::string &str, std::function<LabelType(const std::string &)> strToLabel)
     {
         unsigned int pos = 0;
         if (str.empty() || !validate_tree(str))
@@ -406,10 +430,10 @@ private:
             throw std::invalid_argument("Invalid tree string. Error at position: " + std::to_string(pos));
         }
 
-        std::stack<Node<LabelType> *> nodeStack;
+        std::stack<std::shared_ptr<Node<LabelType>>> nodeStack;
         std::istringstream iss(str);
         char ch;
-        Node<LabelType> *currentNode, *root = nullptr;
+        std::shared_ptr<Node<LabelType>> currentNode, root = nullptr;
         while (iss >> ch)
         {
             if (ch == '(')
@@ -431,7 +455,7 @@ private:
                 LabelType label = strToLabel(labelStr);
                 if (nodeStack.empty())
                 {
-                    currentNode = root = new Node<LabelType>(label);
+                    currentNode = root = std::make_shared<Node<LabelType>>(label);
                     nodeStack.push(currentNode);
                 }
                 else
@@ -452,15 +476,15 @@ private:
      * @param node The root of the subtree.
      * @param nodes A reference to a vector to store the nodes.
      */
-    void collect_nodes(Node<LabelType> *node, std::vector<Node<LabelType> *> &nodes) const
+    void collect_nodes(std::shared_ptr<Node<LabelType>> node, std::vector<std::shared_ptr<Node<LabelType>>> &nodes) const
     {
         if (!node) return;
 
-        std::stack<Node<LabelType> *> stack;
+        std::stack<std::shared_ptr<Node<LabelType>>> stack;
         stack.push(node);
 
         while (!stack.empty()) {
-            Node<LabelType> *current = stack.top();
+            auto current = stack.top();
             stack.pop();
             nodes.push_back(current);
 
@@ -477,7 +501,7 @@ private:
      * @param node The root of the subtree.
      * @param oss The output string stream.
      */
-    void to_string_helper(const Node<LabelType> *node, std::ostringstream &oss) const
+    void to_string_helper(const std::shared_ptr<Node<LabelType>> node, std::ostringstream &oss) const
     {
         if (!node)
             return;
