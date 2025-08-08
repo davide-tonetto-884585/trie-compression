@@ -14,7 +14,8 @@ private:
     std::vector<uint64_t> m_chain_weights;       // weights of chains
 
 public:
-    ChainsDivisionSolver(const TreeDAWG<> &treeDAWG, uint16_t p)
+    ChainsDivisionSolver(const TreeDAWG<> &treeDAWG, const std::vector<uint64_t> &node_order, uint16_t p)
+
     {
         // compute number of nodes for bipartite graph
         uint64_t num_nodes = treeDAWG.get_num_nodes() + p;
@@ -23,9 +24,6 @@ public:
         // initialize perfect matching
         m_pm = PerfectMatching(num_nodes, max_edges);
 
-        // order tree nodes using xbwt pathsort and get equivalence classes ordered
-        XBWT xbwt = XBWT(treeDAWG);
-        std::vector<uint64_t> order = xbwt.get_node_order();
         std::vector<std::pair<uint64_t, uint64_t>> class_change_pos;
         uint64_t last_class = -1;
         for (uint64_t i = 0; i < order.size(); ++i)
