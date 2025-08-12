@@ -86,7 +86,11 @@ Notice that it is important to consider the order of the nodes of the two sets $
 
 Notice also that when we talk about the same $\treeset{1}$ node placed in $\treeset{2}$, we are referring to the corresponding node in $\treeset{2}$ that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets $\treeset{1}$ and $\treeset{2}$. In \cref{fig:bipartite_structure,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 \begin{example}[Vertices] \label{ex:reduction_vertices}
-    This example illustrates the structure of the bipartite graph vertices for the tree shown in \cref{fig:original_tree}. The nodes in this tree are labeled by their equivalence classes obtained from the minimization of the corresponding DAWG in \cref{ex:DAWG_minimization}. Our goal is to partition the tree's nodes into $p=2$ chains.
+    This example illustrates the structure of the bipartite graph vertices for the tree shown in \cref{fig:original_tree}. The nodes in this tree are labeled by their equivalence classes obtained from the minimization of the corresponding DAWG in \cref{ex:DAWG_minimization}. Our goal is to partition the tree's nodes into $p=2$ chains. The nodes of the tree are ordered according to \cref{alg:pathSort}, the order is the following: 
+    % 0 3 4 2 5 8 9 1 6 7 10
+    \[
+        a \prec h \prec i \prec d \prec e \prec l \prec m \prec b \prec c \prec f \prec g
+    \]
 
     \cref{fig:bipartite_structure} shows the corresponding bipartite graph. The graph is composed of:
     \begin{itemize}
@@ -125,7 +129,7 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
             child {node[accepting] (g) {D}}
             };
         \end{tikzpicture}
-        \caption{Tree resulting from DAWG minimization of \cref{fig:example_dawg}. Each node is labeled with its equivalence class.}
+        \caption{Tree DAWG of \cref{fig:example_dawg}. Each node is labeled with its equivalence class.}
         \label{fig:original_tree}
     \end{figure}
     
@@ -210,9 +214,9 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
 \begin{example}[Edges]
     Let's see a small example for each case. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, for each source, $p$ edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence classes in $\treeset{2}$.
 
-    In \cref{fig:reduction_small_examples}-(b), there is an example for the tree nodes' edges. For each node in $\treeset{1}$, edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$ after the corresponding node in $\treeset{2}$ (coming after the node itself in the ordering), and edges with weight $0$ are created and connected to the first node with the same class in $\treeset{2}$ after the corresponding node in $\treeset{2}$. As we can see from the image, we consider the first node in $\treeset{1}$ labelled $A$ that is connected to the node labelled $B$ with weight $1$, and to the node labelled $C$ with weight $1$, and to the second node labelled $A$ in $V_2$ with weight $0$.
+    In \cref{fig:reduction_small_examples}-(b), there is an example for the tree nodes' edges. For each node in $\treeset{1}$, edges with weight $1$ are created and connected to the first $p$ nodes with distinct equivalence class in $\treeset{2}$ after the corresponding node in $\treeset{2}$ (coming after the node itself in the ordering), and edges with weight $0$ are created and connected to the first node with the same class in $\treeset{2}$ after the corresponding node in $\treeset{2}$. As we can see from the image, we consider the first node in $\treeset{1}$ labelled $A$ that is connected to the node labelled $B$ with weight $1$, and to the node labelled $C$ with weight $1$, and to the second node labelled $A$ in $\treeset{2}$ with weight $0$.
 
-    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labeled $A$, which is connected to a node labeled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $V_1$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
+    Lastly, in \cref{fig:reduction_small_examples}-(c) there is an example for the destination nodes' edges. We start by considering the node in $\treeset{1}$ that is labeled $A$, which is connected to a node labeled $B$ with weight $1$. Then, since there is no node with the same class in $\treeset{2}$, we connect it to the destination nodes $d_1$ and $d_2$ with weight $0$. The same is done for the second node in $\treeset{1}$ that is labelled $B$ since no nodes are coming after it in the order; it is connected to the destination nodes $d_1$ and $d_2$ with weight $0$.
 
     \begin{figure}[H]
         \centering
@@ -341,11 +345,11 @@ Before we present the proof of the correctness of the reduction, let us state th
 \end{theorem}
 
 \begin{proof}
-    The $O(t (p + 1))$ edges come from the tree nodes, the $O(p^2)$ edges come from the sources since each source node is connected to $p$ nodes, and the $O(tp)$ edges come from the destination nodes since in the worst case we have $t$ distinct equivalence classes meaning that all the nodes are connected to the destination nodes. 
+    The $O(t (p + 1))$ edges come from the tree nodes, the $O(p^2)$ edges come from the sources since each source node is connected to $p$ nodes, and the $O(tp)$ edges come from the destination nodes since in the worst case we have $t$ distinct equivalence classes, which means that all the nodes are connected to the destination nodes. 
 \end{proof}
 
 \subsection{Proof of Correctness}
-In this section, we present the proof of the correctness of the reduction introduced in the previous sections. Let's start by stating the following lemmas.
+In this section, we present the proof of the correctness of the reduction introduced in the previous sections. Let us start by stating the following lemmas.
 
 \begin{comment}
 \begin{lemma} \label{lemma:all_destinations}
@@ -564,7 +568,7 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
     Since there is a cost-preserving bijection between the set of all valid partitions and the set of all perfect matchings, an optimal solution to one problem corresponds to an optimal solution to the other. Therefore, finding a minimum weight perfect matching in $G$ is equivalent to solving the \textsc{CHAINS-DIVISION} problem for $T$.
 \end{proof}
 
-\begin{example}
+\begin{example} \label{ex:reduction_ex}
     Consider the example in \cref{fig:reduction_example} where we have the bipartite graph for the tree in \cref{fig:original_tree} and $p = 2$. In \cref{fig:reduction_example}-(a) we have the resulting bipartite graph, and in \cref{fig:reduction_example}-(b) we have one of the possible minimum perfect matchings for the graph in (a) having weight $5$. At the end we can see that the optimal partition of the nodes of the tree $T$ is $C_1 = \{A,C,B,B,C\}$ and $C_2 = \{D,D,D,D,D,D\}$ with a total cost of $5$, this can be obtained starting from the sources and by following the edges of the nodes, jumping to the corresponding node in $V_1$ and following the edges again until we reach the destination nodes.
 
     \begin{figure}[H]

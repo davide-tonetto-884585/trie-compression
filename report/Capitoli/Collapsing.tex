@@ -1,0 +1,160 @@
+\section{Collapsing Nodes in Chains} \label{sec:collapsing}
+The next crucial step of our compression scheme is to reduce the space required by each chain by collapsing equivalent nodes. Specifically, any sequence of consecutive nodes within the same chain that belong to the same equivalence class is merged into a single representative node. This new node preserves the connectivity of the original structure by inheriting all distinct outgoing and ingoing edges from the nodes it replaces. In the following subsections we will introduce the concept of non-deterministic finite automaton and define how nodes are collapsed in a chain. Then, we prove that this transformation is language-preserving (see \cref{lemma:collapsing_equivalence}).
+
+\subsection{Non-deterministic Finite Automaton}
+We start by defining a non-deterministic finite automaton (NFA).  
+\begin{definition}[Non-deterministic Finite Automaton]
+    A non-deterministic finite automaton is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$, where:
+    \begin{itemize}[leftmargin=25pt]
+        \item $Q$ is a finite set of states.
+        \item $\Sigma$ is a finite set of symbols.
+        \item $\delta: Q \times \Sigma \cup \{\varepsilon\} \to \mathcal{P}(Q)$ is a transition function where $\mathcal{P}(Q)$ is the power set of $Q$.
+        \item $q_0 \in Q$ is the initial state.
+        \item $F \subseteq Q$ is the set of accept states.
+    \end{itemize}
+\end{definition}
+The main difference between a DFA and an NFA is that the latter allows for multiple transitions from a state on the same input symbol and the use of the empty string $\varepsilon$ as a transition.
+
+\subsection{How to Collapse Nodes}
+Now, we define the concept of collapsing consecutive equivalent nodes in a chain.
+\begin{definition}[Collapsing consecutive equivalent nodes]
+    \label{def:collapsing}
+    Let $V$ be the set of nodes of the tree, let $\Sigma$ be the alphabet, and let $E \subseteq V \times \Sigma \times V$ be the set of labeled edges.
+    Let $\mathcal{P} = \{C_1, C_2, \ldots, C_m\}$ be the set of all chains partitioning $V$.
+    
+    For each chain $C_i = (u_1^{(i)}, u_2^{(i)}, \ldots, u_{n_i}^{(i)}) \in \mathcal{P}$, partition it into maximal consecutive blocks $B_1^{(i)}, \ldots, B_{k_i}^{(i)}$, where each block $B_t^{(i)} = (u_j^{(i)}, \ldots, u_\ell^{(i)})$ satisfies $\equivsetfunc{u_r^{(i)}} = \equivsetfunc{u_s^{(i)}}$ for all $r,s \in \{j,\ldots,\ell\}$, and the block is maximal (cannot be extended).
+
+    The collapsed chain is $C_i' = (v_1^{(i)}, \ldots, v_{k_i}^{(i)})$, where each block $B_t^{(i)}$ is replaced by a single node $v_t^{(i)}$.
+    
+    Define the global collapse map $\Phi: V \to V'$ where $V' = \bigcup_{i=1}^m C_i'$, such that $\Phi(u) = v_t^{(i)}$ if $u \in B_t^{(i)}$ for some chain $C_i$ and block $B_t^{(i)}$.
+    
+    Then:
+    \begin{itemize}[leftmargin=25pt]
+        \item Two consecutive nodes $u_j^{(i)}, u_{j+1}^{(i)} \in C_i$ are collapsed into the same node if and only if $\equivsetfunc{u_j^{(i)}} = \equivsetfunc{u_{j+1}^{(i)}}$.
+        \item The edge set after collapsing all chains is
+        \[
+            E' \;=\; \{\, (\Phi(x), a, \Phi(y)) \;:\; (x,a,y) \in E \,\},
+        \]
+        where parallel duplicates are removed (i.e., $E'$ is treated as a set).
+    \end{itemize}
+\end{definition}
+
+\begin{example}
+    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,B,B,C\}$ and $C_2 = \{D,D,D,D,D,D\}$ for the tree DAWG in \cref{fig:example_dawg} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
+    \begin{itemize}
+        \item $C_1 = \{a,d,b,c,f\}$
+        \item $C_2 = \{h,i,e,l,m,g\}$
+    \end{itemize}
+    
+    Applying the collapsing operation from \cref{def:collapsing}:
+    \begin{itemize}
+        \item For $C_1 = (a,d,b,c,f)$ with classes $(A,C,B,B,C)$: 
+        \begin{itemize}
+            \item Block $B_1 = \{a\}$ (class $A$) $\rightarrow$ collapsed node $v_1$. The node $a$ is the initial state. It has two outgoing edges: $a \xrightarrow{0} b$ and $a \xrightarrow{1} c$. Since $b$ and $c$ collapse to $v_3$, both transitions become $v_1 \xrightarrow{0} v_3$ and $v_1 \xrightarrow{1} v_3$.
+            \item Block $B_2 = \{d\}$ (class $C$) $\rightarrow$ collapsed node $v_2$. The node $d$ has two outgoing edges: $d \xrightarrow{0} h$ and $d \xrightarrow{1} i$. As $h,i$ collapse to $w_1$, we obtain $v_2 \xrightarrow{0} w_1$ and $v_2 \xrightarrow{1} w_1$.
+            \item Block $B_3 = \{b,c\}$ (class $B$) $\rightarrow$ collapsed node $v_3$. The outgoing edges of $b$ and $c$ are:
+            \[
+                b \xrightarrow{0} d,\; b \xrightarrow{1} e,\qquad
+                c \xrightarrow{0} f,\; c \xrightarrow{1} g.
+            \]
+            After collapsing, we obtain:
+            \[
+                v_3 \xrightarrow{0} v_2, v_3 \xrightarrow{1} w_1,\qquad v_3 \xrightarrow{0} v_4, v_3 \xrightarrow{1} w_1.
+            \]
+            Since we have two identical edges $v_3 \xrightarrow{1} w_1$, we can remove one of them.
+            \item Block $B_4 = \{f\}$ (class $C$) $\rightarrow$ collapsed node $v_4$. The node $f$ has two outgoing edges: $f \xrightarrow{0} l$ and $f \xrightarrow{1} m$. As $l,m$ collapse to $w_1$, we obtain $v_4 \xrightarrow{0} w_1$ and $v_4 \xrightarrow{1} w_1$.
+        \end{itemize}
+        Result: $C_1' = (v_1, v_2, v_3, v_4)$ with classes $(A, C, B, C)$. Here, $v_1$ is the initial state.
+        
+        \item For $C_2 = (h,i,e,l,m,g)$ with classes $(D,D,D,D,D,D)$:
+        \begin{itemize}
+            \item Block $B_1 = \{h,i,e,l,m,g\}$ (all class $D$) $\rightarrow$ collapsed node $w_1$. The node $w_1$ collects all incoming edges formerly targeting any of $h,i,e,l,m,g$, and it is accepting.
+        \end{itemize}
+        Result: $C_2' = (w_1)$ with class $(D)$, and $w_1$ is the unique accepting state for this example.
+    \end{itemize}
+    
+    The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting NFA is shown in \cref{fig:minimized_chains}.
+
+    \begin{figure}[H]
+        \centering
+        \begin{tikzpicture}[->, >=stealth, node distance=3cm, on grid, auto]
+            \node[state, initial, initial text=] (v1) {$v_1$};
+            \node[state] (v2) [right=of v1] {$v_2$};
+            \node[state] (v3) [right=of v2] {$v_3$};
+            \node[state] (v4) [right=of v3] {$v_4$};
+            \node[state, accepting] (w1) [right=of v4] {$w_1$};
+        
+            \path (v1) edge [bend left] node {0} (v3)
+                    edge [bend right] node[below] {1} (v3)
+                % v2 -> w1 (due archi su ancoraggi diversi)
+                (v2) edge [out=30, in=140, looseness=1, shorten >=1pt] node {0} (w1.100)
+                    edge [out=-35, in=250, looseness=1, shorten >=1pt] node[below] {1} (w1.260)
+                % v3 -> v2 / v4 (rimangono)
+                (v3) edge [out=100, in=80, looseness=1] node[above] {0} (v2)
+                    edge [bend left] node {0} (v4)
+                % v3 -> w1 (un arco con angolo dedicato)
+                    edge [out=-30, in=220, looseness=1.3, shorten >=1pt] node[below] {1} (w1.230)
+                % v4 -> w1 (due archi su ancoraggi diversi)
+                (v4) edge [bend left] node {0} (w1)
+                    edge [bend right] node[below] {1} (w1);
+        \end{tikzpicture}
+        \caption{NFA obtained after collapsing equivalent nodes in chains $C_1$ and $C_2$.}
+        \label{fig:minimized_chains}
+    \end{figure} 
+\end{example}
+
+\subsection{Language Equivalence}
+Now, we need to prove that the language recognized by the NFA obtained after collapsing equivalent nodes in chains following \cref{def:collapsing} is equivalent to the language of the original tree DAWG. We define the language of an NFA or DAWG $F$ as $L(F)$.
+
+\begin{lemma}[Root forms a singleton class under Revuz]
+    \label{lemma:root_singleton}
+    In a tree DAWG minimized by Revuz’s algorithm (\cref{sec:revuz}), the root forms a singleton equivalence class.
+\end{lemma}
+\begin{proof}
+    Let $T$ be a tree DAWG, let $r$ be its root, and let $D = h(r)$ be its height as in \cref{def:height}. For every other node $u \neq r$ at depth $k \ge 1$, we have $h(u) \le D - k < D$. Hence $r$ is the unique state in the level $\Pi_D$. Since Revuz’s algorithm partitions by height and refines within each level, $r$ cannot be merged with any other state and thus forms its own equivalence class.
+\end{proof}
+
+\begin{lemma}[All leaves fall into the same class under Revuz]
+    \label{lemma:all_leaves_same_class}
+    In a tree DAWG minimized by Revuz’s algorithm, all leaves belong to the same equivalence class.
+\end{lemma}
+\begin{proof}
+    Every leaf $\ell$ is final and has no outgoing transitions, so $h(\ell) = 0$. In the base step on level $\Pi_0$, the label of a state depends only on its finality and on transitions to already distinguished classes. All leaves share the same label (final, no outgoing transitions), hence they are merged into a single equivalence class in $\Pi_0$.
+\end{proof}
+
+\begin{lemma}
+    \label{lemma:collapsing_equivalence}
+    Let $T$ be a tree DAWG with alphabet $\Sigma$. Let $C_1, C_2, \ldots, C_m$ be the chains partitioning $T$ as defined in \cref{def:problem_def}. Let $N$ be the NFA obtained after collapsing equivalent nodes in chains $C_1, C_2, \ldots, C_m$ as defined in \cref{def:collapsing}. Then, $L(N) = L(T)$.
+\end{lemma}
+
+\begin{proof}
+    We prove the equality $L(N) = L(T)$ by showing both inclusions $L(T) \subseteq L(N)$ and $L(N) \subseteq L(T)$.
+
+    \textbf{($L(T) \subseteq L(N)$):} Let $w \in L(T)$. Then there exists an accepting path in $T$ from the root to some accepting state:
+    \[
+        q_0 \xrightarrow{a_1} q_1 \xrightarrow{a_2} q_2 \xrightarrow{a_3} \cdots \xrightarrow{a_n} q_n
+    \]
+    where $q_0$ is the root, $q_n$ is accepting, and $w = a_1a_2\ldots a_n$.
+
+    By \cref{def:collapsing}, each node $q_i$ in the original tree is mapped to a collapsed node $\Phi(q_i)$ in $N$. Since the collapse map preserves all edges (by the definition of $E'$), there exists a corresponding path in $N$:
+    \[
+        \Phi(q_0) \xrightarrow{a_1} \Phi(q_1) \xrightarrow{a_2} \Phi(q_2) \xrightarrow{a_3} \cdots \xrightarrow{a_n} \Phi(q_n)
+    \]
+    Since $q_0$ is the root of $T$, by \cref{lemma:root_singleton} its image $\Phi(q_0)$ is the unique initial state of $N$. Since $q_n$ is accepting in $T$, by \cref{lemma:all_leaves_same_class} its image $\Phi(q_n)$ lies in the unique leaf class, which is marked accepting in $N$. Hence, $w \in L(N)$.
+
+    \textbf{($L(N) \subseteq L(T)$):} Let $w \in L(N)$. Then there exists an accepting path in $N$:
+    \[
+        v_0 \xrightarrow{a_1} v_1 \xrightarrow{a_2} v_2 \xrightarrow{a_3} \cdots \xrightarrow{a_n} v_n
+    \]
+    where $v_0$ is the initial state, $v_n$ is accepting, and $w = a_1a_2\ldots a_n$.
+
+    Each collapsed node $v_i$ corresponds to some block $B_t^{(j)}$ in the original tree. By \cref{def:collapsing}, every edge $(v_{i-1}, a_i, v_i)$ in $N$ corresponds to at least one edge $(u, a_i, u')$ in the original tree $T$, where $\Phi(u) = v_{i-1}$ and $\Phi(u') = v_i$.
+
+    Since the chains preserve the ordering from the original tree structure, we can construct a valid path in $T$ by selecting appropriate representatives from each collapsed block. Specifically, we can choose nodes $u_0, u_1, \ldots, u_n$ in $T$ such that $\Phi(u_i) = v_i$ and $(u_{i-1}, a_i, u_i) \in E$ for all $i = 1, \ldots, n$.
+
+    Since $v_0$ corresponds to the root block and $v_n$ is accepting, for \cref{lemma:root_singleton,lemma:all_leaves_same_class} we have $u_0$ as the root and $u_n$ as an accepting state in $T$ respectively. Therefore, $w \in L(T)$.
+
+    Thus, $L(N) = L(T)$.
+\end{proof}
+
+Collapsing the nodes as in \cref{def:collapsing} preserves the language of the original tree DAWG and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}, which we present in the next chapter.
