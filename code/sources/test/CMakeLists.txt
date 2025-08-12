@@ -1,6 +1,6 @@
 # Build the test executable
 add_executable(dawg_test test.cpp)
-target_link_libraries(dawg_test PUBLIC DAWG)
+target_link_libraries(dawg_test PUBLIC DAWG CDS)
 
 # Add debug symbols for better Valgrind output
 target_compile_options(dawg_test PRIVATE -g -O0)

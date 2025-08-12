@@ -7,6 +7,7 @@ FetchContent_Declare(
   sdsl
   GIT_REPOSITORY https://github.com/simongog/sdsl-lite.git
   GIT_TAG v2.1.1
+  GIT_SHALLOW TRUE
 )
 
 FetchContent_GetProperties(sdsl)
@@ -42,5 +43,110 @@ if(NOT sdsl_POPULATED)
 endif()
 
 ##########################################################################
+# LEMON
 
+FetchContent_Declare(
+  lemon
+  URL https://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz
+  URL_HASH SHA256=71b7c725f4c0b4a8ccb92eb87b208701586cf7a96156ebd821ca3ed855bad3c8
+)
 
+FetchContent_GetProperties(lemon)
+if(NOT lemon_POPULATED)
+  FetchContent_Populate(lemon)
+  
+  # Configure LEMON build options
+  set(LEMON_ENABLE_GLPK OFF CACHE BOOL "Disable GLPK support")
+  set(LEMON_ENABLE_ILOG_CPLEX OFF CACHE BOOL "Disable CPLEX support")
+  set(LEMON_ENABLE_COIN OFF CACHE BOOL "Disable COIN support")
+  set(LEMON_ENABLE_SOPLEX OFF CACHE BOOL "Disable SoPlex support")
+  
+  add_subdirectory(${lemon_SOURCE_DIR} ${lemon_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+##########################################################################
+# Boost library
+
+FetchContent_Declare(
+  Boost
+  GIT_REPOSITORY https://github.com/boostorg/boost.git
+  GIT_TAG boost-1.88.0
+  GIT_SHALLOW TRUE
+)
+
+FetchContent_GetProperties(Boost)
+if(NOT boost_POPULATED)
+  FetchContent_Populate(Boost)
+  
+  # Configure Boost build options
+  set(BOOST_ENABLE_CMAKE ON CACHE BOOL "Enable CMake support for Boost")
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries")
+  
+  # Only build the libraries we need
+  set(BOOST_INCLUDE_LIBRARIES 
+      graph
+      system
+      filesystem
+      algorithm
+      CACHE STRING "Boost libraries to build")
+  
+  add_subdirectory(${boost_SOURCE_DIR} ${boost_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+##########################################################################
+# Blossom V - Minimum Cost Perfect Matching
+
+FetchContent_Declare(
+  blossom5
+  URL https://pub.ista.ac.at/~vnk/software/blossom5-v2.05.src.tar.gz
+)
+
+FetchContent_GetProperties(blossom5)
+if(NOT blossom5_POPULATED)
+  FetchContent_Populate(blossom5)
+  
+  # Fix pointer type issue for 64-bit systems
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit system
+    file(READ ${blossom5_SOURCE_DIR}/PMimplementation.h PMIMPL_CONTENT)
+    string(REPLACE "typedef unsigned long POINTER_TYPE;" 
+                   "typedef uintptr_t POINTER_TYPE;" 
+                   PMIMPL_CONTENT "${PMIMPL_CONTENT}")
+    string(REPLACE "#include <stdio.h>" 
+                   "#include <stdio.h>\n#include <stdint.h>" 
+                   PMIMPL_CONTENT "${PMIMPL_CONTENT}")
+    file(WRITE ${blossom5_SOURCE_DIR}/PMimplementation.h "${PMIMPL_CONTENT}")
+    message(STATUS "Applied 64-bit pointer fix to Blossom V")
+  endif()
+  
+  # Create CMakeLists.txt for Blossom V
+  file(WRITE ${blossom5_SOURCE_DIR}/CMakeLists.txt "
+    cmake_minimum_required(VERSION 3.13)
+    project(blossom5)
+    
+    set(BLOSSOM5_SOURCES
+        PMduals.cpp
+        PMexpand.cpp
+        PMinit.cpp
+        PMinterface.cpp
+        PMmain.cpp
+        PMrepair.cpp
+        PMshrink.cpp
+        MinCost/MinCost.cpp
+    )
+    
+    add_library(blossom5 STATIC \${BLOSSOM5_SOURCES})
+    target_include_directories(blossom5 PUBLIC .)
+    set_target_properties(blossom5 PROPERTIES CXX_STANDARD 11)
+    
+    # Disable problematic warnings
+    if(MSVC)
+        target_compile_options(blossom5 PRIVATE /wd4267 /wd4244)
+    else()
+        target_compile_options(blossom5 PRIVATE -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast)
+    endif()
+  ")
+  
+  add_subdirectory(${blossom5_SOURCE_DIR} ${blossom5_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+##########################################################################

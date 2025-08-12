@@ -2,3 +2,5 @@ set(DAWG_SOURCES DAWG.hpp TreeDAWG.hpp)
 
 add_library(DAWG OBJECT ${DAWG_SOURCES})
 set_target_properties(DAWG PROPERTIES LINKER_LANGUAGE CXX)
+
+target_link_libraries(DAWG PRIVATE LabeledTree)
