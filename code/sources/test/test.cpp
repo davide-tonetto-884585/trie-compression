@@ -4,6 +4,9 @@
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <vector>
+#include "../../include/XBWT/XBWT.hpp"
+#include "../../include/ChainsDivisionSolver/ChainsDivisionSolver.hpp"
 
 // Function to convert tree structure to balanced parentheses
 std::string tree_to_balanced_parentheses(const TreeDAWG<char> &tree_dawg)
@@ -33,50 +36,10 @@ std::string tree_to_balanced_parentheses(const TreeDAWG<char> &tree_dawg)
 
 int main()
 {
-    // test albero
-    TreeDAWG<char> tree_dawg;
+    bool verbose = false;
 
-    // Node mapping from character labels to integer IDs
-    std::unordered_map<char, size_t> char_to_id;
-    char_to_id['a'] = tree_dawg.add_node();
-    char_to_id['b'] = tree_dawg.add_node();
-    char_to_id['c'] = tree_dawg.add_node();
-    char_to_id['d'] = tree_dawg.add_node();
-    char_to_id['e'] = tree_dawg.add_node();
-    char_to_id['f'] = tree_dawg.add_node();
-    char_to_id['g'] = tree_dawg.add_node();
-    char_to_id['h'] = tree_dawg.add_node();
-    char_to_id['i'] = tree_dawg.add_node();
-    char_to_id['l'] = tree_dawg.add_node();
-    char_to_id['m'] = tree_dawg.add_node();
-
-    // Use configure_state for the tree as well
-    tree_dawg.configure_state(char_to_id['a'], {{'0', char_to_id['b']}, {'1', char_to_id['c']}});
-    tree_dawg.configure_state(char_to_id['b'], {{'0', char_to_id['d']}, {'1', char_to_id['e']}});
-    tree_dawg.configure_state(char_to_id['c'], {{'0', char_to_id['f']}, {'1', char_to_id['g']}});
-    tree_dawg.configure_state(char_to_id['d'], {{'0', char_to_id['h']}, {'1', char_to_id['i']}});
-    tree_dawg.configure_state(char_to_id['f'], {{'0', char_to_id['l']}, {'1', char_to_id['m']}});
-    // Final states (e, g, h, i, l, m) already set during add_node
-
-    tree_dawg.set_initial_state(char_to_id['a']);
-
-    // Print as balanced parentheses
-    std::string balanced_parentheses = tree_to_balanced_parentheses(tree_dawg);
-    std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
-
-    // Run minimization
-    tree_dawg.minimize(); // Assuming it's a tree
-
-    // Print DAWG information using to_string method
-    std::cout << tree_dawg.to_string();
-
-    std::cout << "--------------------" << std::endl;
-
-    // test with generated trees
-    std::string str = "(A(B(D(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(a))(E(B(D(a))(a)(E(C(C(C(C(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b))(a)(B(a)))(D(E(c)))(D(B(a))(a)(B(c)))(b)))(C(D(c))(b)(D(c)))(B(D(b)))(B(D(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b)))(b)))(C(D(c))(b)(D(c)))(B(D(b))))";
-    // str = "(a(b(c(b(c(x)(y)(z))))))";
-
-    std::string filename = "tree_generator/generated_trees/tree_bf4_t5_rp40_td4-6_letters8_mn1000000_s42.txt";
+    std::string filename = "tree_generator/generated_trees/tree_bf3_rp50_sd1-5_letters8_mn100000_s42.txt";
+    std::string str = "(1(0(0(0)(1))(1))(1(0(0)(1))(1)))";
 
     // Read input string from file
     std::ifstream inputFile(filename);
@@ -91,22 +54,94 @@ int main()
         return 1;
     }
 
-    LabeledTree<char> tree(str, [](const std::string &s)
-                           { return s[0]; });
+    if (verbose)
+        std::cout << "Input string: " << str << std::endl;
 
-    std::cout << "Building DAWG from tree..." << std::endl;
-    TreeDAWG<char> tree_dawg2(tree);
+    std::cout << "Parsing tree..." << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    LabeledTree<char> tree(str, [](const std::string &label) -> char
+                           { return label[0]; });
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Tree construction time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " ms" << std::endl;
+
+    std::cout << "Number of nodes: " << tree.get_nodes().size() << std::endl;
+
+    if (verbose)
+        std::cout << "Tree: " << tree.to_string() << std::endl;
+
+    // build an XBWT
+    std::vector<unsigned int> intNodesPosSorted{};
+    std::vector<unsigned int> testIntNodesPosSorted{};
+
+    // Measure time for XBWT construction
+    std::cout << "Building XBWT..." << std::endl;
+    /* start = std::chrono::high_resolution_clock::now();
+    XBWT<char> xbwt(tree, true, verbose, &intNodesPosSorted);
+    end = std::chrono::high_resolution_clock::now();
+    std::cout << std::endl
+              << "XBWT construction time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " ms" << std::endl; */
+
+    start = std::chrono::high_resolution_clock::now();
+    XBWT<char> xbwt2(tree, false, verbose, &testIntNodesPosSorted);
+    end = std::chrono::high_resolution_clock::now();
+    std::cout << std::endl
+              << "XBWT construction time no path sort: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+              << " ms" << std::endl;
+
+    /* if (intNodesPosSorted != testIntNodesPosSorted)
+        throw std::runtime_error("IntNodesPosSorted is not correct"); */
+
+    // test albero
+    std::cout << "Building Tree DAWG..." << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    TreeDAWG<char> tree_dawg(tree);
+    end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Tree DAWG construction completed in " << duration.count() << " ms" << std::endl;
 
     // Print as balanced parentheses
-    // balanced_parentheses = tree_to_balanced_parentheses(tree_dawg2);
-    // std::cout << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
+    if (verbose)
+    {
+        std::string balanced_parentheses = tree_to_balanced_parentheses(tree_dawg);
+        std::cout << std::endl
+                  << "Tree as balanced parentheses: " << balanced_parentheses << std::endl;
+    }
 
-    auto start_time = std::chrono::high_resolution_clock::now();
-    tree_dawg2.minimize();
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-    std::cout << "Minimization took: " << duration.count() << " ms" << std::endl;
-    // std::cout << tree_dawg2.to_string();
+    // Run minimization
+    std::cout << "Minimizing Tree DAWG..." << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    tree_dawg.minimize(); // Assuming it's a tree
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Minimization completed in " << duration.count() << " ms" << std::endl;
+
+    // Print DAWG information using to_string method
+    if (verbose)
+        std::cout << tree_dawg.to_string() << std::endl;
+
+    uint16_t p = 2;
+    std::vector<uint64_t> node_order(testIntNodesPosSorted.begin(), testIntNodesPosSorted.end());
+    
+    std::cout << "Building bipartite graph..." << std::endl;
+    auto start_construction = std::chrono::high_resolution_clock::now();
+    ChainsDivisionSolver solver(tree_dawg, node_order, p, verbose);
+    auto end_construction = std::chrono::high_resolution_clock::now();
+    auto construction_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_construction - start_construction);
+    std::cout << "Construction time: " << construction_time.count() << " ms" << std::endl;
+    
+    std::cout << "Solving minimum weight perfect matching..." << std::endl;
+    auto start_solving = std::chrono::high_resolution_clock::now();
+    auto chains = solver.solve(verbose);
+    auto end_solving = std::chrono::high_resolution_clock::now();
+    auto solving_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_solving - start_solving);
+    std::cout << "Solving time: " << solving_time.count() << " ms" << std::endl;
+
+    std::cout << "--------------------" << std::endl;
 
     return 0;
 }

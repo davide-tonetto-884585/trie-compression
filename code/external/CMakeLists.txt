@@ -45,53 +45,24 @@ endif()
 ##########################################################################
 # LEMON
 
-FetchContent_Declare(
-  lemon
-  URL https://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz
-  URL_HASH SHA256=71b7c725f4c0b4a8ccb92eb87b208701586cf7a96156ebd821ca3ed855bad3c8
-)
-
-FetchContent_GetProperties(lemon)
-if(NOT lemon_POPULATED)
-  FetchContent_Populate(lemon)
-  
-  # Configure LEMON build options
-  set(LEMON_ENABLE_GLPK OFF CACHE BOOL "Disable GLPK support")
-  set(LEMON_ENABLE_ILOG_CPLEX OFF CACHE BOOL "Disable CPLEX support")
-  set(LEMON_ENABLE_COIN OFF CACHE BOOL "Disable COIN support")
-  set(LEMON_ENABLE_SOPLEX OFF CACHE BOOL "Disable SoPlex support")
-  
-  add_subdirectory(${lemon_SOURCE_DIR} ${lemon_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
-##########################################################################
-# Boost library
-
-FetchContent_Declare(
-  Boost
-  GIT_REPOSITORY https://github.com/boostorg/boost.git
-  GIT_TAG boost-1.88.0
-  GIT_SHALLOW TRUE
-)
-
-FetchContent_GetProperties(Boost)
-if(NOT boost_POPULATED)
-  FetchContent_Populate(Boost)
-  
-  # Configure Boost build options
-  set(BOOST_ENABLE_CMAKE ON CACHE BOOL "Enable CMake support for Boost")
-  set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries")
-  
-  # Only build the libraries we need
-  set(BOOST_INCLUDE_LIBRARIES 
-      graph
-      system
-      filesystem
-      algorithm
-      CACHE STRING "Boost libraries to build")
-  
-  add_subdirectory(${boost_SOURCE_DIR} ${boost_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+# FetchContent_Declare(
+#   lemon
+#   URL https://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz
+#   URL_HASH SHA256=71b7c725f4c0b4a8ccb92eb87b208701586cf7a96156ebd821ca3ed855bad3c8
+# )
+# 
+# FetchContent_GetProperties(lemon)
+# if(NOT lemon_POPULATED)
+#   FetchContent_Populate(lemon)
+#   
+#   # Configure LEMON build options
+#   set(LEMON_ENABLE_GLPK OFF CACHE BOOL "Disable GLPK support")
+#   set(LEMON_ENABLE_ILOG_CPLEX OFF CACHE BOOL "Disable CPLEX support")
+#   set(LEMON_ENABLE_COIN OFF CACHE BOOL "Disable COIN support")
+#   set(LEMON_ENABLE_SOPLEX OFF CACHE BOOL "Disable SoPlex support")
+#   
+#   add_subdirectory(${lemon_SOURCE_DIR} ${lemon_BINARY_DIR} EXCLUDE_FROM_ALL)
+# endif()
 
 ##########################################################################
 # Blossom V - Minimum Cost Perfect Matching

@@ -687,10 +687,10 @@ std::vector<unsigned int> XBWT<T>::path_sort_merge(std::vector<unsigned int> &in
         merged.erase(merged.begin());
     }
 
-    std::cout << "Merged: " << std::endl;
+    /* std::cout << "Merged: " << std::endl;
     for (unsigned int i = 0; i < merged.size(); ++i)
         std::cout << merged[i] << " ";
-    std::cout << std::endl;
+    std::cout << std::endl; */
 
     return merged;
 }

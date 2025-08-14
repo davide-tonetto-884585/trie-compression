@@ -1,7 +1,7 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
 The next crucial step of our compression scheme is to reduce the space required by each chain by collapsing equivalent nodes. Specifically, any sequence of consecutive nodes within the same chain that belong to the same equivalence class is merged into a single representative node. This new node preserves the connectivity of the original structure by inheriting all distinct outgoing and ingoing edges from the nodes it replaces. In the following subsections we will introduce the concept of non-deterministic finite automaton and define how nodes are collapsed in a chain. Then, we prove that this transformation is language-preserving (see \cref{lemma:collapsing_equivalence}).
 
-\subsection{Non-deterministic Finite Automaton}
+\subsection{Non-deterministic Finite Automata}
 We start by defining a non-deterministic finite automaton (NFA).  
 \begin{definition}[Non-deterministic Finite Automaton]
     A non-deterministic finite automaton is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$, where:

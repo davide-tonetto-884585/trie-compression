@@ -78,14 +78,14 @@ class TreeNode:
 
 
 class RepetitiveTreeGenerator:
-    """Generates trees with repetitive subtree patterns."""
+    """Generates trees with repetitive subtree patterns using copy-paste approach."""
 
     def __init__(
         self,
         max_branching_factor: int = 3,
-        num_subtree_templates: int = 3,
         repetition_probability: float = 0.7,
-        template_depth_range: Tuple[int, int] = (2, 4),
+        min_subtree_depth: int = 1,
+        max_subtree_depth: int = 5,
         alphabet_type: str = "letters",
         alphabet_size: int = 26,
         max_nodes: Optional[int] = None,
@@ -96,18 +96,18 @@ class RepetitiveTreeGenerator:
 
         Args:
             max_branching_factor: Maximum number of children per node
-            num_subtree_templates: Number of different subtree templates to create
-            repetition_probability: Probability of reusing an existing template vs creating new
-            template_depth_range: (min, max) depth range for subtree templates
+            repetition_probability: Probability of copying an existing subtree vs creating new
+            min_subtree_depth: Minimum depth of subtrees to extract for copying
+            max_subtree_depth: Maximum depth of subtrees to extract for copying
             alphabet_type: "letters" for a-z or "numbers" for 1-n
             alphabet_size: Size of alphabet (max 26 for letters, any positive int for numbers)
             max_nodes: Maximum number of nodes in the generated tree (None for no limit)
             seed: Random seed for reproducible generation
         """
         self.max_branching_factor = max_branching_factor
-        self.num_subtree_templates = num_subtree_templates
         self.repetition_probability = repetition_probability
-        self.template_depth_range = template_depth_range
+        self.min_subtree_depth = min_subtree_depth
+        self.max_subtree_depth = max_subtree_depth
         self.alphabet_type = alphabet_type
         self.alphabet_size = (
             min(alphabet_size, 26) if alphabet_type == "letters" else alphabet_size
@@ -117,18 +117,13 @@ class RepetitiveTreeGenerator:
         if seed is not None:
             random.seed(seed)
 
-        # Storage for subtree templates
-        self.subtree_templates: List[TreeNode] = []
-        self.template_usage_count: List[int] = []
-        self.template_sizes: List[int] = []  # Cache template sizes for performance
+        # Storage for tracking repetitions
+        self.copied_subtrees: List[TreeNode] = []  # Store references to copied subtrees
         self.next_node_id = 0
         self.current_node_count = 0  # Track current number of nodes in the tree
 
         # Generate alphabet
         self._generate_alphabet()
-
-        # Generate initial subtree templates
-        self._generate_subtree_templates()
 
     def _generate_alphabet(self):
         """Generate the alphabet based on the specified type and size."""
@@ -151,31 +146,60 @@ class RepetitiveTreeGenerator:
         """Pick a random label from the alphabet."""
         return random.choice(self.alphabet)
 
-    def _generate_subtree_templates(self):
-        """Generate the initial set of subtree templates."""
-        for i in range(self.num_subtree_templates):
-            template_depth = random.randint(*self.template_depth_range)
-            template = self._create_random_subtree(template_depth)
-            self.subtree_templates.append(template)
-            self.template_usage_count.append(0)
-            self.template_sizes.append(template.size())  # Cache the size
+    def _collect_subtrees(self, root: TreeNode) -> List[TreeNode]:
+        """Sample random nodes and collect subtrees rooted at them up to max depth."""
+        # Collect all nodes in the tree first
+        all_nodes = []
+        stack = [root]
+        
+        while stack:
+            node = stack.pop()
+            all_nodes.append(node)
+            stack.extend(node.children)
+        
+        # Sample random nodes (limit to avoid too many candidates)
+        num_samples = min(50, len(all_nodes))
+        if len(all_nodes) <= num_samples:
+            sampled_nodes = all_nodes
+        else:
+            sampled_nodes = random.sample(all_nodes, num_samples)
+        
+        # For each sampled node, create a subtree with random depth between min and max
+        subtrees = []
+        for node in sampled_nodes:
+            # Sample a random depth between min_subtree_depth and max_subtree_depth
+            random_depth = random.randint(self.min_subtree_depth, self.max_subtree_depth)
+            subtree = self._extract_subtree_with_max_depth(node, random_depth)
+            subtrees.append(subtree)
+        
+        return subtrees
 
-    def _create_random_subtree(self, max_depth: int) -> TreeNode:
-        """Create a random subtree with the given maximum depth using alphabet labels."""
-        root = TreeNode(label=self._get_rand_label(), children=[])
-        root.node_id = self._get_next_node_id()
+    def _extract_subtree_with_max_depth(self, root_node: TreeNode, max_depth: int) -> TreeNode:
+        """Extract a subtree rooted at the given node up to the specified maximum depth."""
+        if max_depth <= 0:
+            return None
+            
+        def copy_with_depth_limit(node: TreeNode, remaining_depth: int) -> TreeNode:
+            # Create a copy of the current node
+            new_node = TreeNode(
+                label=node.label,
+                children=[],
+                node_id=None  # Will be assigned later when actually used
+            )
+            
+            # If we still have depth remaining, copy children
+            if remaining_depth > 1:
+                for child in node.children:
+                    child_copy = copy_with_depth_limit(child, remaining_depth - 1)
+                    if child_copy:
+                        new_node.add_child(child_copy)
+            
+            return new_node
+        
+        return copy_with_depth_limit(root_node, max_depth)
 
-        if max_depth > 1:
-            num_children = random.randint(1, min(self.max_branching_factor, 3))
-            for _ in range(num_children):
-                child = self._create_random_subtree(max_depth - 1)
-                root.add_child(child)
-
-        return root
-
-    def _copy_subtree_template(self, template: TreeNode) -> TreeNode:
-        """Create a copy of a subtree template preserving original labels but with new node IDs."""
-
+    def _copy_subtree(self, source: TreeNode) -> TreeNode:
+        """Create a deep copy of a subtree with new node IDs but preserving labels."""
         def copy_node(node: TreeNode) -> TreeNode:
             new_node = TreeNode(
                 label=node.label,  # Preserve original label
@@ -186,74 +210,39 @@ class RepetitiveTreeGenerator:
                 new_node.add_child(copy_node(child))
             return new_node
 
-        return copy_node(template)
+        copied = copy_node(source)
+        # Store the size of the copied subtree for accurate statistics
+        copied_size = source.size()
+        self.copied_subtrees.append((copied, copied_size))
+        return copied
 
-    def _add_template_leaves_to_stack(self, node: TreeNode, stack: list):
-        """Add leaf nodes of a template subtree to the stack for iterative processing."""
-        # Check if we've exceeded max nodes before continuing
-        if self.max_nodes is not None and self.current_node_count >= self.max_nodes:
-            return
-            
-        # Use a temporary stack to find all leaf nodes iteratively
-        temp_stack = [node]
-        
-        while temp_stack:
-            current = temp_stack.pop()
-            
-            if current.is_leaf():
-                # This is a leaf node, add it to the main stack for processing
-                stack.append(current)
-            else:
-                # Add children to temporary stack to continue searching for leaves
-                for child in current.children:
-                    temp_stack.append(child)
+    def _should_copy_subtree(self, available_subtrees: List[TreeNode]) -> bool:
+        """Decide whether to copy an existing subtree or create a new node."""
+        # Only copy if we have available subtrees and meet probability threshold
+        return len(available_subtrees) > 0 and random.random() < self.repetition_probability
 
-    def _should_use_template(self) -> bool:
-        """Decide whether to use a template or create a new subtree."""
-        # Use the base repetition probability without depth adjustment
-        return random.random() < self.repetition_probability
-
-    def _select_template(self) -> int:
-        """Select a template to use, with preference for less-used templates."""
-        if not self.template_usage_count:
-            return 0
-
-        # Calculate weights inversely proportional to usage count
-        max_usage = max(self.template_usage_count) + 1
-        weights = [max_usage - count for count in self.template_usage_count]
-
-        # Weighted random selection
-        total_weight = sum(weights)
-        if total_weight == 0:
-            return random.randint(0, len(self.subtree_templates) - 1)
-
-        rand_val = random.uniform(0, total_weight)
-        cumulative = 0
-        for i, weight in enumerate(weights):
-            cumulative += weight
-            if rand_val <= cumulative:
-                return i
-
-        return len(self.subtree_templates) - 1
+    def _select_subtree_to_copy(self, available_subtrees: List[TreeNode]) -> TreeNode:
+        """Select a random subtree from available options."""
+        return random.choice(available_subtrees)
 
     def generate_tree(self) -> TreeNode:
-        """Generate a repetitive tree."""
-        # Reset usage counters for new tree
-        self.template_usage_count = [0] * len(self.subtree_templates)
-        # Reset node counter
+        """Generate a repetitive tree using copy-paste approach."""
+        # Reset counters for new tree
+        self.copied_subtrees = []
         self.current_node_count = 0
 
         root = TreeNode(label=self._get_rand_label(), children=[])
         root.node_id = self._get_next_node_id()
-        self.current_node_count += 1  # Count the root node
+        self.current_node_count += 1
 
-        self._build_tree_recursive(root)
+        self._build_tree_iterative(root)
         return root
 
-    def _build_tree_recursive(self, parent: TreeNode):
-        """Iteratively build the tree with repetitive patterns."""
-        # Use a stack to simulate recursion: (node, depth)
-        stack = [parent]
+    def _build_tree_iterative(self, root: TreeNode):
+        """Build the tree iteratively with copy-paste repetitive patterns."""
+        stack = [root]
+        available_subtrees = []  # Cache available subtrees
+        subtree_collection_interval = 50  # Collect subtrees every N nodes
         
         while stack:
             current_node = stack.pop()
@@ -262,59 +251,88 @@ class RepetitiveTreeGenerator:
             if self.max_nodes is not None and self.current_node_count >= self.max_nodes:
                 break
 
-            num_children = random.randint(1, self.max_branching_factor)
+            # Periodically collect available subtrees to avoid expensive repeated collection
+            if self.current_node_count % subtree_collection_interval == 0:
+                available_subtrees = self._collect_subtrees(root)
+            
+            # Limit the number of children based on remaining node budget
+            max_possible_children = self.max_branching_factor
+            if self.max_nodes is not None:
+                remaining_nodes = self.max_nodes - self.current_node_count
+                max_possible_children = min(max_possible_children, remaining_nodes)
+            
+            if max_possible_children <= 0:
+                break
+                
+            num_children = random.randint(1, max_possible_children)
 
             for _ in range(num_children):
                 # Check node limit before creating each child
                 if self.max_nodes is not None and self.current_node_count >= self.max_nodes:
                     break
+                
+                # Decide whether to copy an existing subtree or create a new node
+                if self._should_copy_subtree(available_subtrees):
+                    # Copy an existing subtree
+                    source_subtree = self._select_subtree_to_copy(available_subtrees)
+                    subtree_size = source_subtree.size()
                     
-                if (
-                    len(self.subtree_templates) > 0
-                    and self._should_use_template()
-                ):
-                    # Use a template
-                    template_idx = self._select_template()
-                    template = self.subtree_templates[template_idx]
-                    
-                    # Check if adding this template would exceed node limit
-                    template_size = self.template_sizes[template_idx]  # Use cached size
-                    if self.max_nodes is not None and self.current_node_count + template_size > self.max_nodes:
-                        # Skip this template and create a single node instead
+                    # Check if adding this subtree would exceed node limit
+                    if self.max_nodes is not None and self.current_node_count + subtree_size > self.max_nodes:
+                        # Skip copying and create a single node instead
                         child = TreeNode(label=self._get_rand_label(), children=[])
                         child.node_id = self._get_next_node_id()
                         current_node.add_child(child)
                         self.current_node_count += 1
                         stack.append(child)
                     else:
-                        child = self._copy_subtree_template(template)
-                        self.template_usage_count[template_idx] += 1
+                        # Copy the selected subtree
+                        child = self._copy_subtree(source_subtree)
                         current_node.add_child(child)
-                        self.current_node_count += template_size
+                        self.current_node_count += subtree_size
                         
-                        # Add template leaves to stack with adjusted depth
-                        self._add_template_leaves_to_stack(child, stack)
+                        # Add leaf nodes of copied subtree to stack for further expansion
+                        self._add_leaves_to_stack(child, stack)
                 else:
-                    # Create a new subtree
+                    # Create a new single node
                     child = TreeNode(label=self._get_rand_label(), children=[])
                     child.node_id = self._get_next_node_id()
                     current_node.add_child(child)
                     self.current_node_count += 1
                     stack.append(child)
 
+    def _add_leaves_to_stack(self, node: TreeNode, stack: list):
+        """Add leaf nodes of a subtree to the stack for further processing."""
+        # Check if we've exceeded max nodes before continuing
+        if self.max_nodes is not None and self.current_node_count >= self.max_nodes:
+            return
+            
+        temp_stack = [node]
+        leaves_added = 0
+        max_leaves_to_add = 20  # Limit the number of leaves added at once
+        
+        while temp_stack and leaves_added < max_leaves_to_add:
+            current = temp_stack.pop()
+            
+            if current.is_leaf():
+                # This is a leaf node, add it to the main stack for processing
+                stack.append(current)
+                leaves_added += 1
+            else:
+                # Add children to temporary stack to continue searching for leaves
+                temp_stack.extend(current.children)
+
     def get_statistics(self, tree: TreeNode) -> Dict:
         """Get statistics about the generated tree."""
         tree_size = tree.size()
-        template_nodes_count = sum(usage * self.template_sizes[i] for i, usage in enumerate(self.template_usage_count))
+        copied_nodes_count = sum(size for _, size in self.copied_subtrees)
         return {
             "total_nodes": tree_size,
             "tree_depth": tree.depth(),
-            "num_templates": len(self.subtree_templates),
-            "template_usage": dict(enumerate(self.template_usage_count)),
-            "total_template_usage": sum(self.template_usage_count),
-            "template_nodes_count": template_nodes_count,
+            "copied_subtrees_count": len(self.copied_subtrees),
+            "copied_nodes_count": copied_nodes_count,
             "repetition_ratio": (
-                template_nodes_count / tree_size if tree_size > 0 else 0
+                copied_nodes_count / tree_size if tree_size > 0 else 0
             ),
         }
 
@@ -349,23 +367,25 @@ class RepetitiveTreeGenerator:
         with open(filename, "w") as f:
             f.write(parentheses_str)
 
-    def print_templates(self):
-        """Print all subtree templates."""
-        print("Subtree Templates:")
+    def print_copy_statistics(self):
+        """Print statistics about copied subtrees."""
+        print("Copy-Paste Statistics:")
         print("=" * 50)
-        for i, template in enumerate(self.subtree_templates):
-            print(f"Template {i} (used {self.template_usage_count[i]} times):")
-            print(template)
-            print("-" * 30)
+        print(f"Number of copied subtrees: {len(self.copied_subtrees)}")
+        if self.copied_subtrees:
+            print("\nCopied subtrees:")
+            for i, (subtree, size) in enumerate(self.copied_subtrees):
+                print(f"Copy {i+1} (size: {size}):")
+                print(subtree)
+                print("-" * 30)
 
 
 def generate_filename(config_params: Dict) -> str:
     """Generate a descriptive filename based on configuration parameters."""
     params = [
         f"bf{config_params['max_branching_factor']}",
-        f"t{config_params['num_subtree_templates']}",
         f"rp{int(config_params['repetition_probability'] * 100)}",
-        f"td{config_params['template_depth_min']}-{config_params['template_depth_max']}",
+        f"sd{config_params['min_subtree_depth']}-{config_params['max_subtree_depth']}",
         f"{config_params['alphabet_type']}{config_params['alphabet_size']}"
     ]
     
@@ -394,10 +414,9 @@ def load_config(config_file: str = "config.ini") -> Dict:
     
     return {
         'max_branching_factor': tree_config.getint('max_branching_factor'),
-        'num_subtree_templates': tree_config.getint('num_subtree_templates'),
         'repetition_probability': tree_config.getfloat('repetition_probability'),
-        'template_depth_min': tree_config.getint('template_depth_min'),
-        'template_depth_max': tree_config.getint('template_depth_max'),
+        'min_subtree_depth': tree_config.getint('min_subtree_depth', 1),
+        'max_subtree_depth': tree_config.getint('max_subtree_depth', 5),
         'alphabet_type': tree_config.get('alphabet_type'),
         'alphabet_size': tree_config.getint('alphabet_size'),
         'seed': tree_config.getint('seed'),
@@ -409,7 +428,7 @@ def load_config(config_file: str = "config.ini") -> Dict:
 
 def main():
     """Generate tree using parameters from config.ini file."""
-    print("Repetitive Tree Generator - Config-based Generation")
+    print("Repetitive Tree Generator - Copy-Paste Based Generation")
     print("=" * 60)
     
     # Load configuration
@@ -424,16 +443,15 @@ def main():
         print("Using default parameters...")
         config_params = {
             'max_branching_factor': 3,
-            'num_subtree_templates': 2,
             'repetition_probability': 0.8,
-            'template_depth_min': 2,
-            'template_depth_max': 3,
+            'min_subtree_depth': 1,
+            'max_subtree_depth': 5,
             'alphabet_type': 'letters',
             'alphabet_size': 10,
             'seed': 42,
             'output_directory': './generated_trees',
             'verbose': False,
-            'max_nodes': None
+            'max_nodes': 50000
         }
     
     # Create output directory if it doesn't exist
@@ -443,9 +461,9 @@ def main():
     # Generate tree with loaded parameters
     generator = RepetitiveTreeGenerator(
         max_branching_factor=config_params['max_branching_factor'],
-        num_subtree_templates=config_params['num_subtree_templates'],
         repetition_probability=config_params['repetition_probability'],
-        template_depth_range=(config_params['template_depth_min'], config_params['template_depth_max']),
+        min_subtree_depth=config_params['min_subtree_depth'],
+        max_subtree_depth=config_params['max_subtree_depth'],
         alphabet_type=config_params['alphabet_type'],
         alphabet_size=config_params['alphabet_size'],
         max_nodes=config_params['max_nodes'],
@@ -461,18 +479,16 @@ def main():
         # Display tree information
         print("Generated Tree:")
         print(tree)
-        print("\nSubtree Templates:")
-        generator.print_templates()
+        print("\nCopy-Paste Information:")
+        generator.print_copy_statistics()
     
     # Get and display statistics
     stats = generator.get_statistics(tree)
     print(f"\nTree Statistics:")
     print(f"  Total nodes: {stats['total_nodes']}")
     print(f"  Tree depth: {stats['tree_depth']}")
-    print(f"  Number of templates: {stats['num_templates']}")
-    print(f"  Template usage: {stats['template_usage']}")
-    print(f"  Total template usage: {stats['total_template_usage']}")
-    print(f"  Template nodes count: {stats['template_nodes_count']}")
+    print(f"  Copied subtrees count: {stats['copied_subtrees_count']}")
+    print(f"  Copied nodes count: {stats['copied_nodes_count']}")
     print(f"  Repetition ratio: {stats['repetition_ratio']:.1%}")
     
     # Generate balanced parentheses representation
