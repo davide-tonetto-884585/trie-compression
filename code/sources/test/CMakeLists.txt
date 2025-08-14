@@ -21,7 +21,7 @@ if(VALGRIND_FOUND)
             --verbose
             --error-exitcode=1
             --suppressions=${CMAKE_CURRENT_SOURCE_DIR}/valgrind.supp
-            $<TARGET_FILE:test>
+            $<TARGET_FILE:dawg_test>
     )
     
     # Cache profiling test
@@ -32,7 +32,7 @@ if(VALGRIND_FOUND)
             --cache-sim=yes
             --branch-sim=yes
             --cachegrind-out-file=${CMAKE_BINARY_DIR}/cachegrind.out.%p
-            $<TARGET_FILE:test>
+            $<TARGET_FILE:dawg_test>
     )
     
     # Heap profiling test
@@ -43,7 +43,7 @@ if(VALGRIND_FOUND)
             --heap=yes
             --stacks=yes
             --massif-out-file=${CMAKE_BINARY_DIR}/massif.out.%p
-            $<TARGET_FILE:test>
+            $<TARGET_FILE:dawg_test>
     )
     
     # Call graph profiling test
@@ -54,7 +54,7 @@ if(VALGRIND_FOUND)
             --callgrind-out-file=${CMAKE_BINARY_DIR}/callgrind.out.%p
             --collect-jumps=yes
             --collect-systime=yes
-            $<TARGET_FILE:test>
+            $<TARGET_FILE:dawg_test>
     )
     
     # Set test properties
@@ -87,8 +87,8 @@ if(VALGRIND_FOUND)
             --track-origins=yes
             --verbose
             --suppressions=${CMAKE_CURRENT_SOURCE_DIR}/valgrind.supp
-            $<TARGET_FILE:test>
-        DEPENDS test
+            $<TARGET_FILE:dawg_test>
+        DEPENDS dawg_test
         COMMENT "Running memory check with Valgrind"
     )
     
@@ -98,8 +98,8 @@ if(VALGRIND_FOUND)
             --cache-sim=yes
             --branch-sim=yes
             --cachegrind-out-file=${CMAKE_BINARY_DIR}/cachegrind.out
-            $<TARGET_FILE:test>
-        DEPENDS test
+            $<TARGET_FILE:dawg_test>
+        DEPENDS dawg_test
         COMMENT "Running cache profiling with Cachegrind"
     )
     
@@ -109,8 +109,8 @@ if(VALGRIND_FOUND)
             --heap=yes
             --stacks=yes
             --massif-out-file=${CMAKE_BINARY_DIR}/massif.out
-            $<TARGET_FILE:test>
-        DEPENDS test
+            $<TARGET_FILE:dawg_test>
+        DEPENDS dawg_test
         COMMENT "Running heap profiling with Massif"
     )
     
@@ -120,8 +120,8 @@ if(VALGRIND_FOUND)
             --callgrind-out-file=${CMAKE_BINARY_DIR}/callgrind.out
             --collect-jumps=yes
             --collect-systime=yes
-            $<TARGET_FILE:test>
-        DEPENDS test
+            $<TARGET_FILE:dawg_test>
+        DEPENDS dawg_test
         COMMENT "Running call graph profiling with Callgrind"
     )
     

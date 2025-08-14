@@ -5,20 +5,87 @@
 #include "../XBWT/XBWT.hpp"
 #include "PerfectMatching.h" // Blossom V header
 
+/**
+ * @brief Solver for dividing tree nodes into chains using minimum weight perfect matching
+ * 
+ * This class implements a chain division algorithm that partitions tree nodes into p chains
+ * by solving a minimum weight perfect matching problem on a bipartite graph. The algorithm
+ * aims to minimize the number of equivalence class changes across chain boundaries.
+ * 
+ * The bipartite graph construction follows these rules:
+ * - Left side (V1): source nodes s_1...s_p and tree nodes u_0...u_{t-1}
+ * - Right side (V2): tree nodes v_0...v_{t-1} and destination nodes d_1...d_p
+ * - Edge weights: 0 for same equivalence class, 1 for different equivalence classes
+ */
 class ChainsDivisionSolver
 {
 private:
-    uint64_t m_num_nodes;
-    PerfectMatching m_pm;
-    uint16_t m_p;                                // number of chains
-    std::vector<std::vector<uint64_t>> m_chains; // chains of nodes id
-    std::vector<uint64_t> m_chain_weights;       // weights of chains
-    std::vector<uint64_t> m_node_order;          // store node order for output
+    uint64_t m_num_nodes;                        ///< Total number of tree nodes
+    PerfectMatching m_pm;                        ///< Blossom V perfect matching solver instance
+    uint16_t m_p;                                ///< Number of chains to create
+    std::vector<std::vector<uint64_t>> m_chains; ///< Resulting chains of node indices
+    std::vector<uint64_t> m_node_order;          ///< Input node order sequence
+
+    /**
+     * @brief Prints the minimum weight perfect matching results
+     * 
+     * Outputs the matching pairs between left and right nodes in the bipartite graph,
+     * showing which source/tree nodes are matched to which tree/destination nodes.
+     */
+    void print_matching_results()
+    {
+        std::cout << "Minimum weight perfect matching:" << std::endl;
+        uint64_t t = m_num_nodes;
+        for (uint64_t i = 0; i < t + m_p; i++)
+        {
+            uint64_t j = m_pm.GetMatch(i);
+            if (i < j)
+            {
+                std::string left_label, right_label;
+
+                // Determine left node label
+                if (i < m_p)
+                {
+                    left_label = "s_" + std::to_string(i + 1);
+                }
+                else if (i < m_p + t)
+                {
+                    left_label = "u_" + std::to_string(i - m_p);
+                }
+
+                // Determine right node label
+                if (j >= m_p + t && j < m_p + t + t)
+                {
+                    right_label = "v_" + std::to_string(j - m_p - t);
+                }
+                else if (j >= m_p + t + t)
+                {
+                    right_label = "d_" + std::to_string(j - m_p - t - t + 1);
+                }
+
+                std::cout << left_label << " -> " << right_label << std::endl;
+            }
+        }
+    }
 
 public:
+    /**
+     * @brief Constructs the chain division solver and builds the bipartite graph
+     * 
+     * @tparam T Type of the tree node labels
+     * @param treeDAWG The tree DAWG containing nodes with equivalence classes
+     * @param node_order Ordered sequence of tree node indices to be divided into chains
+     * @param p Number of chains to create (must be > 0)
+     * @param verbose If true, prints detailed construction information
+     * 
+     * The constructor builds a bipartite graph where:
+     * - Source nodes s_i connect to the first p distinct equivalence class positions
+     * - Tree nodes u_i connect to subsequent nodes with different equivalence classes
+     * - Special weight-0 edges preserve equivalence class continuity within chains
+     */
     template <typename T>
     ChainsDivisionSolver(const TreeDAWG<T> &treeDAWG, const std::vector<uint64_t> &node_order, uint16_t p, bool verbose = false)
-        : m_num_nodes(treeDAWG.get_num_nodes()), m_pm(2 * (treeDAWG.get_num_nodes() + p), p * p + treeDAWG.get_num_nodes() * (p + 1) + treeDAWG.get_num_nodes() * p), m_p(p), m_node_order(node_order)
+        : m_num_nodes(treeDAWG.get_num_nodes()), m_pm(2 * (treeDAWG.get_num_nodes() + p), p * p + treeDAWG.get_num_nodes() * (p + 1) + treeDAWG.get_num_nodes() * p), m_p(p), m_chains(p), m_node_order(node_order)
     {
         if (verbose)
         {
@@ -141,41 +208,76 @@ public:
         }
     }
 
-    // Solve minimum weight perfect matching
-    std::vector<std::pair<int, int>> solve(bool verbose = false)
+    /**
+     * @brief Solves the minimum weight perfect matching and constructs the chains
+     * 
+     * @param verbose If true, prints matching results and final chains
+     * @return Vector of p chains, where each chain contains node indices in order
+     * 
+     * Uses the Blossom V algorithm to find the minimum weight perfect matching,
+     * then reconstructs the chains by following the matching edges from source
+     * nodes through the tree nodes.
+     */
+    std::vector<std::vector<uint64_t>> solve(bool verbose = false)
     {
         m_pm.Solve();
         if (verbose)
         {
-            std::cout << "Minimum weight perfect matching:" << std::endl;
-            uint64_t t = m_num_nodes;
-            for (uint64_t i = 0; i < t + m_p; i++)
+            print_matching_results();
+        }
+
+        std::vector<uint64_t> chain_mem(m_p, 0); // array used to save cur chain node
+        for (uint64_t i = 0; i < m_num_nodes; i++)
+        {
+            uint64_t j = m_pm.GetMatch(i);
+            uint64_t real_i = i - m_p;
+            uint64_t real_j = j - m_num_nodes - m_p;
+            // sources
+            if (i < m_p)
             {
-                uint64_t j = m_pm.GetMatch(i);
-                if (i < j)
+                chain_mem[i] = real_j;
+                m_chains[i].push_back(m_node_order[real_j]);
+            }
+            else if (j < m_p + m_num_nodes * 2)
+            {
+                for (uint64_t k = 0; k < m_p; k++)
                 {
-                    std::string left_label, right_label;
-                    
-                    // Determine left node label
-                    if (i < m_p) {
-                        left_label = "s_" + std::to_string(i + 1);
-                    } else if (i < m_p + t) {
-                        left_label = "u_" + std::to_string(i - m_p);
+                    if (chain_mem[k] == real_i)
+                    {
+                        m_chains[k].push_back(m_node_order[real_j]);
+                        chain_mem[k] = real_j;
+                        break;
                     }
-                    
-                    // Determine right node label
-                    if (j >= m_p + t && j < m_p + t + t) {
-                        right_label = "v_" + std::to_string(j - m_p - t);
-                    } else if (j >= m_p + t + t) {
-                        right_label = "d_" + std::to_string(j - m_p - t - t + 1);
-                    }
-                    
-                    std::cout << left_label << " -> " << right_label << std::endl;
                 }
             }
         }
 
-        return {{}};
+        if (verbose)
+        {
+            for (uint64_t i = 0; i < m_p; i++)
+            {
+                std::cout << "Chain " << i << ": ";
+                for (uint64_t j : m_chains[i])
+                {
+                    std::cout << j << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+
+        return m_chains;
+    }
+
+    /**
+     * @brief Returns the constructed chains
+     * 
+     * @return Const reference to the vector of chains
+     * 
+     * Note: This method should only be called after solve() has been executed,
+     * otherwise it returns empty chains.
+     */
+    const std::vector<std::vector<uint64_t>>& get_chains() const {
+        return m_chains;
     }
 };
 
