@@ -2,6 +2,9 @@
 #define TREE_DAWG_HPP
 
 #include <stack>
+#include <unordered_map>
+#include <algorithm>
+#include <string>
 #include "DAWG.hpp"
 #include "../LabeledTree/LabeledTree.hpp"
 
@@ -31,9 +34,14 @@ public:
     /**
      * @brief Constructor from LabeledTree for the TreeDAWG class.
      */
-    TreeDAWG(const LabeledTree<LabelType> &tree)
+    TreeDAWG(const LabeledTree<LabelType> &tree) : DAWG<TreeDAWG<LabelType>, LabelType>()
     {
         auto nodes = tree.get_nodes();
+
+        // Handle empty tree case
+        if (nodes.empty()) {
+            return;
+        }
 
         // Create a mapping from tree nodes to DAWG node IDs
         std::unordered_map<std::shared_ptr<Node<LabelType>>, uint64_t> node_to_id;
@@ -45,7 +53,7 @@ public:
             node_to_id[node] = dawg_node_id;
         }
 
-        // Second pass: add transitions between nodes
+        // Second pass: add transitions between nodes and set parent IDs
         for (const auto &tree_node : nodes)
         {
             uint64_t current_id = node_to_id[tree_node];
@@ -56,6 +64,9 @@ public:
             {
                 uint64_t child_id = node_to_id[child];
                 transitions.emplace_back(child->get_label(), child_id);
+                
+                // Set the parent ID for the child node
+                this->m_nodes[child_id].set_parent_state_id(current_id);
             }
 
             // Configure the state with its transitions
@@ -77,99 +88,74 @@ public:
         }
     }
 
+    /**
+     * @brief Stable sorts nodes based on their label path from parent edge transition to root.
+     * 
+     * This method creates a path of transition labels from each node up to the root,
+     * then performs a stable sort based on lexicographic comparison of these paths.
+     * The path for each node consists of the labels of transitions from the root down to
+     * the parent of that node.
+     * 
+     * @return A vector of node IDs sorted by their label paths to the root.
+     */
+    std::vector<uint64_t> stable_sort_nodes_by_label_path(bool verbose = false)
+    {
+        std::vector<uint64_t> node_ids;
+        for (uint64_t i = 0; i < get_num_nodes(); ++i)
+        {
+            node_ids.push_back(i);
+        }
+
+        // Create a map to store label paths for each node
+        std::vector<std::string> node_paths(get_num_nodes());
+        
+        // Build label paths for each node
+        for (uint64_t node_id : node_ids)
+        {
+            std::string path;
+            uint64_t current_id = node_id;
+            
+            // Traverse up to root, collecting transition labels
+            while (this->m_nodes[current_id].has_parent())
+            {
+                uint64_t parent_id = this->m_nodes[current_id].get_parent_state_id();
+                
+                // Find the transition label from parent to current node
+                const auto& parent_transitions = this->m_nodes[parent_id].get_transitions();
+                for (const auto& [label, target_id] : parent_transitions)
+                {
+                    if (target_id == current_id)
+                    {
+                        path += std::string(1, label);
+                        break;
+                    }
+                }
+                current_id = parent_id;
+            }
+            
+            node_paths[node_id] = path;
+        }
+
+        // Stable sort based on lexicographic comparison of label paths
+        std::stable_sort(node_ids.begin(), node_ids.end(),
+            [&node_paths](uint64_t a, uint64_t b) {
+                return node_paths[a] < node_paths[b];
+            });
+
+        if (verbose)
+        {
+            std::cout << "Node order: ";
+            for (uint64_t i : node_ids)
+            {
+                std::cout << i << "(" << node_paths[i] << ") ";
+            }
+            std::cout << std::endl;
+        }
+
+        return node_ids;
+    }
+
 private:
-    /**
-     * @brief Sets the initial state, ensuring it's a valid tree root (no incoming transitions).
-     * @param node_id The ID of the node to set as initial state.
-     * @throws std::invalid_argument if the node has incoming transitions.
-     */
-    void set_initial_state_impl(uint64_t node_id)
-    {
-        // First validate that the node exists
-        if (node_id >= get_num_nodes())
-        {
-            throw std::out_of_range("Attempt to set non-existent initial state with ID " + std::to_string(node_id));
-        }
-
-        // Validate that this node has no incoming transitions (is a root)
-        validate_is_root(node_id);
-
-        // Set the initial state
-        m_initial_state_id = node_id;
-    }
-
-    /**
-     * @brief Computes the height of all nodes for a DAWG that is a tree.
-     * This version is optimized for trees and does not perform cycle detection.
-     * It uses an iterative post-order traversal to avoid stack overflow on deep trees.
-     * @return The maximum height of any node in the tree.
-     */
-    int64_t compute_all_heights_impl()
-    {
-        for (auto &node : m_nodes)
-            node.m_height = -1;
-
-        int64_t max_h = -1;
-        // compute height starting from root
-        std::stack<uint64_t> dfs_stack;
-        std::stack<uint64_t> processing_stack; // post-order stack
-
-        dfs_stack.push(m_initial_state_id);
-
-        std::vector<bool> visited(m_nodes.size(), false);
-        while (!dfs_stack.empty())
-        {
-            uint64_t current_node_id = dfs_stack.top();
-            dfs_stack.pop();
-
-            if (visited[current_node_id])
-                continue;
-
-            visited[current_node_id] = true;
-            processing_stack.push(current_node_id);
-
-            for (const auto &[_, target_node_id] : m_nodes[current_node_id].m_transitions)
-            {
-                if (!visited[target_node_id])
-                {
-                    dfs_stack.push(target_node_id);
-                }
-            }
-        }
-
-        while (!processing_stack.empty())
-        {
-            uint64_t node_id = processing_stack.top();
-            processing_stack.pop();
-
-            State<LabelType> &node = m_nodes[node_id];
-
-            if (node.m_height != -1)
-                continue;
-
-            int64_t current_max_h = node.is_final() ? 0 : -2;
-            for (const auto &[_, target_node_id] : node.m_transitions)
-            {
-                int64_t target_height = m_nodes[target_node_id].m_height;
-
-                if (target_height != -2)
-                {
-                    current_max_h = std::max(current_max_h, 1 + target_height);
-                }
-            }
-
-            node.m_height = current_max_h;
-        }
-
-        // find max height
-        for (const auto &node : m_nodes)
-        {
-            max_h = std::max(max_h, node.m_height);
-        }
-
-        return max_h;
-    }
-
     /**
      * @brief Validates that a node has no incoming transitions (is a root).
      * @param node_id The ID of the node to validate.

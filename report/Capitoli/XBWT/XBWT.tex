@@ -1,4 +1,4 @@
-\section{Definition}
+\subsection{Definition}
 The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to efficiently compress and index \emph{ordered node-labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT) \cite{burrows1994block} for strings, the XBWT extends these principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
 
 \begin{definition} [Node informations]
@@ -21,10 +21,10 @@ The construction of $S$ is a two-step process. First, an intermediate multi-set 
 
 $S_{\pi}$ (for each $i$ from 1 to $t$, $S_{\pi}[i]$ is the '$\pi$' component of the $i$-th triplet in $S$), therefore is not needed after the construction of the XBWT. However, in the following discussion, we will still refer to it as it possesses some important properties.
 
-\section{Properties}
+\subsection{Properties}
 The XBWT's effectiveness as an indexing structure stems from a key property of the sorted multi-set $S$. This property, along with its consequences, arises directly from the transform's definition and the sorting process.
 
-\subsection{Key Property: Grouping by Parent}
+\subsubsection{Key Property: Grouping by Parent}
 
 The fundamental property of the XBWT is that the children of any node $u$ in the tree $T$ form a contiguous block in the sorted multi-set $S$. Let $u_1, \dots, u_z$ be the children of node $u$ in their original order. Their corresponding triplets will appear consecutively in $S$ in that same order.
 \begin{example}
@@ -54,7 +54,7 @@ This grouping provides several important consequent properties:
     \end{itemize}
 \end{example}
 
-\subsection{Other Properties}
+\subsubsection{Other Properties}
 Additional properties of the XBWT components include:
 
 \begin{itemize}
@@ -142,7 +142,7 @@ Additional properties of the XBWT components include:
     \label{tab:xbwt_example}
 \end{table}
 
-\section{Construction}
+\subsection{Construction}
 A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for large deep trees. To overcome this issue, Ferragina et al. \cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time and $O(t \log t)$ space.
 
 The linear time algorithm is called \textbf{pathSort}, it is based on a generalization of the Skew algorithm for suffix array construction of strings \cite{karkkainen2006linear}. Let's see briefly how the Skew algorithm works.
@@ -156,7 +156,7 @@ The linear time algorithm is called \textbf{pathSort}, it is based on a generali
 \end{figure}
 \end{comment}
 
-\subsection{Skew Algorithm}
+\subsubsection{Skew Algorithm}
 The Skew algorithm is an efficient method for constructing the suffix array of a string in linear time. A suffix array is a data structure that lists the starting indices of all the suffixes of a string in lexicographical order, and it is widely used in various string processing algorithms.
 
 \subsubsection*{Algorithm Overview}
@@ -184,7 +184,7 @@ Once the suffixes in $S_{12}$ are sorted, the algorithm proceeds to sort the suf
 
 Finally, the sorted orders of the suffixes in $S_0$ and $S_{12}$ are merged to obtain the complete suffix array of the original string. This merging process can be performed in linear time, ensuring the overall efficiency of the algorithm.
 
-\subsection{PathSort Algorithm} \label{sec:pathSort}
+\subsubsection{PathSort Algorithm} \label{sec:pathSort}
 
 The pseudocode of the pathSort algorithm is shown in \cref{alg:pathSort}. As we can see, the algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees. 
 Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the upward subpaths of the tree starting at nodes in levels $\not\equiv j \pmod{3}$, then sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the two sets of sorted subpaths by exploiting their lexicographic names. $j$ is chosen in such a way that the number of nodes of the shrunk tree whose level is $\equiv j \pmod{3}$ is at least $t/3$ so that a constant fraction of upward paths are ensured to be dropped at each recursive step.
@@ -219,7 +219,7 @@ Next, the algorithm selects a value $j$ such that the number of nodes in \texttt
 
 For each node $u$ in \texttt{IntNodesNotAtPosJ}, the algorithm extracts the upward path consisting of the first three ancestors of $u$. These paths are then sorted using radix sort. If the sorted upward paths contain duplicates, the algorithm recursively calls the PathSort function on a new contracted tree, where nodes are renamed according to their sorted paths. Otherwise, if all upward paths are unique, the nodes in \texttt{IntNodesAtPosJ} are sorted and subsequently merged with \texttt{IntNodesNotAtPosJ} using lexicographic ordering, following the same merging strategy as in the Skew algorithm.
 
-\section{Inversion}
+\subsection{Inversion}
 The ability to invert the XBWT is fundamental to its utility as a compression technique. Invertibility guarantees that the original tree can be perfectly reconstructed from its transformed representation ($S_{\text{last}}$ and $S_{\alpha}$). This ensures that the compression is lossless, meaning no information is lost during the process, which is a critical requirement for most applications.
 
 Property 'Path-based Indexing' (\cref{prop3}) ensures that the two arrays $S_{\text{last}}$ and $S_{\alpha}$ of the XBWT can be used to reconstruct the original tree $T$. The algorithm to invert the XBWT is linear in time and requires $O(t \log t)$ bits of space.
@@ -302,7 +302,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
     \end{algorithmic}
 \end{algorithm}
 
-\section{Compressing Labeled Trees}
+\subsection{Compressing Labeled Trees}
 \begin{comment}
 Let the $k$-context of a node $u \in T$ be the first $k$ symbols of $\pi(u)$. We denote this $k$-long prefix as $\pi_k[u]$. Thus, $\pi_k[u]$ represents the subpath of length $k$ leading to $u$ in $T$, or equivalently, the node $u$ descends from a subpath labeled as $\pi_k[u]$, where the nodes in $\pi_k[u]$ are encountered in an upward direction.
 \end{comment}
@@ -323,7 +323,7 @@ In general, the following theorem holds:
 
 Since $H_k(S_\alpha) \leq (\log |\Sigma|) + 1,^6$ the above bound is at most $t(\log |\Sigma| + 3) + o(t)$ bits, and can be significantly better than the information-theoretic lower bound and the plain storage of XBWT[$T$] (both taking $2t + t \log|\Sigma|$ bits), depending on the distribution of the labels among its nodes.
 
-\section{Indexing a Compressed Labeled Tree} \label{sec:xbwt_operations}
+\subsection{Indexing a Compressed Labeled Tree} \label{sec:xbwt_operations}
 In order to implement the efficient operations listed in \cref{compandindexinglabtree} using the compressed arrays $S_{\text{last}}$ and $S_{\alpha}$ of XBWT, we need that the chosen compressors $C_{\alpha}$ and $C_{\text{last}}$ support the following operations:
 
 Given a string $S[1, t]$ over alphabet $\Sigma$

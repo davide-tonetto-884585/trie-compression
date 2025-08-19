@@ -87,9 +87,8 @@ Notice that it is important to consider the order of the nodes of the two sets $
 Notice also that when we talk about the same $\treeset{1}$ node placed in $\treeset{2}$, we are referring to the corresponding node in $\treeset{2}$ that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets $\treeset{1}$ and $\treeset{2}$. In \cref{fig:bipartite_structure,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 \begin{example}[Vertices] \label{ex:reduction_vertices}
     This example illustrates the structure of the bipartite graph vertices for the tree shown in \cref{fig:original_tree}. The nodes in this tree are labeled by their equivalence classes obtained from the minimization of the corresponding DAWG in \cref{ex:DAWG_minimization}. Our goal is to partition the tree's nodes into $p=2$ chains. The nodes of the tree are ordered according to \cref{alg:pathSort}, the order is the following: 
-    % 0 3 4 2 5 8 9 1 6 7 10
     \[
-        a \prec h \prec i \prec d \prec e \prec l \prec m \prec b \prec c \prec f \prec g
+        a \prec b \prec d \prec h \prec l \prec f \prec c \prec e \prec i \prec m \prec g
     \]
 
     \cref{fig:bipartite_structure} shows the corresponding bipartite graph. The graph is composed of:
@@ -149,28 +148,28 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
             
             % Tree nodes (left column, red border)
             \node[main] (t1) [below of=s2, yshift=-0.3cm] {A};
-            \node[main] (t2) [below of=t1] {D};
-            \node[main] (t3) [below of=t2] {D};
-            \node[main] (t4) [below of=t3] {C};
+            \node[main] (t2) [below of=t1] {B};
+            \node[main] (t3) [below of=t2] {C};
+            \node[main] (t4) [below of=t3] {D};
             \node[main] (t5) [below of=t4] {D};
-            \node[main] (t6) [below of=t5] {D};
-            \node[main] (t7) [below of=t6] {D};
-            \node[main] (t8) [below of=t7] {B};
-            \node[main] (t9) [below of=t8] {B};
-            \node[main] (t10) [below of=t9] {C};
+            \node[main] (t6) [below of=t5] {C};
+            \node[main] (t7) [below of=t6] {B};
+            \node[main] (t8) [below of=t7] {D};
+            \node[main] (t9) [below of=t8] {D};
+            \node[main] (t10) [below of=t9] {D};
             \node[main] (t11) [below of=t10] {D};
             
             % Tree nodes (right column, red border)
             \node[main] (r1) [right of=t1, xshift=3cm] {A};
-            \node[main] (r2) [below of=r1] {D};
-            \node[main] (r3) [below of=r2] {D};
-            \node[main] (r4) [below of=r3] {C};
+            \node[main] (r2) [below of=r1] {B};
+            \node[main] (r3) [below of=r2] {C};
+            \node[main] (r4) [below of=r3] {D};
             \node[main] (r5) [below of=r4] {D};
-            \node[main] (r6) [below of=r5] {D};
-            \node[main] (r7) [below of=r6] {D};
-            \node[main] (r8) [below of=r7] {B};
-            \node[main] (r9) [below of=r8] {B};
-            \node[main] (r10) [below of=r9] {C};
+            \node[main] (r6) [below of=r5] {C};
+            \node[main] (r7) [below of=r6] {B};
+            \node[main] (r8) [below of=r7] {D};
+            \node[main] (r9) [below of=r8] {D};
+            \node[main] (r10) [below of=r9] {D};
             \node[main] (r11) [below of=r10] {D};
             
             % Destination nodes (right column, blue background)
@@ -569,7 +568,7 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
 \end{proof}
 
 \begin{example} \label{ex:reduction_ex}
-    Consider the example in \cref{fig:reduction_example} where we have the bipartite graph for the tree in \cref{fig:original_tree} and $p = 2$. In \cref{fig:reduction_example}-(a) we have the resulting bipartite graph, and in \cref{fig:reduction_example}-(b) we have one of the possible minimum perfect matchings for the graph in (a) having weight $5$. At the end we can see that the optimal partition of the nodes of the tree $T$ is $C_1 = \{A,C,B,B,C\}$ and $C_2 = \{D,D,D,D,D,D\}$ with a total cost of $5$, this can be obtained starting from the sources and by following the edges of the nodes, jumping to the corresponding node in $V_1$ and following the edges again until we reach the destination nodes.
+    Consider the example in \cref{fig:reduction_example} where we have the bipartite graph for the tree in \cref{fig:original_tree} and $p = 2$. In \cref{fig:reduction_example}-(a) we have the resulting bipartite graph, and in \cref{fig:reduction_example}-(b) we have one of the possible minimum perfect matchings for the graph in (a) having weight $5$. At the end we can see that the optimal partition of the nodes of the tree $T$ is $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ with a total cost of $5$, this can be obtained starting from the sources and by following the edges of the nodes, jumping to the corresponding node in $V_1$ and following the edges again until we reach the destination nodes.
 
     \begin{figure}[H]
         \centering
@@ -586,28 +585,28 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
                 
                 % Tree nodes (left column, red border)
                 \node[main] (t1) [below of=s2] {A};
-                \node[main] (t2) [below of=t1] {D};
-                \node[main] (t3) [below of=t2] {D};
-                \node[main] (t4) [below of=t3] {C};
+                \node[main] (t2) [below of=t1] {B};
+                \node[main] (t3) [below of=t2] {C};
+                \node[main] (t4) [below of=t3] {D};
                 \node[main] (t5) [below of=t4] {D};
-                \node[main] (t6) [below of=t5] {D};
-                \node[main] (t7) [below of=t6] {D};
-                \node[main] (t8) [below of=t7] {B};
-                \node[main] (t9) [below of=t8] {B};
-                \node[main] (t10) [below of=t9] {C};
+                \node[main] (t6) [below of=t5] {C};
+                \node[main] (t7) [below of=t6] {B};
+                \node[main] (t8) [below of=t7] {D};
+                \node[main] (t9) [below of=t8] {D};
+                \node[main] (t10) [below of=t9] {D};
                 \node[main] (t11) [below of=t10] {D};
                 
                 % Tree nodes (right column, red border)
                 \node[main] (r1) [right of=t1, xshift=3cm] {A};
-                \node[main] (r2) [below of=r1] {D};
-                \node[main] (r3) [below of=r2] {D};
-                \node[main] (r4) [below of=r3] {C};
+                \node[main] (r2) [below of=r1] {B};
+                \node[main] (r3) [below of=r2] {C};
+                \node[main] (r4) [below of=r3] {D};
                 \node[main] (r5) [below of=r4] {D};
-                \node[main] (r6) [below of=r5] {D};
-                \node[main] (r7) [below of=r6] {D};
-                \node[main] (r8) [below of=r7] {B};
-                \node[main] (r9) [below of=r8] {B};
-                \node[main] (r10) [below of=r9] {C};
+                \node[main] (r6) [below of=r5] {C};
+                \node[main] (r7) [below of=r6] {B};
+                \node[main] (r8) [below of=r7] {D};
+                \node[main] (r9) [below of=r8] {D};
+                \node[main] (r10) [below of=r9] {D};
                 \node[main] (r11) [below of=r10] {D};
                 
                 % Destination nodes (right column, blue background)
@@ -619,37 +618,31 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
                 \draw[red, ->] (s2) -- (r1);
                 \draw[red, ->] (s2) -- (r2);
                 \draw[red, ->] (t1) -- (r2);
-                \draw[red, ->] (t1) -- (r4);
+                \draw[red, ->] (t1) -- (r3);
                 \draw[green, ->] (t1) -- (d1);
                 \draw[green, ->] (t1) -- (d2);
-                \draw[green, ->] (t2) -- (r3);
+                \draw[red, ->] (t2) -- (r3);
                 \draw[red, ->] (t2) -- (r4);
-                \draw[red, ->] (t2) -- (r8);
+                \draw[green, ->] (t2) -- (r7);
                 \draw[red, ->] (t3) -- (r4);
-                \draw[red, ->] (t3) -- (r8);
-                \draw[green, ->] (t3) -- (r5);
-                \draw[red, ->] (t4) -- (r5);
-                \draw[red, ->] (t4) -- (r8);
-                \draw[green, ->] (t4) -- (r10);
-                \draw[red, ->] (t5) -- (r8);
-                \draw[red, ->] (t5) -- (r10);
-                \draw[green, ->] (t5) -- (r6);
+                \draw[red, ->] (t3) -- (r7);
+                \draw[green, ->] (t3) -- (r6);
+                \draw[green, ->] (t4) -- (r5);
+                \draw[red, ->] (t4) -- (r6);
+                \draw[red, ->] (t4) -- (r7);
+                \draw[red, ->] (t5) -- (r6);
+                \draw[red, ->] (t5) -- (r7);
+                \draw[green, ->] (t5) -- (r8);
+                \draw[red, ->] (t6) -- (r7);
                 \draw[red, ->] (t6) -- (r8);
-                \draw[red, ->] (t6) -- (r10);
-                \draw[green, ->] (t6) -- (r7);
+                \draw[green, ->] (t6) -- (d1);
+                \draw[green, ->] (t6) -- (d2);
                 \draw[red, ->] (t7) -- (r8);
-                \draw[red, ->] (t7) -- (r10);
-                \draw[green, ->] (t7) -- (r11);
-                \draw[red, ->] (t8) -- (r11);
-                \draw[red, ->] (t8) -- (r10);
+                \draw[green, ->] (t7) -- (d1);
+                \draw[green, ->] (t7) -- (d2);
                 \draw[green, ->] (t8) -- (r9);
-                \draw[red, ->] (t9) -- (r11);
-                \draw[red, ->] (t9) -- (r10);
-                \draw[green, ->] (t9) -- (d1);
-                \draw[green, ->] (t9) -- (d2);
-                \draw[red, ->] (t10) -- (r11);
-                \draw[green, ->] (t10) -- (d1);
-                \draw[green, ->] (t10) -- (d2);
+                \draw[green, ->] (t9) -- (r10);
+                \draw[green, ->] (t10) -- (r11);
                 \draw[green, ->] (t11) -- (d1);
                 \draw[green, ->] (t11) -- (d2);
             \end{tikzpicture} &
@@ -665,28 +658,28 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
                 
                 % Tree nodes (left column, red border)
                 \node[main] (t1) [below of=s2] {A};
-                \node[main] (t2) [below of=t1] {D};
-                \node[main] (t3) [below of=t2] {D};
-                \node[main] (t4) [below of=t3] {C};
+                \node[main] (t2) [below of=t1] {B};
+                \node[main] (t3) [below of=t2] {C};
+                \node[main] (t4) [below of=t3] {D};
                 \node[main] (t5) [below of=t4] {D};
-                \node[main] (t6) [below of=t5] {D};
-                \node[main] (t7) [below of=t6] {D};
-                \node[main] (t8) [below of=t7] {B};
-                \node[main] (t9) [below of=t8] {B};
-                \node[main] (t10) [below of=t9] {C};
+                \node[main] (t6) [below of=t5] {C};
+                \node[main] (t7) [below of=t6] {B};
+                \node[main] (t8) [below of=t7] {D};
+                \node[main] (t9) [below of=t8] {D};
+                \node[main] (t10) [below of=t9] {D};
                 \node[main] (t11) [below of=t10] {D};
                 
                 % Tree nodes (right column, red border)
                 \node[main] (r1) [right of=t1, xshift=3cm] {A};
-                \node[main] (r2) [below of=r1] {D};
-                \node[main] (r3) [below of=r2] {D};
-                \node[main] (r4) [below of=r3] {C};
+                \node[main] (r2) [below of=r1] {B};
+                \node[main] (r3) [below of=r2] {C};
+                \node[main] (r4) [below of=r3] {D};
                 \node[main] (r5) [below of=r4] {D};
-                \node[main] (r6) [below of=r5] {D};
-                \node[main] (r7) [below of=r6] {D};
-                \node[main] (r8) [below of=r7] {B};
-                \node[main] (r9) [below of=r8] {B};
-                \node[main] (r10) [below of=r9] {C};
+                \node[main] (r6) [below of=r5] {C};
+                \node[main] (r7) [below of=r6] {B};
+                \node[main] (r8) [below of=r7] {D};
+                \node[main] (r9) [below of=r8] {D};
+                \node[main] (r10) [below of=r9] {D};
                 \node[main] (r11) [below of=r10] {D};
                 
                 % Destination nodes (right column, blue background)
@@ -695,16 +688,16 @@ Specifically, a path starting at $s_i$ will match it to a node $u_{a} \in \trees
                 
                 \draw[red, ->] (s1) -- (r1);
                 \draw[red, ->] (s2) -- (r2);
-                \draw[red, ->] (t1) -- (r4);
-                \draw[green, ->] (t2) -- (r3);
-                \draw[green, ->] (t3) -- (r5);
-                \draw[red, ->] (t4) -- (r8);
-                \draw[green, ->] (t5) -- (r6);
-                \draw[green, ->] (t6) -- (r7);
-                \draw[green, ->] (t7) -- (r11);
+                \draw[red, ->] (t1) -- (r3);
+                \draw[red, ->] (t2) -- (r4);
+                \draw[green, ->] (t3) -- (r6);
+                \draw[green, ->] (t4) -- (r5);
+                \draw[green, ->] (t5) -- (r8);
+                \draw[red, ->] (t6) -- (r7);
+                \draw[green, ->] (t7) -- (d1);
                 \draw[green, ->] (t8) -- (r9);
-                \draw[red, ->] (t9) -- (r10);
-                \draw[green, ->] (t10) -- (d1);
+                \draw[green, ->] (t9) -- (r10);
+                \draw[green, ->] (t10) -- (r11);
                 \draw[green, ->] (t11) -- (d2);
             \end{tikzpicture} \\
         (a) & (b) \\

@@ -14,30 +14,7 @@
 #include <sdsl/int_vector.hpp>
 
 #include "../LabeledTree/LabeledTree.hpp"
-
-template <typename T1, typename T2, typename T3>
-struct Triplet
-{
-    T1 first;
-    T2 second;
-    T3 third;
-
-    Triplet(T1 f, T2 s, T3 t) : first(f), second(s), third(t) {}
-    Triplet(const Triplet &other) : first(other.first), second(other.second), third(other.third) {}
-    Triplet& operator=(const Triplet &other) {
-        if (this != &other) {
-            first = other.first;
-            second = other.second;
-            third = other.third;
-        }
-        return *this;
-    }
-
-    std::string join(const std::string &sep) const
-    {
-        return first + sep + second + sep + third;
-    }
-};
+#include "../Triplet/Triplet.hpp"
 
 std::string padLeft(const std::string &str, unsigned int num, char paddingChar = ' ')
 {

@@ -145,6 +145,13 @@ class RepetitiveTreeGenerator:
     def _get_rand_label(self) -> str:
         """Pick a random label from the alphabet."""
         return random.choice(self.alphabet)
+    
+    def _get_unique_label(self, used_labels: set) -> Optional[str]:
+        """Get a unique label that hasn't been used among siblings."""
+        available_labels = [label for label in self.alphabet if label not in used_labels]
+        if not available_labels:
+            return None  # No more unique labels available
+        return random.choice(available_labels)
 
     def _collect_subtrees(self, root: TreeNode) -> List[TreeNode]:
         """Sample random nodes and collect subtrees rooted at them up to max depth."""
@@ -265,6 +272,9 @@ class RepetitiveTreeGenerator:
                 break
                 
             num_children = random.randint(1, max_possible_children)
+            
+            # Track used labels for this node's children to ensure deterministic behavior
+            used_labels = set()
 
             for _ in range(num_children):
                 # Check node limit before creating each child
@@ -280,24 +290,37 @@ class RepetitiveTreeGenerator:
                     # Check if adding this subtree would exceed node limit
                     if self.max_nodes is not None and self.current_node_count + subtree_size > self.max_nodes:
                         # Skip copying and create a single node instead
-                        child = TreeNode(label=self._get_rand_label(), children=[])
+                        unique_label = self._get_unique_label(used_labels)
+                        if unique_label is None:
+                            break  # No more unique labels available
+                        child = TreeNode(label=unique_label, children=[])
                         child.node_id = self._get_next_node_id()
                         current_node.add_child(child)
+                        used_labels.add(unique_label)
                         self.current_node_count += 1
                         stack.append(child)
                     else:
-                        # Copy the selected subtree
+                        # Copy the selected subtree and ensure unique root label
                         child = self._copy_subtree(source_subtree)
+                        unique_label = self._get_unique_label(used_labels)
+                        if unique_label is None:
+                            break  # No more unique labels available
+                        child.label = unique_label  # Override the copied label to ensure uniqueness
                         current_node.add_child(child)
+                        used_labels.add(unique_label)
                         self.current_node_count += subtree_size
                         
                         # Add leaf nodes of copied subtree to stack for further expansion
                         self._add_leaves_to_stack(child, stack)
                 else:
                     # Create a new single node
-                    child = TreeNode(label=self._get_rand_label(), children=[])
+                    unique_label = self._get_unique_label(used_labels)
+                    if unique_label is None:
+                        break  # No more unique labels available
+                    child = TreeNode(label=unique_label, children=[])
                     child.node_id = self._get_next_node_id()
                     current_node.add_child(child)
+                    used_labels.add(unique_label)
                     self.current_node_count += 1
                     stack.append(child)
 

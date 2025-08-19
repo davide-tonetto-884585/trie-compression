@@ -43,28 +43,6 @@ if(NOT sdsl_POPULATED)
 endif()
 
 ##########################################################################
-# LEMON
-
-# FetchContent_Declare(
-#   lemon
-#   URL https://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz
-#   URL_HASH SHA256=71b7c725f4c0b4a8ccb92eb87b208701586cf7a96156ebd821ca3ed855bad3c8
-# )
-# 
-# FetchContent_GetProperties(lemon)
-# if(NOT lemon_POPULATED)
-#   FetchContent_Populate(lemon)
-#   
-#   # Configure LEMON build options
-#   set(LEMON_ENABLE_GLPK OFF CACHE BOOL "Disable GLPK support")
-#   set(LEMON_ENABLE_ILOG_CPLEX OFF CACHE BOOL "Disable CPLEX support")
-#   set(LEMON_ENABLE_COIN OFF CACHE BOOL "Disable COIN support")
-#   set(LEMON_ENABLE_SOPLEX OFF CACHE BOOL "Disable SoPlex support")
-#   
-#   add_subdirectory(${lemon_SOURCE_DIR} ${lemon_BINARY_DIR} EXCLUDE_FROM_ALL)
-# endif()
-
-##########################################################################
 # Blossom V - Minimum Cost Perfect Matching
 
 FetchContent_Declare(

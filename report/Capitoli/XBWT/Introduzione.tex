@@ -1,7 +1,7 @@
-\chapter[The Extended Burrows-Wheeler Transform]{The Extended Burrows-Wheeler \\ Transform} \label{chp:tree_compression}
-\textit{Disclaimer: The fundamental definitions, properties, and algorithms related to the Extended Burrows-Wheeler Transform presented in this chapter are based on the work introduced by Ferragina et al.~`Compressing and Indexing Labeled Trees, with Applications'~\cite{ferragina2009compressing}.}
+\section[The Extended Burrows-Wheeler Transform]{The Extended Burrows-Wheeler \\ Transform} \label{chp:tree_compression}
+The fundamental definitions, properties, and algorithms related to the Extended Burrows-Wheeler Transform presented in this chapter are based on the work introduced by Ferragina et al.~`Compressing and Indexing Labeled Trees, with Applications'~\cite{ferragina2009compressing}.
 
-\section{Introduction and Motivation}
+\subsection{Introduction and Motivation}
 This chapter explores the Extended Burrows-Wheeler Transform (XBWT), introduced by Ferragina et al.~\cite{ferragina2009compressing}, a state of the art technique for labeled tree compression. Understanding the principles and performance of the XBWT is crucial as it will serve as the primary benchmark against which we will evaluate the novel compression scheme proposed in this thesis. By establishing a baseline with a well-regarded method like the XBWT, we can effectively demonstrate the potential advantages and contributions of our new approach, particularly for trees exhibiting high repetitiveness.
 
 In 2005, Ferragina et al.~\cite{ferragina2009compressing} introduced an innovative approach to labeled tree compression by transforming it into a more tractable string compression problem. Their key contribution, the Extended Burrows-Wheeler Transform (XBWT), is a sophisticated data structure that achieves highly efficient compression by combining entropy-compressed edge labels with a succinct representation of the tree topology. This elegant solution not only simplifies the compression process but also maintains the structural relationships essential for tree operations.
@@ -26,7 +26,7 @@ The transformation process of the XBWT is as follows:
 \end{enumerate}
 \end{comment}
 
-\subsection{Key Aspects}
+\subsubsection{Key Aspects}
 The XBWT has several key properties that make it an effective tool for labeled tree compression and indexing:
 \begin{itemize}
     \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the \emph{information-theoretic lower bound}, which is \( 2t - \Theta(\log t) + t \log |\Sigma| \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.

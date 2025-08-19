@@ -3,7 +3,7 @@ The next crucial step of our compression scheme is to reduce the space required 
 
 \subsection{Non-deterministic Finite Automata}
 We start by defining a non-deterministic finite automaton (NFA).  
-\begin{definition}[Non-deterministic Finite Automaton]
+\begin{definition}[Non-deterministic Finite Automaton] \label{def:nfa}
     A non-deterministic finite automaton is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$, where:
     \begin{itemize}[leftmargin=25pt]
         \item $Q$ is a finite set of states.
@@ -40,37 +40,37 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
 \end{definition}
 
 \begin{example}
-    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,B,B,C\}$ and $C_2 = \{D,D,D,D,D,D\}$ for the tree DAWG in \cref{fig:example_dawg} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
+    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree DAWG in \cref{fig:example_dawg} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
     \begin{itemize}
-        \item $C_1 = \{a,d,b,c,f\}$
-        \item $C_2 = \{h,i,e,l,m,g\}$
+        \item $C_1 = \{a,d,f,c\}$
+        \item $C_2 = \{b,h,l,e,i,m,g\}$
     \end{itemize}
     
     Applying the collapsing operation from \cref{def:collapsing}:
     \begin{itemize}
-        \item For $C_1 = (a,d,b,c,f)$ with classes $(A,C,B,B,C)$: 
+        \item For $C_1 = (a,d,f,c)$ with classes $(A,C,C,B)$: 
         \begin{itemize}
-            \item Block $B_1 = \{a\}$ (class $A$) $\rightarrow$ collapsed node $v_1$. The node $a$ is the initial state. It has two outgoing edges: $a \xrightarrow{0} b$ and $a \xrightarrow{1} c$. Since $b$ and $c$ collapse to $v_3$, both transitions become $v_1 \xrightarrow{0} v_3$ and $v_1 \xrightarrow{1} v_3$.
-            \item Block $B_2 = \{d\}$ (class $C$) $\rightarrow$ collapsed node $v_2$. The node $d$ has two outgoing edges: $d \xrightarrow{0} h$ and $d \xrightarrow{1} i$. As $h,i$ collapse to $w_1$, we obtain $v_2 \xrightarrow{0} w_1$ and $v_2 \xrightarrow{1} w_1$.
-            \item Block $B_3 = \{b,c\}$ (class $B$) $\rightarrow$ collapsed node $v_3$. The outgoing edges of $b$ and $c$ are:
+            \item Block $B_1 = \{a\}$ (class $A$) $\rightarrow$ collapsed node $v_1$. The node $a$ is the initial state. It has two outgoing edges: $a \xrightarrow{0} b$ and $a \xrightarrow{1} c$. Since $b$ and $c$ collapse to $w_1$ and $v_3$ respectively, we obtain $v_1 \xrightarrow{0} w_1$ and $v_1 \xrightarrow{1} v_3$.
+            \item Block $B_2 = \{d,f\}$ (class $C$) $\rightarrow$ collapsed node $v_2$. The outgoing edges of $d$ and $f$ are:
             \[
-                b \xrightarrow{0} d,\; b \xrightarrow{1} e,\qquad
-                c \xrightarrow{0} f,\; c \xrightarrow{1} g.
+                d \xrightarrow{0} h,\; d \xrightarrow{1} i,\qquad
+                f \xrightarrow{0} l,\; f \xrightarrow{1} m.
             \]
             After collapsing, we obtain:
             \[
-                v_3 \xrightarrow{0} v_2, v_3 \xrightarrow{1} w_1,\qquad v_3 \xrightarrow{0} v_4, v_3 \xrightarrow{1} w_1.
+                v_2 \xrightarrow{0} w_2, v_2 \xrightarrow{1} w_2,\qquad v_2 \xrightarrow{0} w_2, v_2 \xrightarrow{1} w_2.
             \]
-            Since we have two identical edges $v_3 \xrightarrow{1} w_1$, we can remove one of them.
-            \item Block $B_4 = \{f\}$ (class $C$) $\rightarrow$ collapsed node $v_4$. The node $f$ has two outgoing edges: $f \xrightarrow{0} l$ and $f \xrightarrow{1} m$. As $l,m$ collapse to $w_1$, we obtain $v_4 \xrightarrow{0} w_1$ and $v_4 \xrightarrow{1} w_1$.
+            Since we have two identical edges we can keep only one of each.
+            \item Block $B_3 = \{c\}$ (class $B$) $\rightarrow$ collapsed node $v_3$. It has two outgoing edges: $c \xrightarrow{0} f$ and $c \xrightarrow{1} g$. Since $f$ and $g$ collapse to $v_2$ and $w_2$ respectively, we obtain $v_3 \xrightarrow{0} v_2$ and $v_3 \xrightarrow{1} w_2$.
         \end{itemize}
-        Result: $C_1' = (v_1, v_2, v_3, v_4)$ with classes $(A, C, B, C)$. Here, $v_1$ is the initial state.
+        Result: $C_1' = (v_1, v_2, v_3)$ with classes $(A, C, B)$. Here, $v_1$ is the initial state.
         
-        \item For $C_2 = (h,i,e,l,m,g)$ with classes $(D,D,D,D,D,D)$:
+        \item For $C_2 = (b,h,l,e,i,m,g)$ with classes $(B,D,D,D,D,D,D)$:
         \begin{itemize}
-            \item Block $B_1 = \{h,i,e,l,m,g\}$ (all class $D$) $\rightarrow$ collapsed node $w_1$. The node $w_1$ collects all incoming edges formerly targeting any of $h,i,e,l,m,g$, and it is accepting.
+            \item Block $B_1 = \{b\}$ (class $B$) $\rightarrow$ collapsed node $w_1$. It has two outgoing edges: $b \xrightarrow{0} d$ and $b \xrightarrow{1} e$. As $d,e$ collapse to $v_2$ and $w_2$ respectively, we obtain $w_1 \xrightarrow{0} v_2$ and $w_1 \xrightarrow{1} w_2$.
+            \item Block $B_2 = \{h,l,e,i,m,g\}$ (all class $D$) $\rightarrow$ collapsed node $w_2$. The node $w_2$ collects all incoming edges formerly targeting any of $b,h,l,e,i,m,g$, and it is accepting.
         \end{itemize}
-        Result: $C_2' = (w_1)$ with class $(D)$, and $w_1$ is the unique accepting state for this example.
+        Result: $C_2' = (w_1, w_2)$ with classes $(B,D)$, and $w_2$ is the unique accepting state for this example.
     \end{itemize}
     
     The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting NFA is shown in \cref{fig:minimized_chains}.
@@ -81,22 +81,21 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
             \node[state, initial, initial text=] (v1) {$v_1$};
             \node[state] (v2) [right=of v1] {$v_2$};
             \node[state] (v3) [right=of v2] {$v_3$};
-            \node[state] (v4) [right=of v3] {$v_4$};
-            \node[state, accepting] (w1) [right=of v4] {$w_1$};
+            \node[state] (w1) [right=of v3] {$w_1$};
+            \node[state, accepting] (w2) [right=of w1] {$w_2$};
         
-            \path (v1) edge [bend left] node {0} (v3)
+            \path (v1) edge [bend left] node {0} (w1)
                     edge [bend right] node[below] {1} (v3)
                 % v2 -> w1 (due archi su ancoraggi diversi)
-                (v2) edge [out=30, in=140, looseness=1, shorten >=1pt] node {0} (w1.100)
-                    edge [out=-35, in=250, looseness=1, shorten >=1pt] node[below] {1} (w1.260)
+                (v2) edge [out=40, in=140, looseness=1, shorten >=1pt] node {0} (w2.100)
+                    edge [out=-40, in=250, looseness=1, shorten >=1pt] node[below] {1} (w2.260)
                 % v3 -> v2 / v4 (rimangono)
-                (v3) edge [out=100, in=80, looseness=1] node[above] {0} (v2)
-                    edge [bend left] node {0} (v4)
+                (v3) edge [bend right] node[above] {0} (v2)
                 % v3 -> w1 (un arco con angolo dedicato)
-                    edge [out=-30, in=220, looseness=1.3, shorten >=1pt] node[below] {1} (w1.230)
+                    edge [out=-30, in=220, looseness=1.3, shorten >=1pt] node[below] {1} (w2.230)
                 % v4 -> w1 (due archi su ancoraggi diversi)
-                (v4) edge [bend left] node {0} (w1)
-                    edge [bend right] node[below] {1} (w1);
+                (w1) edge [bend left] node {0} (v2)
+                    edge [bend right] node[below] {1} (w2);
         \end{tikzpicture}
         \caption{NFA obtained after collapsing equivalent nodes in chains $C_1$ and $C_2$.}
         \label{fig:minimized_chains}

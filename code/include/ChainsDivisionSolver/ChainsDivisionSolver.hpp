@@ -2,7 +2,6 @@
 #define CHAINS_DIVISION_SOLVER_HPP
 
 #include "../DAWG/TreeDAWG.hpp"
-#include "../XBWT/XBWT.hpp"
 #include "PerfectMatching.h" // Blossom V header
 
 /**
@@ -138,9 +137,11 @@ public:
             // Check if current node i is between two class change positions with his same class
             if (i < class_change_pos[cp_index].first - 1)
             {
-                if (cp_index - 1 >= 0 &&
+                if ((cp_index - 1 >= 0 &&
                     i >= class_change_pos[cp_index - 1].first &&
-                    current_equiv_class == class_change_pos[cp_index - 1].second)
+                    current_equiv_class == class_change_pos[cp_index - 1].second) ||
+                    (cp_index - 1 < 0 &&
+                    current_equiv_class == class_change_pos[cp_index].second))
                 {
                     // Add edge to current index + 1 with weight 0
                     uint64_t v_j = t + p + i + 1;
@@ -152,9 +153,12 @@ public:
             }
             else if (i >= class_change_pos[cp_index].first)
             {
-                if (cp_index + 1 < class_change_pos.size() &&
+                if ((cp_index + 1 < class_change_pos.size() &&
                     i < class_change_pos[cp_index + 1].first - 1 &&
-                    current_equiv_class == class_change_pos[cp_index].second)
+                    current_equiv_class == class_change_pos[cp_index].second) ||
+                    (cp_index + 1 >= class_change_pos.size() &&
+                    current_equiv_class == class_change_pos[cp_index].second && 
+                    i < t - 1))
                 {
                     // Add edge to current index + 1 with weight 0
                     uint64_t v_j = t + p + i + 1;
@@ -162,16 +166,19 @@ public:
                     found_zero_weight_edge = true;
                     if (verbose)
                         std::cout << "Add edge: u_" << i << " -> v_" << i + 1 << " (weight 0)" << std::endl;
-                }
+                } 
             }
 
-            if (class_change_pos[cp_index].first <= i)
+            if (class_change_pos[cp_index].first <= i && cp_index < class_change_pos.size() - 1)
                 ++cp_index;
 
             uint64_t cur_cp_index = cp_index;
-            while (cur_cp_index < class_change_pos.size() && edges_added <= p)
+            while (cur_cp_index < class_change_pos.size() && edges_added <= p && i < t - 1)
             {
                 uint64_t j = class_change_pos[cur_cp_index].first;
+                if (j <= i)
+                    j = i + 1;
+            
                 uint64_t target_equiv_class = class_change_pos[cur_cp_index].second;
                 uint64_t v_j = t + p + j; // v_j position in V2
 
@@ -218,7 +225,7 @@ public:
      * then reconstructs the chains by following the matching edges from source
      * nodes through the tree nodes.
      */
-    std::vector<std::vector<uint64_t>> solve(bool verbose = false)
+    const std::vector<std::vector<uint64_t>>& solve(bool verbose = false)
     {
         m_pm.Solve();
         if (verbose)
@@ -227,7 +234,7 @@ public:
         }
 
         std::vector<uint64_t> chain_mem(m_p, 0); // array used to save cur chain node
-        for (uint64_t i = 0; i < m_num_nodes; i++)
+        for (uint64_t i = 0; i < m_num_nodes + m_p; i++)
         {
             uint64_t j = m_pm.GetMatch(i);
             uint64_t real_i = i - m_p;

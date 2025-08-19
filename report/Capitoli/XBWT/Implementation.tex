@@ -1,9 +1,9 @@
-\section{Implementation}
+\subsection{Implementation}
 The XBWT data structure has been implemented in C++ using the Succinct Data Structure Library 2.0 (SDSL) for efficient representation and manipulation of compressed data structures. We will develop two algorithms for constructing the XBWT: one efficient linear-time recursive algorithm and one more straightforward iterative algorithm. Also, we will implement the necessary data structures and algorithms for navigating and querying the XBWT, such as parent-child navigation and path-based searches. 
 
 The implementation of the XBWT is based on the descriptions provided in the previous sections. Also, it is available on GitHub at the following link: \url{https://github.com/davide-tonetto-884585/XBWT}.
 
-\subsection{Implementation Choices}
+\subsubsection{Implementation Choices}
 Follows a list of the main choices made during the implementation of the XBWT:
 \begin{itemize}
     \item The implementation is not focused on a specific kind of data, such as XML documents or JSON files, but it is designed to work with any kind of labeled tree. 
@@ -14,7 +14,7 @@ Follows a list of the main choices made during the implementation of the XBWT:
     \item All the operations introduced in \cref{sec:xbwt_operations} are implemented in the XBWT class.
 \end{itemize}
 
-\subsection{Succinct Data Structures}
+\subsubsection{Succinct Data Structures}
 The implementation of the XBWT relies heavily on succinct data structures to achieve space efficiency while maintaining fast query operations. In particular, we use succinct data structures to compress the two main arrays of the XBWT: $S_\alpha$ and $S_{\text{last}}$. These arrays, which can be quite large for substantial trees, benefit significantly from compression.
 
 The compression is achieved through the Succinct Data Structure Library (SDSL), which provides efficient implementations of various compressed data structures. For $S_{\text{last}}$, which is a binary sequence, we utilize a compressed bit vector that supports fast rank and select operations. For $S_\alpha$, which contains labels from a potentially large alphabet, we employ a wavelet tree structure that provides both compression and efficient query capabilities.

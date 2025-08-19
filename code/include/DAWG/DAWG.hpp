@@ -159,13 +159,31 @@ struct State
     constexpr uint64_t get_equivalence_class() const { return m_equivalence_class; }
 
     /**
+     * @brief Get the parent state ID.
+     * @return The parent state ID, or UINT64_MAX if no parent is set.
+     */
+    constexpr uint64_t get_parent_state_id() const { return m_parent_state_id; }
+
+    /**
+     * @brief Set the parent state ID.
+     * @param parent_id The ID of the parent state.
+     */
+    void set_parent_state_id(uint64_t parent_id) { m_parent_state_id = parent_id; }
+
+    /**
+     * @brief Check if the state has a parent.
+     * @return true if the state has a parent, false otherwise.
+     */
+    constexpr bool has_parent() const { return m_parent_state_id != UINT64_MAX; }
+
+    /**
      * @brief Construct a new State object.
      *
      * @param _id The unique identifier for the state.
      * @param _is_final Whether the state is a final state.
      */
     constexpr State(uint64_t _id)
-        : m_id(_id), m_height(-1), m_equivalence_class(-1) {}
+        : m_id(_id), m_height(-1), m_equivalence_class(-1), m_parent_state_id(UINT64_MAX) {}
 
 private:
     uint64_t m_id;
@@ -173,6 +191,7 @@ private:
 
     int64_t m_height;            // Cached height of the state.
     int64_t m_equivalence_class; // Equivalence class ID used in minimization.
+    uint64_t m_parent_state_id;  // ID of the parent state, UINT64_MAX if no parent.
 
     template <typename Derived, typename Label>
     friend class DAWG;
@@ -433,7 +452,6 @@ public:
 
     /**
      * @brief Adds a new node to the DAWG.
-     * @param is_final Whether the new node is a final state.
      * @return The ID of the newly created node.
      */
     uint64_t add_node()
@@ -448,6 +466,7 @@ public:
      *
      * This method provides a convenient way to define all transitions for a state at once.
      * It uses a `State::Builder` to efficiently add and sort the transitions.
+     * Additionally, it sets the parent state ID for all target states.
      *
      * @param state_id The ID of the state to configure.
      * @param transitions An initializer list of pairs, where each pair contains a label and a target state ID.
@@ -458,6 +477,8 @@ public:
         for (const auto &[symbol, target] : transitions)
         {
             builder.add_transition(symbol, target);
+            // Set the parent ID for the target state
+            m_nodes[target].set_parent_state_id(state_id);
         }
 
         builder.build_into(m_nodes[state_id]);
