@@ -25,7 +25,7 @@ The results are shown in Table \cref{tab:experiments}.
         50000 & 486 & 0.310 & 0.350 \\
         100000 & 754 & 0.690 & 1.250\\
         500000 & 2246 & 4.700 & 16.460 \\
-        900000 & 2658 & 8.510 & 34.20 \\
+        900000 & 2658 & 8.510 & 34.200 \\
         \hline
     \end{tabular}
     \caption{Performance comparison between PathSort \draft{(P.S.)} and Naive Sort \draft{(N.S.)} algorithms.}
@@ -35,7 +35,7 @@ The results are shown in Table \cref{tab:experiments}.
 \subsubsection{Space Analysis}
 To evaluate the space savings achieved through XBWT compression, we conducted experiments on the same set of randomly generated trees used for the construction performance tests. For each tree, we compared the memory usage (in bytes) of three representations: the plain tree, the uncompressed XBWT, and the compressed XBWT.
 
-The plain tree representation consists of the simple balanced parenthesis encoding of the tree structure combined with the edge labels. For example for tree in Figure \cref{fig:XBWT_example}, the plain tree representation would be:
+The plain tree representation consists of the simple balanced parenthesis encoding of the tree structure combined with the edge labels. For example for tree in Figure \cref{fig:xbwt_example}, the plain tree representation would be:
 
 \texttt{(A(B(D(a))(a)(E(b)))(C(D(c))(b)(D(c)))(B(D(b))))}.
 

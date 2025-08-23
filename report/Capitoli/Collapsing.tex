@@ -1,20 +1,6 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
 The next crucial step of our compression scheme is to reduce the space required by each chain by collapsing equivalent nodes. Specifically, any sequence of consecutive nodes within the same chain that belong to the same equivalence class is merged into a single representative node. This new node preserves the connectivity of the original structure by inheriting all distinct outgoing and ingoing edges from the nodes it replaces. In the following subsections we will introduce the concept of non-deterministic finite automaton and define how nodes are collapsed in a chain. Then, we prove that this transformation is language-preserving (see \cref{lemma:collapsing_equivalence}).
 
-\subsection{Non-deterministic Finite Automata}
-We start by defining a non-deterministic finite automaton (NFA).  
-\begin{definition}[Non-deterministic Finite Automaton] \label{def:nfa}
-    A non-deterministic finite automaton is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$, where:
-    \begin{itemize}[leftmargin=25pt]
-        \item $Q$ is a finite set of states.
-        \item $\Sigma$ is a finite set of symbols.
-        \item $\delta: Q \times \Sigma \cup \{\varepsilon\} \to \mathcal{P}(Q)$ is a transition function where $\mathcal{P}(Q)$ is the power set of $Q$.
-        \item $q_0 \in Q$ is the initial state.
-        \item $F \subseteq Q$ is the set of accept states.
-    \end{itemize}
-\end{definition}
-The main difference between a DFA and an NFA is that the latter allows for multiple transitions from a state on the same input symbol and the use of the empty string $\varepsilon$ as a transition.
-
 \subsection{How to Collapse Nodes}
 Now, we define the concept of collapsing consecutive equivalent nodes in a chain.
 \begin{definition}[Collapsing consecutive equivalent nodes]
@@ -40,7 +26,7 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
 \end{definition}
 
 \begin{example}
-    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree DAWG in \cref{fig:example_dawg} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
+    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree ADFA in \cref{fig:example_ADFA} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
     \begin{itemize}
         \item $C_1 = \{a,d,f,c\}$
         \item $C_2 = \{b,h,l,e,i,m,g\}$
@@ -103,19 +89,19 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
 \end{example}
 
 \subsection{Language Equivalence}
-Now, we need to prove that the language recognized by the NFA obtained after collapsing equivalent nodes in chains following \cref{def:collapsing} is equivalent to the language of the original tree DAWG. We define the language of an NFA or DAWG $F$ as $L(F)$.
+Now, we need to prove that the language recognized by the NFA obtained after collapsing equivalent nodes in chains following \cref{def:collapsing} is equivalent to the language of the original tree ADFA. We define the language of an NFA or ADFA $F$ as $L(F)$.
 
 \begin{lemma}[Root forms a singleton class under Revuz]
     \label{lemma:root_singleton}
-    In a tree DAWG minimized by Revuz’s algorithm (\cref{sec:revuz}), the root forms a singleton equivalence class.
+    In a tree ADFA minimized by Revuz’s algorithm (\cref{sec:revuz}), the root forms a singleton equivalence class.
 \end{lemma}
 \begin{proof}
-    Let $T$ be a tree DAWG, let $r$ be its root, and let $D = h(r)$ be its height as in \cref{def:height}. For every other node $u \neq r$ at depth $k \ge 1$, we have $h(u) \le D - k < D$. Hence $r$ is the unique state in the level $\Pi_D$. Since Revuz’s algorithm partitions by height and refines within each level, $r$ cannot be merged with any other state and thus forms its own equivalence class.
+    Let $T$ be a tree ADFA, let $r$ be its root, and let $D = h(r)$ be its height as in \cref{def:height}. For every other node $u \neq r$ at depth $k \ge 1$, we have $h(u) \le D - k < D$. Hence $r$ is the unique state in the level $\Pi_D$. Since Revuz’s algorithm partitions by height and refines within each level, $r$ cannot be merged with any other state and thus forms its own equivalence class.
 \end{proof}
 
 \begin{lemma}[All leaves fall into the same class under Revuz]
     \label{lemma:all_leaves_same_class}
-    In a tree DAWG minimized by Revuz’s algorithm, all leaves belong to the same equivalence class.
+    In a tree ADFA minimized by Revuz’s algorithm, all leaves belong to the same equivalence class.
 \end{lemma}
 \begin{proof}
     Every leaf $\ell$ is final and has no outgoing transitions, so $h(\ell) = 0$. In the base step on level $\Pi_0$, the label of a state depends only on its finality and on transitions to already distinguished classes. All leaves share the same label (final, no outgoing transitions), hence they are merged into a single equivalence class in $\Pi_0$.
@@ -123,7 +109,7 @@ Now, we need to prove that the language recognized by the NFA obtained after col
 
 \begin{lemma}
     \label{lemma:collapsing_equivalence}
-    Let $T$ be a tree DAWG with alphabet $\Sigma$. Let $C_1, C_2, \ldots, C_m$ be the chains partitioning $T$ as defined in \cref{def:problem_def}. Let $N$ be the NFA obtained after collapsing equivalent nodes in chains $C_1, C_2, \ldots, C_m$ as defined in \cref{def:collapsing}. Then, $L(N) = L(T)$.
+    Let $T$ be a tree ADFA with alphabet $\Sigma$. Let $C_1, C_2, \ldots, C_m$ be the chains partitioning $T$ as defined in \cref{def:problem_def}. Let $N$ be the NFA obtained after collapsing equivalent nodes in chains $C_1, C_2, \ldots, C_m$ as defined in \cref{def:collapsing}. Then, $L(N) = L(T)$.
 \end{lemma}
 
 \begin{proof}
@@ -156,4 +142,36 @@ Now, we need to prove that the language recognized by the NFA obtained after col
     Thus, $L(N) = L(T)$.
 \end{proof}
 
-Collapsing the nodes as in \cref{def:collapsing} preserves the language of the original tree DAWG and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}, which we present in the next chapter.
+Collapsing the nodes as in \cref{def:collapsing} preserves the language of the original tree ADFA and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}, which we present in the next chapter.
+
+\begin{theorem}[Myhill--Nerode]
+Let $L \subseteq \Sigma^*$ and define the indistinguishability relation
+\[
+x \sim_L y \;\Longleftrightarrow\; \forall z \in \Sigma^*,\; xz \in L \iff yz \in L .
+\]
+Then:
+\begin{enumerate}
+    \item $\sim_L$ is an equivalence relation on $\Sigma^*$.
+    \item $L$ is regular iff $\sim_L$ has finitely many equivalence classes.
+    \item The states of the minimal DFA for $L$ are in one-to-one correspondence with the equivalence classes of $\sim_L$.
+    \item $L$ is exactly the union of those equivalence classes that intersect $L$:
+    \[
+        L \;=\; \bigcup \{ [x]_{\sim_L} \mid x \in L \}.
+    \]
+\end{enumerate}
+\end{theorem}
+
+\begin{lemma}
+Let $M=(Q,\Sigma,\delta,q_0,F)$ be a DFA recognizing $L \subseteq \Sigma^*$.
+If two states $p,q \in Q$ correspond to the same Myhill--Nerode class for $L$ (i.e., for all $w\in\Sigma^*$ we have $\delta(p,w)\in F \iff \delta(q,w)\in F$),
+then merging $p$ and $q$ into a single state yields an automaton (possibly nondeterministic) that still recognizes exactly $L$.
+\end{lemma}
+
+\begin{proof}
+By the Myhill--Nerode theorem, every state of $M$ corresponds to a unique equivalence class of $\sim_L$, and $L$ is exactly the union of those classes that intersect $L$.
+If $p$ and $q$ belong to the same equivalence class, then for every continuation $z \in \Sigma^*$ we have
+\[
+\delta(p,z) \in F \iff \delta(q,z) \in F.
+\]
+Thus replacing $p$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore merging $p$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
+\end{proof} 

@@ -1,34 +1,44 @@
 \subsection{Definition}
 The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to efficiently compress and index \emph{ordered node-labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT) \cite{burrows1994block} for strings, the XBWT extends these principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
 
-\begin{definition} [Node informations]
+\begin{definition}
     \label{def:node_informations}
-    Let $T$ be an ordered node-labeled tree of arbitrary fan-out, depth, and shape, with $n$ internal nodes and $l$ leaves ($t$ nodes in total) and alphabet $\Sigma$. Let $u$ be a node in $T$, we define the following information:
+    Let $T$ be a totally ordered node-labeled tree of arbitrary fan-out, depth, and shape, with $n$ internal nodes and $l$ leaves ($t$ nodes in total) and alphabet $\Sigma$. Let $u$ be a node in $T$, we define the following information:
     \begin{itemize}
-        \item $last(u)$: a binary value that is 1 if $u$ is the last (rightmost) child of its parent, and 0 otherwise.
-        \item $\alpha(u)$: denotes the label of node $u$ plus one bit that is 1 if $u$ is a leaf and 0 otherwise.
-        \item $\pi(u)$: the string obtained by concatenating the labels of the nodes on the \textsc{upward path} from $u$'s parent to the root of $T$ (the root has an empty $\pi$ component). Note that $\pi(u) = \pi(u') \circ label(u')$ where $\circ$ is the concatenation operator.
+        \item $last(u)$: a binary value that is 1 if $u$ is the last (rightmost) child of its parent in the total order, and 0 otherwise.
+        \item $\alpha(u)$: denotes the label of node $u$ concatenated with one bit that is 1 if $u$ is a leaf and 0 otherwise.
+        \item $\pi(u)$: the string obtained by concatenating the labels of the nodes on the \textsc{upward path} from $u$'s parent to the root of $T$. Formally, we define $\pi(u)$ recursively as:
+        \begin{align*}
+            \pi(u) = \begin{cases}
+                \varepsilon & \text{if u is the root} \\
+                label(parent(u)) \circ \pi(parent(u)) & \text{otherwise}
+            \end{cases}
+        \end{align*}
+        where $\circ$ is the concatenation operator and $\varepsilon$ is the empty string.
     \end{itemize}
 \end{definition}
 
-The definition of the XBWT relies on a sorted multi-set $S$, which contains a triplet $(last(u), \alpha(u), \pi(u))$ for each node $u$ in the tree $T$.
+If the leaf-label alphabet $\Sigma_L$ is disjoint from the internal-node label alphabet $\Sigma_N$, the additional indicator bit in $\alpha(u)$ is redundant and may be omitted. In that case, we identify $\alpha(u)$ with the node label, i.e., $\alpha(u) := label(u)$.
 
-The construction of $S$ is a two-step process. First, an intermediate multi-set is created by traversing the tree $T$ in pre-order and generating a triplet $(last(u), \alpha(u), \pi(u))$ for each node. Second, this multi-set is stably sorted according to the lexicographical order of the '$\pi$' component to produce the final multi-set $S$.
+The definition of the XBWT relies on a sequence $S$, which contains a triplet \\ 
+$(last(u), \alpha(u), \pi(u))$ for each node $u$ in the tree $T$.
+
+The construction of $S$ is a two-step process. First, an intermediate vector of triplets is created by traversing the tree $T$ in pre-order and generating a triplet $(last(u), \alpha(u), \pi(u))$ for each node. Second, it is stably sorted according to the lexicographical order of the '$\pi$' component to produce the final sequence $S$ (see \cref{tab:xbwt_example} for an example).
 
 \begin{theorem}
-    The XBWT of a labeled tree $T$ consists of two arrays, $S_{\text{last}}$ and $S_{\alpha}$. These are constructed from the sorted multi-set $S$ of triplets. Specifically, for each $i$ from 1 to $t$, $S_{\text{last}}[i]$ is the `$last$` component of the $i$-th triplet in $S$, and $S_{\alpha}[i]$ is the '$\alpha$' component. The total space required is $2t + t \log |\Sigma|$ bits.
+    The XBWT of a labeled tree $T$ consists of two arrays, $S_{\text{last}}$ and $S_{\alpha}$. These are constructed from the sequence $S$ of triplets. Specifically, for each $i$ from 1 to $t$, $S_{\text{last}}[i]$ is the `$last$` component of the $i$-th triplet in $S$, and $S_{\alpha}[i]$ is the '$\alpha$' component. The total space required is $2t + t \log |\Sigma|$ bits.
 \end{theorem}
 
-$S_{\pi}$ (for each $i$ from 1 to $t$, $S_{\pi}[i]$ is the '$\pi$' component of the $i$-th triplet in $S$), therefore is not needed after the construction of the XBWT. However, in the following discussion, we will still refer to it as it possesses some important properties.
+$S_{\pi}$ (for each $i$ from 1 to $t$, $S_{\pi}[i]$ is the '$\pi$' component of the $i$-th triplet in $S$), therefore is not needed after the construction of the XBWT. However, in the following discussion, we will still refer to it as it possesses some important properties. See \cref{fig:example_tree} for an example of the tree $T$ and its corresponding sequence $S$.
 
 \subsection{Properties}
-The XBWT's effectiveness as an indexing structure stems from a key property of the sorted multi-set $S$. This property, along with its consequences, arises directly from the transform's definition and the sorting process.
+The XBWT's effectiveness as an indexing structure stems from a key property of the sequence $S$. This property, along with its consequences, arises directly from the transform's definition and the sorting process.
 
 \subsubsection{Key Property: Grouping by Parent}
 
-The fundamental property of the XBWT is that the children of any node $u$ in the tree $T$ form a contiguous block in the sorted multi-set $S$. Let $u_1, \dots, u_z$ be the children of node $u$ in their original order. Their corresponding triplets will appear consecutively in $S$ in that same order.
+The fundamental property of the XBWT is that the children of any node $u$ in the tree $T$ form a contiguous block in the sequence $S$. Let $u_1, \dots, u_z$ be the children of node $u$ in their original order. Their corresponding triplets will appear consecutively in $S$ in that same order.
 \begin{example}
-    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can see that its children form a contiguous block in positions $[5, 6, 7]$ of the sorted multi-set $S$.
+    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can see that its children form a contiguous block in positions $[5, 6, 7]$ of the sequence $S$.
 \end{example}
 
 This grouping provides several important consequent properties:
@@ -40,12 +50,12 @@ This grouping provides several important consequent properties:
 
 \textbf{Preservation of Sibling Order:} If two nodes $u$ and $v$ have the same label, and the triplet for $u$ precedes the triplet for $v$ in $S$, then the entire block of children of $u$ will also precede the block of children of $v$.
 \begin{example}
-    Consider nodes $u$ and $v$ in \cref{fig:example_tree}. In \cref{tab:xbwt_example}, node $u$ appears at index 2 while node $v$ appears at index 4 in the sorted multi-set $S$. Following the preservation of sibling order property, all children of $u$ (occupying positions $[5, 6, 7]$) appear before the child of $v$ (at position $8$).
+    Consider nodes $u$ and $v$ in \cref{fig:example_tree}. In \cref{tab:xbwt_example}, node $u$ appears at index 2 while node $v$ appears at index 4 in the sequence $S$. Following the preservation of sibling order property, all children of $u$ (occupying positions $[5, 6, 7]$) appear before the child of $v$ (at position $8$).
 \end{example}
 
 \textbf{Path-based Indexing:} This property extends to entire paths. For any label $c \in \Sigma$, all triplets whose $\pi$-components are prefixed by $c$ form a contiguous block in $S$. If $u$ is the $i$-th node with label $c$ in $S_{\alpha}$, its children's block is located within the larger block of all nodes with paths prefixed by $c$. This block is delimited by the $(i-1)$-th and $i$-th '1's in the corresponding section of $S_{\text{last}}$. \label{prop3}
 \begin{example}
-    Let's examine nodes $u$ and $v$ in \cref{fig:example_tree}, both labeled 'B'. In the sorted multi-set $S$ shown in \cref{tab:xbwt_example}, $u$ is the first node with label 'B' (at index 2), and $v$ is the second (at index 4).
+    Let's examine nodes $u$ and $v$ in \cref{fig:example_tree}, both labeled 'B'. In the sequence $S$ shown in \cref{tab:xbwt_example}, $u$ is the first node with label 'B' (at index 2), and $v$ is the second (at index 4).
 
     The children of all nodes labeled 'B' form a contiguous block in $S$. In this case, the children of both $u$ and $v$ are located in the range $[5, 8]$. We can distinguish between the children of $u$ and the children of $v$ using the $S_{\text{last}}$ array:
     \begin{itemize}
@@ -120,7 +130,7 @@ Additional properties of the XBWT components include:
     \hline\hline
     \textbf{} & \textbf{$S_{\text{last}}$} & \textbf{$S_{\alpha}$} & \textbf{$S_{\pi}$} \\
     \hline
-    \textbf{1} & 0 & A & \textit{empty string} \\
+    \textbf{1} & 0 & A & $\epsilon$ \\
     \textbf{2} & 0 & B & A \\
     \textbf{3} & 0 & C & A \\
     \textbf{4} & 1 & B & A \\
@@ -138,12 +148,12 @@ Additional properties of the XBWT components include:
     \textbf{16} & 1 & b & EBA \\
     \hline\hline
     \end{tabular}
-    \caption{The multi-set $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their '$\pi$' components. In this representation, nodes $u$ and $v$ from the original tree $T$ appear at indices $2$ and $4$, respectively. The children's block of node $u$ occupies positions $5$ through $7$, while node $v$'s single child is located at index $8$.}
+    \caption{The sequence $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their '$\pi$' components. In this representation, nodes $u$ and $v$ from the original tree $T$ appear at indices $2$ and $4$, respectively. The children's block of node $u$ occupies positions $5$ through $7$, while node $v$'s single child is located at index $8$.}
     \label{tab:xbwt_example}
 \end{table}
 
 \subsection{Construction}
-A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for large deep trees. To overcome this issue, Ferragina et al. \cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time and $O(t \log t)$ space.
+A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for deep trees. To overcome this issue, Ferragina et al. \cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time and $O(t \log t)$ bits of working space.
 
 The linear time algorithm is called \textbf{pathSort}, it is based on a generalization of the Skew algorithm for suffix array construction of strings \cite{karkkainen2006linear}. Let's see briefly how the Skew algorithm works.
 
@@ -161,28 +171,41 @@ The Skew algorithm is an efficient method for constructing the suffix array of a
 
 \subsubsection*{Algorithm Overview}
 
-\subsubsection*{1. Divide the String}
+\paragraph{Step 0: Construct a Sample.}
+For $k \in \{0,1,2\}$, define the index sets
+\[
+B_k \;=\; \{\, i \in [0,n] \mid i \bmod 3 = k \,\}.
+\]
+Let $C = B_1 \cup B_2$ be the set of sample positions, and let $S_C$ denote the set of sample suffixes.
 
-The algorithm begins by partitioning the indices of the string into three groups based on their modulo 3 value:
-\begin{itemize}
-    \item $S_0$: Indices congruent to 0 mod 3.
-    \item $S_1$: Indices congruent to 1 mod 3.
-    \item $S_2$: Indices congruent to 2 mod 3.
-\end{itemize}
+\paragraph{Step 1: Sort Sample Suffixes.}
+For $k \in \{1,2\}$, construct the string $R_k$ whose characters are the triples $[\,t_i\, t_{i+1}\, t_{i+2}\,]$ for $i \in B_k$ in increasing order of $i$. The last character of $R_k$ is unique because we pad with sentinels so that $t_{n+1} = t_{n+2} = 0$. Let $R = R_1 R_2$ be the concatenation of $R_1$ and $R_2$.
+Then the nonempty suffixes of $R$ correspond to the sample suffixes in $S_C$ in an order-preserving way: sorting the suffixes of $R$ yields the order of $S_C$.
+To sort the suffixes of $R$, first radix sort the characters of $R$ (the triples) and rename them by their ranks to obtain a string $R'$. If all characters are distinct, their order directly gives the order of suffixes. Otherwise, sort the suffixes of $R'$ recursively using the same DC3 procedure.
+Once $S_C$ is sorted, assign ranks to sample suffixes: for $i \in C$, let $\mathrm{rank}(S_i)$ be the rank of $S_i$ within $S_C$. Additionally, define $\mathrm{rank}(S_{n+1}) = \mathrm{rank}(S_{n+2}) = 0$. For $i \in B_0$, $\mathrm{rank}(S_i)$ is undefined.
 
-The suffixes starting at positions in $S_1$ and $S_2$ are combined into a single group called $S_{12}$.
+\paragraph{Step 2: Sort Nonsample Suffixes.}
+Represent each nonsample suffix $S_i$ with $i \in B_0$ by the pair
+\[
+\bigl(t_i,\ \mathrm{rank}(S_{i+1})\bigr).
+\]
+Note that $\mathrm{rank}(S_{i+1})$ is always defined for $i \in B_0$ by the previous step. Then, radix sort these pairs to obtain the order of $S_{B_0}$.
 
-\subsubsection*{2. Sort Suffixes in $S_{12}$}
+\paragraph{Step 3: Merge.}
+Merge the two sorted sets $S_C$ and $S_{B_0}$ using a standard comparison-based merging. To compare a suffix $S_i \in S_C$ against a suffix $S_j \in S_{B_0}$, distinguish two cases:
+\[
+\begin{aligned}
+&\text{if } i \in B_1: && S_i \le S_j \iff \bigl(t_i,\ \mathrm{rank}(S_{i+1})\bigr) \le_{\mathrm{lex}} \bigl(t_j,\ \mathrm{rank}(S_{j+1})\bigr),\\
+&\text{if } i \in B_2: && S_i \le S_j \iff \bigl(t_i,\ t_{i+1},\ \mathrm{rank}(S_{i+2})\bigr) \le_{\mathrm{lex}} \bigl(t_j,\ t_{j+1},\ \mathrm{rank}(S_{j+2})\bigr).
+\end{aligned}
+\]
+The ranks used above are defined in all cases by Step~1. Each comparison inspects $O(1)$ characters/ranks, and the two-way merge advances each pointer at most once, so the merge runs in linear time overall.
 
-To sort the suffixes in $S_{12}$, the algorithm considers the triplets of characters starting at each position in $S_{12}$. These triplets are sorted using a linear-time sorting algorithm, such as radix sort, and then renamed by assigning each triplet an integer value representing its rank in the sorted order. If all triplets are unique, the sorting is complete; otherwise, the same procedure is applied recursively to the sequence of ranks obtained.
-
-\subsubsection*{3. Sort Suffixes in $S_0$}
-
-Once the suffixes in $S_{12}$ are sorted, the algorithm proceeds to sort the suffixes in $S_0$. To compare two suffixes starting at positions $i$ and $j$ in $S_0$, it compares the first characters of their respective substrings. If the characters are different, their lexicographical order is immediately determined. If they are equal, the algorithm compares the suffixes starting at positions $i+1$ and $j+1$, whose ranks are already known from the sorting of $S_{12}$.
-
-\subsubsection*{4. Merge the Sorted Orders}
-
-Finally, the sorted orders of the suffixes in $S_0$ and $S_{12}$ are merged to obtain the complete suffix array of the original string. This merging process can be performed in linear time, ensuring the overall efficiency of the algorithm.
+\paragraph{Time Complexity.}
+Excluding the recursive call, all steps are linear-time via radix sorting and a single-pass merge. The recursion operates on a string of length $2n/3$, so the overall time satisfies
+\[
+T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
+\]
 
 \subsubsection{PathSort Algorithm} \label{sec:pathSort}
 
@@ -199,9 +222,8 @@ Is important to note that:
     \caption{\textsc{PathSort}($T$)}
     \label{alg:pathSort}
     \begin{algorithmic}[1]
-    \State Create the array \texttt{IntNodes}[1, $t$], initially empty.
-    \State Visit the internal nodes of $T$ in pre-order. Let $u$ denote the $i$-th visited node.
-    \State Write in \texttt{IntNodes}[$i$] the symbol $\alpha(u)$, the level of $u$ in $T$, and the position in \texttt{IntNodes} of $u$'s parent.
+    \State Initialize the array of triplets \texttt{IntNodes}[1..$t$].
+    \State Visit the internal nodes of $T$ in pre-order. For the $i$-th visited internal node $u$, set $\texttt{IntNodes}[i] \gets \bigl(\alpha(u),\, \text{level}(u),\, \text{parent}(u)\bigr)$.
     \State Let $j \in \{0, 1, 2\}$ be such that the number of nodes in \texttt{IntNodes} whose level is $\equiv j \pmod{3}$ is at least $t/3$. Sort recursively the upward subpaths starting at nodes in levels $\not\equiv j \pmod{3}$.
     \State Sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of Step 3.
     \State Merge the two sets of sorted subpaths by exploiting their lexicographic names.
@@ -252,7 +274,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
             \State \textbf{continue};
         \EndIf
         \State Find first $j' \geq j$ such that $S_{\text{last}}[j'] = 1$; \Comment{$S[j, j']$ are the children of $u$ in $T$}
-        \For{$h = j'$ downto $j$} \Comment{Recall that $Q$ is a stack}
+        \For{$h = j'$ downto $j$} 
             \State Create the node $v$ labeled $S_\alpha[h]$;
             \State Attach $v$ as first child of $u$;
             \State push($\langle h, v \rangle$, $Q$);
@@ -307,7 +329,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
 Let the $k$-context of a node $u \in T$ be the first $k$ symbols of $\pi(u)$. We denote this $k$-long prefix as $\pi_k[u]$. Thus, $\pi_k[u]$ represents the subpath of length $k$ leading to $u$ in $T$, or equivalently, the node $u$ descends from a subpath labeled as $\pi_k[u]$, where the nodes in $\pi_k[u]$ are encountered in an upward direction.
 \end{comment}
 
-The XBWT[$T$] exhibits a local homogeneity property on the string $S_{\alpha}$, specifically, node labels get distributed over $S_{\alpha}$ in accordance with a pattern that clusters closely the labels that descend from `similar' upward paths sharing long prefixes. Which can be demonstrated through the concept of $k$-contexts on trees. 
+The XBWT[$T$] exhibits a local homogeneity property on $S_{\alpha}$: specifically, the labels $\alpha(u)$ of nodes $u$ whose upward paths $\pi(u)$ share long common prefixes appear in $S_{\alpha}$ in contiguous (or tightly bounded) clusters. This phenomenon can be formalized via the notion of $k$-contexts on trees.
 This property mirrors the strong local homogeneity exhibited by strings under the Burrows-Wheeler Transform \cite{burrows1994block} when applied to labeled trees.
 
 To illustrate this, let us consider two arbitrary nodes $u$ and $v$ in $T$, and examine their contexts $\pi(u)$ and $\pi(v)$. Given the sorting of $S$, the greater the length of the shared prefix between $\pi(u)$ and $\pi(v)$, the closer the corresponding labels $\alpha(u)$ and $\alpha(v)$ will be in the string $S_{\alpha}$. These closely spaced labels are expected to be few in number, resulting in $S_{\alpha}$ exhibiting local homogeneity. As a consequence, we can leverage the advanced algorithmic techniques developed for BWT-based compression methods to achieve efficient compression.
@@ -317,14 +339,14 @@ $C_{\alpha}$ and $C_{\text{last}}$ are used to compress the two strings that com
 
 In general, the following theorem holds:
 
-\begin{theorem}
+\begin{theorem}[\cite{ferragina2009compressing}, Theorem 4]
     let $C_{\alpha}$ be a $k$-th order string compressor that compresses any string $w$ into $|w|H_k(w) + |w| + o(|w|)$ bits, taking $O(|w|)$ time; and let $C_{\text{last}}$ be an algorithm that stores $S_{\text{last}}$ without compression. With this simple instantiation, the labeled tree $T$ can be compressed within $t H_k(S_{\alpha}) + 2t + o(t)$ bits and takes $O(t)$ optimal time.
 \end{theorem}
 
-Since $H_k(S_\alpha) \leq (\log |\Sigma|) + 1,^6$ the above bound is at most $t(\log |\Sigma| + 3) + o(t)$ bits, and can be significantly better than the information-theoretic lower bound and the plain storage of XBWT[$T$] (both taking $2t + t \log|\Sigma|$ bits), depending on the distribution of the labels among its nodes.
+Since $H_k(S_\alpha) \leq (\log |\Sigma|) + 1$ (Recall that when a unique alphabet is used to label both internal nodes and leaves, one needs a further bit to distinguish between them. The additional term +1 in the bound takes this into account), the above bound is at most $t(\log |\Sigma| + 3) + o(t)$ bits, and can be significantly better than the information-theoretic lower bound and the plain storage of XBWT[$T$] (both taking $2t + t \log|\Sigma|$ bits), depending on the distribution of the labels among its nodes.
 
 \subsection{Indexing a Compressed Labeled Tree} \label{sec:xbwt_operations}
-In order to implement the efficient operations listed in \cref{compandindexinglabtree} using the compressed arrays $S_{\text{last}}$ and $S_{\alpha}$ of XBWT, we need that the chosen compressors $C_{\alpha}$ and $C_{\text{last}}$ support the following operations:
+In order to implement the efficient operations listed in \cref{compandindexinglabtree} using the compressed arrays $S_{\text{last}}$ and $S_{\alpha}$ of XBWT, we need the chosen compressors $C_{\alpha}$ and $C_{\text{last}}$ to support the following operations:
 
 Given a string $S[1, t]$ over alphabet $\Sigma$
 \begin{itemize}
@@ -335,16 +357,16 @@ Given a string $S[1, t]$ over alphabet $\Sigma$
 The compressed indexing of XBWT[$T$] will be based on three compressed data structures that support rank and select queries over the two strings $S_{\alpha}$ and $S_{\text{last}}$, and over an auxiliary binary array $A[1, t]$ defined as: $A[1] = 0$, $A[j] = 1$ if and only if the first symbol of $S_{\pi}[j]$ differs from the first symbol of $S_{\pi}[j - 1]$. 
 Hence, $A$ contains at most $|\Sigma| + 1$ bits set to 1 out of $t$ positions. It is also easy to see that, through rank and select operations over $A$, we can succinctly implement the array $F$ employed in \cref{alg:rebuildTree,alg:buildF}.
 
-The following methods are supported by the compressed index:
+In this section, let $S := (S_{\text{last}}, S_{\alpha})$ denote the XBWT$[T]$ obtained after the construction phase. The following methods are supported by the compressed index:
 
 \textbf{GetRankedChild(i, k)}: Returns the position in $S$ of the $k$-th child of the node at index $i$. If the child does not exist, it returns -1. 
 \begin{example}
-    In \cref{tab:xbwt_example}, \texttt{GetRankedChild(2, 2)} returns 6.
+    In \cref{tab:xbwt_example_2}, \texttt{GetRankedChild(2, 2)} returns 6.
 \end{example}
 
 \textbf{GetCharRankedChild(i, c, k)}: Returns the position in $S$ of the $k$-th child labeled $c$ of the node at index $i$. If the child does not exist, it returns -1.
 \begin{example}
-    In \cref{tab:xbwt_example}, \texttt{GetCharRankedChild(1, B, 2)} returns 4.
+    In \cref{tab:xbwt_example_2}, \texttt{GetCharRankedChild(1, B, 2)} returns 4.
 \end{example}
 
 \textbf{GetDegree(i)}: Returns the total number of children of the node at index $i$ in $S$.
@@ -353,14 +375,14 @@ The following methods are supported by the compressed index:
 
 \textbf{GetParent(i)}: Returns the position in $S$ of the parent of the node at index $i$. If the node is the root (at index 1), it returns -1.
 \begin{example}
-    In \cref{tab:xbwt_example}, \texttt{GetParent(8)} returns 4.
+    In \cref{tab:xbwt_example_2}, \texttt{GetParent(8)} returns 4.
 \end{example}
 
 \textbf{GetSubtree(i)}: Retrieves the labels of all nodes in the subtree rooted at the node at index $i$ in $S$. The labels can be returned in any standard traversal order (e.g., pre-order, in-order, or post-order).
 
-\textbf{SubPathSearch($P$)}: For a given labeled path $P = c_1c_2 \cdots c_k$, this function finds the range $S[\text{First} \dots \text{Last}]$ containing the immediate children of all nodes that match the path $P$. Meaning that all strings in $S_{\pi}[\text{First} \dots \text{Last}]$ are prefixed by the reversed path $P^R = c_k \cdots c_2c_1$, as the strings in $S_{\pi}$ are constructed using upward paths.
+\textbf{SubPathSearch($P$)}: For a given labeled path $P = c_1c_2 \cdots c_k$, this function finds the range $S[\text{First} \dots \text{Last}]$ such that all strings in $S_{\pi}[\text{First} \dots \text{Last}]$ are prefixed by the reversed path $P^R = c_k \cdots c_2c_1$.
 \begin{example}
-    In \cref{tab:xbwt_example}, \texttt{SubPathSearch(BD)} results in the range [12, 13], and \\ \texttt{SubPathSearch(AB)} gives the range [5, 8].
+    In \cref{tab:xbwt_example_2}, \texttt{SubPathSearch(BD)} results in the range [12, 13], and \\ \texttt{SubPathSearch(AB)} gives the range [5, 8].
 \end{example}
 
 It is important to note that their time complexity is dependent on the specific implementation for rank and select over the compressed strings $S_{\alpha}$ and $S_{\text{last}}$. 
@@ -373,7 +395,7 @@ Let's now see how to implement some of the above methods (from which the others 
     \hline\hline
     \textbf{} & $A$ & \textbf{$S_{\text{last}}$} & \textbf{$S_{\alpha}$} & \textbf{$S_{\pi}$} \\
     \hline
-    \textbf{1} & 0 & 0 & A & \textit{empty string} \\
+    \textbf{1} & 0 & 0 & A & $\epsilon$ \\
     \textbf{2} & 1 & 0 & B & A \\
     \textbf{3} & 0 & 0 & C & A \\
     \textbf{4} & 0 & 1 & B & A \\
@@ -391,7 +413,7 @@ Let's now see how to implement some of the above methods (from which the others 
     \textbf{16} & 1 & 1 & b & EBA \\
     \hline\hline
     \end{tabular}
-    \caption{The multi-set $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their '$\pi$' components. In this representation, nodes $u$ and $v$ from the original tree $T$ appear at indices $2$ and $4$, respectively. The children's block of node $u$ occupies positions $5$ through $7$, while node $v$'s single child is located at index $8$. Also, the auxiliary binary array $A$ is shown.}
+    \caption{The sequence $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their '$\pi$' components. In this representation, nodes $u$ and $v$ from the original tree $T$ appear at indices $2$ and $4$, respectively. The children's block of node $u$ occupies positions $5$ through $7$, while node $v$'s single child is located at index $8$. Also, the auxiliary binary array $A$ is shown.}
     \label{tab:xbwt_example_2}
 \end{table}
 
@@ -485,7 +507,7 @@ The time complexity of the SubPathSearch algorithm is $O(l)$, where $l$ is the l
         \item Therefore, the algorithm returns the range $[12,13]$
     \end{enumerate}
 
-    Note that both the number of offspring and the number of occurrences of subpath $P$ are 2, as evidenced by the two occurrences of 1 in $S_{\text{last}}[12,13]$.
+    Note that the number of occurrences of subpath $P$ is 2, as evidenced by the two occurrences of 1 in range $S_{\text{last}}[12,13]$.
 \end{example}
 
 \begin{algorithm}[H]

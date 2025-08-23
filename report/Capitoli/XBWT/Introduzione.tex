@@ -6,7 +6,7 @@ This chapter explores the Extended Burrows-Wheeler Transform (XBWT), introduced 
 
 In 2005, Ferragina et al.~\cite{ferragina2009compressing} introduced an innovative approach to labeled tree compression by transforming it into a more tractable string compression problem. Their key contribution, the Extended Burrows-Wheeler Transform (XBWT), is a sophisticated data structure that achieves highly efficient compression by combining entropy-compressed edge labels with a succinct representation of the tree topology. This elegant solution not only simplifies the compression process but also maintains the structural relationships essential for tree operations.
 
-The XBWT works by linearizing a labeled tree into two coordinated arrays: one capturing the structural properties of the tree and the other storing its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of the XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as parent-child navigation and sophisticated path-based searches, in (near-)optimal time and space.
+The XBWT works by linearizing a labeled tree into two coordinated arrays capturing the structural properties of the tree and storing its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of the XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as navigation, visualization and subpath queries (see \cref{def:tree_operations}), within (near-)optimal time bounds and entropy-bounded space.
 
 One of the primary applications of the XBWT is in compressing and indexing hierarchical data formats, such as XML documents. It provides significant improvements in both compression ratio and query performance compared to traditional tools, making it an invaluable resource for data-intensive applications in fields like bioinformatics, information retrieval, and big data analytics.
 
@@ -29,8 +29,8 @@ The transformation process of the XBWT is as follows:
 \subsubsection{Key Aspects}
 The XBWT has several key properties that make it an effective tool for labeled tree compression and indexing:
 \begin{itemize}
-    \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the \emph{information-theoretic lower bound}, which is \( 2t - \Theta(\log t) + t \log |\Sigma| \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.
-    \item \textbf{Efficient Querying:} The XBWT supports a range of navigational operations, such as finding the parent, child, or subtree of a node in near-optimal time.
+    \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the worst-case entropy (\cref{lem:info_theoretic_lower_bound}), which is \( 2t - \Theta(\log t) + t \log |\Sigma| \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.
+    \item \textbf{Efficient Querying:} The XBWT supports the navigational queries (\cref{def:tree_operations}) in optimal time $O(1)$ if $|\Sigma| = O(polylog(t))$, otherwise in $O(\log\log^{1+\epsilon} |\Sigma|)$ time. Whereas, given $s \in \Sigma^*$, subpath queries (\cref{def:tree_operations}) are supported in $O(|s|)$ if $|\Sigma| = O(polylog(t))$, otherwise in $O(|s| \log\log^{1+\epsilon} |\Sigma|)$ time.
     \item \textbf{Scalability:} The XBWT is particularly useful for large-scale hierarchical data, such as XML documents or phylogenetic trees, where both compression and fast querying are critical.
 \end{itemize}
 

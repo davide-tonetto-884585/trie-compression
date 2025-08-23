@@ -13,7 +13,7 @@ int main()
 {
     bool verbose = true, from_file = false;
 
-    std::string filename = "tree_generator/generated_trees/tree_bf3_rp50_sd1-5_letters8_mn10000_s42.txt";
+    std::string filename = "tree_generator/generated_trees/tree_bf3_rp40_sd3-8_letters8_mn100000_s42.txt";
     std::string str = "(1(0(0(0)(1))(1))(1(0(0)(1))(1)))";
 
     if (from_file)
@@ -116,6 +116,17 @@ int main()
 
     std::cout << "Compressing tree..." << std::endl;
     TreeCompressor<char> compressor(tree_dawg, chains, verbose);
+    auto transitions = compressor.get_transitions();
+    uint64_t num_new_nodes = compressor.get_num_new_nodes();
+    uint64_t num_old_nodes = tree_dawg.get_num_nodes();
+
+    std::cout << "Number of new nodes: " << num_new_nodes << std::endl;
+    std::cout << "Number of old nodes: " << num_old_nodes << std::endl;
+
+    std::cout << "Number of new transitions: " << transitions.size() << std::endl;
+    std::cout << "Number of old transitions: " << tree_dawg.get_num_transitions() << std::endl;
+
+    std::cout << "Is NFA: " << compressor.is_nfa() << std::endl;
 
     std::cout << "--------------------" << std::endl;
 

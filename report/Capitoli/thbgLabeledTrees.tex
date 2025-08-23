@@ -1,57 +1,10 @@
-\section{Labeled Trees} \label{chp:thbg_labeled_tree}
+\section{Labeled Trees and Tries} \label{chp:thbg_labeled_tree}
 In this chapter, we will discuss labeled trees, a fundamental data structure used to represent hierarchical data. We will define the concept of a labeled tree, explore its common applications, and introduce the core concepts behind its compression and indexing.
 
-\subsection*{Notation}
-Throughout this chapter, we will use the following notation to discuss labeled trees and related concepts.
-\begin{itemize}
-    \item $T$: A labeled tree or trie.
-    \item $V$: The set of vertices (or nodes) in a tree.
-    \item $E$: The set of directed edges in a tree.
-    \item $r$: The distinguished root vertex of a tree.
-    \item $\Sigma$: A finite alphabet of symbols used for edge labels.
-    \item $\lambda$: An edge labeling function, $\lambda: E \to \Sigma$.
-    \item $L$: A finite set of strings, $L \subseteq \Sigma^*$.
-    \item $t$: The total number of nodes in a tree, i.e., $t = |V|$.
-    \item $\epsilon$: The empty string.
-    \item $str(v)$: The string spelled by the path from the root to vertex $v$.
-\end{itemize}
-
 \subsection{Introduction and Motivation}
-Before delving into specific compression techniques, it is essential to establish a solid theoretical foundation regarding labeled trees. These structures are fundamental for representing hierarchical data across diverse fields, from bioinformatics to document processing. This chapter provides the necessary background, defining labeled trees, exploring their common applications, and introducing the core concepts behind their compression and indexing. 
+Before delving into specific compression techniques, it is essential to establish a solid theoretical foundation regarding labeled trees and tries. These structures are fundamental for representing hierarchical data across diverse fields, from bioinformatics to document processing. This chapter provides the necessary background, defining labeled trees, exploring their common applications, and introducing the core concepts behind their compression and indexing. 
 
-\begin{definition} \label{def:labeled_tree}
-    A \textbf{labeled tree} is a rooted, ordered, hierarchical data structure in which every edge is assigned a label from a predefined alphabet $\Sigma$. The structure consists of nodes connected by edges, forming a directed acyclic graph. Formally, a labeled tree can be defined as $T = (V, E, \lambda, r)$, where:
-    \begin{itemize}
-        \item $V$ is the set of vertices,
-        \item $E \subseteq V \times V$ is the set of directed edges,
-        \item $\lambda : E \to \Sigma$ is an edge labeling function,
-        \item $r \in V$ is the root vertex.
-    \end{itemize}
-\end{definition}
-
-In the case of ordered labeled trees, the children of a node are ordered, meaning their positions relative to each other matter. A labeled tree can have arbitrary degree and shape, and the alphabet $\Sigma$ used for labels can be of arbitrary size.
-
-While labeled trees encompass a broad class of hierarchical structures, this thesis focuses specifically on tries. This focus is motivated by our compression strategy, which relies on identifying and merging identical subtrees. To formally identify these subtrees, we compute the Myhill-Nerode equivalence classes of the trie's states (see \cref{def:myhill-nerode}), a task that can be accomplished using algorithms for DFA minimization. A fundamental prerequisite for these algorithms is determinism, as they require that from any given state, each symbol corresponds to at most one transition. Tries inherently provide this guarantee, since from any node, there is at most one outgoing edge for each symbol in the alphabet. This deterministic nature is therefore what allows us to apply powerful automata minimization techniques to compress the tree structure. Let's give the formal definition of trie.
-
-\begin{definition}[Trie] \label{def:trie}
-Let $\Sigma$ be a finite alphabet and $L \subseteq \Sigma^*$ be a finite set of strings. A \textbf{trie} for $L$ is a 5-tuple $T = (V, E, \lambda, r, F)$ where:
-\begin{itemize}
-    \item $V$ is a finite set of vertices.
-    \item $E \subseteq V \times V$ is a set of edges, such that $(V,E)$ forms a rooted tree.
-    \item $\lambda: E \to \Sigma$ is an edge labeling function.
-    \item $r \in V$ is the root vertex.
-    \item $F \subseteq V$ is the set of terminal (or final) vertices.
-\end{itemize}
-The following properties hold:
-\begin{enumerate}
-    \item \textbf{Determinism}: For every vertex $v \in V$ and every symbol $a \in \Sigma$, there is at most one edge $(v, u) \in E$ such that $\lambda((v, u)) = a$.
-    \item \textbf{String Representation}: For any vertex $v \in V$, let $str(v)$ be the string formed by concatenating the labels on the unique path from the root $r$ to $v$. We define $str(r) = \epsilon$ (the empty string).
-    \item \textbf{Language Correspondence}: The language represented by the trie is exactly $L$. That is, $L = \{str(v) \mid v \in F\}$.
-    \item \textbf{Prefix Property}: The set of all prefixes of words in $L$ is represented by the set of all vertices. That is, $\{\text{prefixes of } w \mid w \in L\} = \{str(v) \mid v \in V\}$.
-\end{enumerate}
-\end{definition}
-
-The deterministic property ensures that for any string prefix, there is a unique path from the root, making tries suitable for our compression techniques. A trie can be seen as a DFA (see \cref{def:dfa}) allowing us to apply automata minimization techniques to compress the tree structure.
+While labeled trees encompass a broad class of hierarchical structures, this thesis focuses specifically on tries. This focus is motivated by our compression strategy, which relies on identifying and merging identical subtrees. To formally identify these subtrees, we compute the Myhill-Nerode equivalence classes of the trie's states (see \cref{def:myhill-nerode}), a task that can be accomplished using algorithms for DFA minimization. A fundamental prerequisite for these algorithms is determinism, as they require that from any given state, each symbol corresponds to at most one transition. Tries inherently provide this guarantee, since from any node, there is at most one outgoing edge for each symbol in the alphabet. This deterministic nature is therefore what allows us to apply powerful automata minimization techniques to compress the tree structure. 
 
 \subsection{Applications}
 Labeled trees are widely used in computer science and data representation due to their hierarchical structure and flexibility in modeling relationships. Prominent applications include:
@@ -66,7 +19,7 @@ Labeled trees are widely used in computer science and data representation due to
 Efficient representation, navigation, and querying of labeled trees are essential for many applications, motivating the development of specialized data structures and algorithms. 
 
 \subsection{Indexing} \label{compandindexinglabtree}
-The goal of compressing and indexing labeled trees is to design a compressed storage scheme for a labeled tree $T$ with $t$ nodes that allows for efficient navigation operations in $T$, as well as fast search and retrieval of subtrees or paths within $T$. To be effective, the compressed representation should minimize the space required to store the tree while supporting a wide range of operations in (near-)optimal time.
+The goal of compressing and indexing labeled trees is to design a compressed storage scheme for a labeled tree $T$ with $t$ nodes that allows for efficient navigation operations in $T$, as well as fast search and retrieval of subtrees or paths within $T$. To be effective, the compressed representation should minimize the space required to store the tree while supporting a wide range of operations in optimal ($O(1)$) or (near-)optimal time.
 
 We define the following navigation operations on $T$:
 \begin{definition}[Tree Operations] \label{def:tree_operations}
@@ -134,7 +87,7 @@ The field of tree indexing and compression has evolved through two main paradigm
 
 In the realm of succinct tree structures, early work by Kosaraju \cite{kosaraju1989efficient} proposed a method to index labeled trees by extending the concept of prefix sorting from strings to labeled trees using trie structures. He introduced the idea of constructing a suffix tree for a reversed trie, enabling subpath queries in $O(|P|\log|\Sigma|+ occ)$ time, where $occ$ is the number of occurrences of $P$ in $T$. However, this approach still required $O(t \log t)$ space (where $t$ is the number of nodes of the tree) and thus was not compressed.
 
-A significant advancement in this direction came with the Extended Burrows-Wheeler Transform (XBWT) \cite{ferragina2009compressing}, a data structure designed for efficient compression and indexing of ordered node-labeled trees. The XBWT works by linearizing a labeled tree into two arrays: one captures the structural properties of the tree, and the other stores its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of the XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as parent-child navigation and sophisticated path-based searches (see \cref{def:tree_operations}), in time and space that are (near-)optimal with respect to the entropy of the tree structure and labels. The XBWT provides significant improvements in both compression ratio and query performance compared to traditional compression schemes, making it a valuable resource for intensive applications.
+A significant advancement in this direction came with the Extended Burrows-Wheeler Transform (XBWT) \cite{ferragina2009compressing}, a data structure designed for efficient compression and indexing of ordered node-labeled trees. The XBWT works by linearizing a labeled tree into two arrays capturing the structural properties of the tree and its labels. This transformation allows for efficient representation, navigation, and querying of the tree. The key advantage of the XBWT lies in its ability to compress labeled trees while supporting a wide range of operations, such as navigation, visualization and subpath queries (see \cref{def:tree_operations}), within (near-)optimal time bounds and entropy-bounded space. The XBWT provides significant improvements in both compression ratio and query performance compared to traditional compression schemes, making it a valuable resource for intensive applications.
 
 Complementing succinct approaches, tree compression has been extensively studied through different paradigms that exploit structural repetitions in distinct ways. One of the classical approaches is \emph{DAG compression}, which represents a tree as a minimal directed acyclic graph (DAG) by identifying and merging identical rooted subtrees. Concretely, whenever two identical subtrees occur, only one copy is stored and all occurrences point to it. The resulting structure can be exponentially smaller than the original tree and can be computed in linear time. DAG compression has been widely used in programming languages, binary decision diagrams, and XML representations \cite{billeTreeCompressionTop2015}.
 

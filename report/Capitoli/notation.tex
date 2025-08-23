@@ -1,0 +1,82 @@
+\section{Notation} \label{sec:notation}
+The following definitions and notation will be used throughout the entire thesis
+
+We first recall the formal definition of a labeled tree.
+
+\begin{definition} \label{def:labeled_tree}
+    A \textbf{labeled tree} is a rooted structure in which every edge is assigned a label from a finite alphabet $\Sigma$. Formally, a labeled tree is a quadruple $T = (V, E, \lambda, r)$, where:
+    \begin{itemize}
+        \item $V$ is the set of vertices,
+        \item $E \subseteq V \times V$ is the set of directed edges such that $(V,E)$ forms a rooted tree,
+        \item $\lambda : E \to \Sigma$ is an edge-labeling function,
+        \item $r \in V$ is the root vertex.
+    \end{itemize}
+\end{definition}
+
+In the case of ordered labeled trees, the children of each node are totally ordered; the degree and shape of the tree, as well as the size of the alphabet $\Sigma$, are otherwise unconstrained.
+
+We now give the formal definition of a trie.
+\begin{definition}[Trie] \label{def:trie}
+Let $\Sigma$ be a finite alphabet and $L \subseteq \Sigma^*$ be a finite set of strings. A \textbf{trie} for $L$ is a 5-tuple $T = (V, E, \lambda, r, F)$ where:
+\begin{itemize}
+    \item $V$ is a finite set of vertices,
+    \item $E \subseteq V \times V$ is a set of edges such that $(V,E)$ forms a rooted tree,
+    \item $\lambda: E \to \Sigma$ is an edge-labeling function,
+    \item $r \in V$ is the root vertex,
+    \item $F \subseteq V$ is the set of terminal (final) vertices.
+\end{itemize}
+The following properties hold:
+\begin{enumerate}
+    \item \textbf{Determinism}: For every vertex $v \in V$ and every symbol $a \in \Sigma$, there is at most one edge $(v, u) \in E$ such that $\lambda((v, u)) = a$.
+    \item \textbf{String Representation}: For any vertex $v \in V$, let $str(v)$ be the string obtained by concatenating the labels on the unique path from the root $r$ to $v$. We set $str(r) = \varepsilon$ (the empty string).
+    \item \textbf{Language Correspondence}: The language represented by the trie is exactly $L$, i.e., $L = \{\, str(v) \mid v \in F \,\}$.
+    \item \textbf{Prefix Property}: The set of all prefixes of words in $L$ coincides with $\{\, str(v) \mid v \in V \,\}$.
+\end{enumerate}
+\end{definition}
+
+The determinism property ensures that each string prefix identifies a unique path from the root, which makes tries well suited to our compression techniques. A trie can be viewed as a DFA (see \cref{def:dfa}), allowing the application of automata minimization to compress the tree structure (DAG compression). \textbf{DAG compression} is the process of transforming a tree into a directed acyclic graph (DAG) by identifying and merging all isomorphic subtrees. In the context of tries, this is equivalent to finding and merging states with the same right language, which is the standard procedure in DFA minimization. The result is the smallest possible automaton that recognizes the same language.
+
+We now recall the definition of a deterministic finite automaton (DFA), a fundamental computational model.
+\begin{definition}[Deterministic Finite Automaton] \label{def:dfa}
+    A deterministic finite automaton (DFA) is a 5-tuple $M = (Q, \Sigma, \delta, q_0, F)$ where:
+    \begin{itemize}[leftmargin=25pt]
+        \item $Q$ is a finite set of states,
+        \item $\Sigma$ is a finite input alphabet,
+        \item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function,
+        \item $q_0 \in Q$ is the initial state,
+        \item $F \subseteq Q$ is the set of final (accepting) states.
+    \end{itemize}
+\end{definition}
+
+A DFA processes an input string $s \in \Sigma^*$ symbol by symbol, starting from $q_0$ and following transitions prescribed by $\delta$. The string $s$ is accepted if the automaton halts in a state of $F$ after consuming all symbols; otherwise, it is rejected. The language recognized by a DFA is the set of all strings it accepts.
+
+Also, we define the notation $I_q$ to denote the set of strings reaching state $q$ from the initial state: $I_q = \{\alpha \in \Sigma^* \mid q = \delta(s, \alpha)\}$
+
+We next define a non-deterministic finite automaton (NFA).
+\begin{definition}[Non-deterministic Finite Automaton] \label{def:nfa}
+    A non-deterministic finite automaton is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$ where:
+    \begin{itemize}[leftmargin=25pt]
+        \item $Q$ is a finite set of states,
+        \item $\Sigma$ is a finite alphabet,
+        \item $\delta: Q \times (\Sigma \cup \{\varepsilon\}) \to \mathcal{P}(Q)$ is the transition function (with $\mathcal{P}(Q)$ the power set of $Q$),
+        \item $q_0 \in Q$ is the initial state,
+        \item $F \subseteq Q$ is the set of accept states.
+    \end{itemize}
+\end{definition}
+
+The principal difference between DFAs and NFAs is that NFAs allow (i) multiple outgoing transitions from a state on the same input symbol and (ii) $\varepsilon$-transitions, whereas DFAs have exactly one outgoing transition per state and input symbol and admit no $\varepsilon$-transitions.
+
+For an automaton $\mathcal{N}=(Q,\Sigma,\delta,q_0,F)$, we extend the transition function to strings as follows, for all $u \in Q$, $a \in \Sigma$, and $\alpha \in \Sigma^*$:
+\[
+\delta(u,\varepsilon)=\{u\}, \qquad
+\delta(u,\alpha a)=\bigcup_{v \in \delta(u,\alpha)} \delta(v,a).
+\]
+Thus, $\delta(q_0,\alpha)$ denotes the set of states reachable from the start state $q_0$ by reading $\alpha$. A string $\alpha$ is \emph{accepted} if $\delta(q_0,\alpha)\cap F \neq \emptyset$. The language recognized by $\mathcal{N}$ is denoted by $\mathcal{L}(\mathcal{N})$ and is defined as
+\[
+\mathcal{L}(\mathcal{N})=\{\alpha \in \Sigma^* \mid \delta(q_0,\alpha)\cap F \neq \emptyset\}.
+\]
+
+We introduce now the concept of regular language.
+\begin{definition}[Regular Language]
+A language $L \subseteq \Sigma^*$ is called a \textbf{regular language} if it is the language recognized by some finite automaton.
+\end{definition}

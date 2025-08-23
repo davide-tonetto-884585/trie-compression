@@ -1,11 +1,13 @@
-\chapter{Min-Weight Perfect Bipartite Matching} \label{chp:min_weight_perfect_bipartite_matching}
+\section{Min-Weight Perfect Bipartite Matching} \label{chp:min_weight_perfect_bipartite_matching}
 
-\section{Introduction and Motivation}
-In this chapter, we delve into the problem of finding a minimum-weight perfect matching in a bipartite graph (MWPBM problem), a fundamental challenge in combinatorial optimization with wide-ranging applications. This problem, often referred to as the assignment problem, seeks to pair elements from two distinct sets in the most efficient way possible, minimizing the total cost of the pairings. The principles and algorithms discussed here are not only of theoretical importance but also have practical relevance in fields such as logistics, scheduling, and resource allocation.
+\subsection{Introduction and Motivation}
+The fundamental goal of our compression scheme is to transform an input trie into a compressed, $p$-sortable automaton by partitioning its nodes into $p$ chains in an optimal way.
 
-Our approach is to partition the tree nodes into chains and apply Run-Length Encoding (RLE), a compression technique that stores sequences of identical data as a single value and a count. The key challenge is to create partitions that maximize the effectiveness of RLE. We prove that this optimization problem can be reduced to the MWPBM problem. By modeling our partitioning problem as a bipartite graph, we can use efficient algorithms for MWPBM to find the optimal representation and achieve a higher compression ratio.
+To make this optimization problem more concrete, we can frame it as a string partitioning problem. Imagine the sequence of nodes in the trie, when read in co-lexicographic order, as a single long string. The "character" corresponding to each node is its Myhill-Nerode equivalence class, which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ subsequences such that the number of runs is minimized (consecutive nodes of the same equivalence class are merged into a single "run"). For instance, a subsequence $AAABBA$ contains three runs. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton.
 
-\section{Bipartite Graph} 
+In this sections, we will provide the necessary background on the Minimum Weight Perfect Bipartite Matching (MWPBM) problem, a fundamental challenge in combinatorial optimization. We will then demonstrate in \cref{chp:tree_compression} a formal reduction from our partitioning problem to MWPBM. This reduction is the key to our method, as it allows us to model our problem as a bipartite graph and leverage well-known, efficient algorithms to find the optimal solution for our compression task.
+
+\subsection{Bipartite Graphs} 
 \begin{definition} \label{def:bipartite}
     A graph $G=(V,E)$ is called \textit{bipartite} if its vertex set $V$ can be partitioned into two disjoint subsets $V=V_1 \cup V_2$ such that every edge in $E$ has the form $(v_1,v_2)$ where $v_1\in V_1$ and $v_2 \in V_2$.
 \end{definition} 
@@ -33,9 +35,14 @@ In other words, the vertices of the graph can be divided into two separate group
     \label{fig:bipartite_graph_example}
 \end{figure}
 
+\begin{definition}[Weighted Bipartite Graph] \label{def:weighted_bipartite}
+    A \textit{weighted bipartite graph} is a bipartite graph $G=(V, E, w)$, where $w$ is a weight function $w: E \to \mathbb{R}$ that assigns a real-valued weight to each edge.
+\end{definition}
 
-\section{Problem Definition}
-Given a weighted bipartite graph $G = (V, E)$ (\cref{def:bipartite}), let's define the concept of a matching. 
+In a weighted bipartite graph, each edge has a numerical value, or "weight", associated with it.
+
+\subsection{Problem Definition}
+Given a bipartite graph $G = (V, E)$ (\cref{def:bipartite}), let's define the concept of a matching. 
 
 \begin{definition}[Matching] \label{def:matching}
     Given a bipartite graph $G = (V, E)$, a matching $M \subseteq E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$.
@@ -112,13 +119,13 @@ In other words, a matching is a set of edges such that no two edges share a comm
     \end{figure}
 \end{example}
 
-The problem of finding a minimum weight perfect matching in a bipartite graph is a well-known problem in combinatorial optimization. The problem can be formulated as follows: 
+The problem of finding a minimum weight perfect matching in a weighted bipartite graph (\cref{def:weighted_bipartite}) is a well-known problem in combinatorial optimization. The problem can be formulated as follows: 
 
-\begin{definition}[Minimum weight perfect matching in bipartite graphs] \label{def:mwpbm}
-    Given a weighted bipartite graph $G = (V, E)$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized.
+\begin{definition}[Minimum weight perfect matching in weighted bipartite graphs] \label{def:mwpbm}
+    Given a weighted bipartite graph $G = (V, E, w)$, find a perfect matching $M$ such that the sum of the weights of the edges in $M$ is minimized.
 \end{definition}
 
-The weight of a matching is the sum of the weights of the edges in the matching. The weight of an edge $e = (u, v)$ is denoted by $w(e)$. We define the weight of a matching $M$ as follows:
+The weight of a matching is the sum of the weights of the edges in the matching. We define the weight of a matching $M$ as follows:
 \begin{equation}
     w(M) = \sum_{e \in M} w(e)
 \end{equation}
@@ -183,7 +190,7 @@ The weight of a matching is the sum of the weights of the edges in the matching.
 % \alessio{La parte sui pesi si può spiegare fuori dalla definizione, dato che non è relativa al problema ma al grafo. Occhio che qua usi $e$ per indicare un arco, ma prima usavi $e$ per indicare il numero di archi in un grafo. $e$ ci sta meglio qua a mio parere, prima scegli se usare $m$ (se è un simbolo libero) o direttamente $|E|$}
 
 \begin{comment}
-\section{The existence of perfect matchings in bipartite graphs}
+\subsection{The existence of perfect matchings in bipartite graphs}
 In this section, we introduce two theorems that state a condition for the existence of perfect matchings in bipartite graphs. These theorems will be useful in the following chapter to prove our reduction \cite{viswanath2004perfect}. \alessio{Specifica se la condizione è sufficiente e/o necessaria}
 \subsection{The Tutte matrix and its determinant}
 
@@ -243,8 +250,11 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
 \end{proof}
 \end{comment}
 
-\section{Hall's Marriage Theorem}
-Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching in a bipartite graph that saturates one side of the partition. It's often stated in the context of finding pairings (like marriages) between two sets of entities. This theorem will be crucial in proving the correctness of our reduction from the tree partitioning problem to the minimum weight perfect bipartite matching problem. Specifically, we will use it to show that our constructed bipartite graph always admits a perfect matching, ensuring that our reduction is valid.
+\subsection{Hall's Marriage Theorem}
+Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching that saturates an entire partition of a bipartite graph. Specifically, it allows us to determine if there is a matching that includes every vertex from the smaller of the two partitions. In the special case where the partitions are of equal size ($|V_1| = |V_2|$), the theorem gives a condition for the existence of a perfect matching.
+
+% TODO: sistemare
+This theorem will be crucial in proving the correctness of our reduction from the tree partitioning problem to the minimum weight perfect bipartite matching problem. Specifically, we will use it to show that our constructed bipartite graph always admits a perfect matching, ensuring that our reduction is valid.
     
 \begin{definition}[Neighborhood] \label{def:neighborhood}
 For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, denoted by $N(W)$, is the subset of all vertices in $V_2$ that are adjacent to at least one vertex in $W$.
@@ -252,7 +262,7 @@ For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, de
 \end{definition}
 
 \begin{theorem}[Hall's Marriage Theorem \cite{hall1935representatives}] \label{thm:halls_marriage_theorem}
-    Let $G = (V, E)$ be a bipartite graph. There exists a perfect matching $M$ in $G$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
+    Let $G = (V, E)$ be a bipartite graph with $V = V_1 \cup V_2$. There exists a matching $M$ in $G$ that covers $V_1$ if and only if for every subset $W \subseteq V_1$, the following condition holds:
     $$|N(W)| \geq |W|$$
 \end{theorem}
 
@@ -260,7 +270,8 @@ This condition is known as \textbf{Hall's condition}.
 
 In simpler terms, a matching that covers all vertices in $V_1$ exists if and only if every group of vertices chosen from $V_1$ collectively has at least as many neighbors in $V_2$ as there are vertices in the chosen group.
 
-\section{Problem Formulation}
+\begin{comment}
+\subsection{Problem Formulation}
 The problem of finding a minimum weight perfect matching in a bipartite graph can be formulated as an integer linear program (ILP), i.e., an optimization problem in which the variables are restricted to integer values, and the constraints and the objective function are linear as a function of these variables. Given a matching $M$, let $x$ be its incidence vector where $x_{ij} = 1$ if edge $(i, j)$ is in the matching, and $x_{ij} = 0$ otherwise. Then, the problem can be formulated as follows:
 
 \begin{equation}
@@ -306,21 +317,17 @@ Consequently, the polytope
 \end{equation}
 
 is called the bipartite perfect matching polytope (see Lecture notes by \cite{goemans2009matching}). 
+\end{comment}
 
-\section{Proposed Solutions} \label{sec:mwpbm_solutions}
-There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955 \cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the assignment problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$, but later Dinic and Kronrod \cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
+\subsection{State of the Art} \label{sec:mwpbm_solutions}
+There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955 \cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the MWPBM problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$ where $n$ is the number of nodes in the bipartite graph. Later Dinic and Kronrod \cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
 
-The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time,  where $n,m$ and $W$ denote the number of vertices, number of edges, and largest magnitude of a cost; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^w)$ time, where $w$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
+The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denote the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
-In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a new solution to the 
-Minimum Cost Flow problem that works in almost-linear time, precisely in 
-$O(m^{1+o(1)})$ time. The minimum-cost flow problem is a classic combinatorial 
-graph problem with numerous applications in engineering and scientific computing. 
-This result is important for our problem since the maximum weight perfect 
-matching problem can be reduced to minimum-cost flow, enabling an almost-linear 
-time solution.
+In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = n^2 + m$ edges.
 
-\section{Implementation}
+\davide{move in experiment chapter (?)}
+\subsection{Implementation}
 To run experiments for the proposed compression scheme, we used a C++ implementation by Vladimir Kolmogorov of the minimum cost perfect matching algorithm described in \cite{kolmogorovBlossomNewImplementation2009}. The implementation is available at \url{https://pub.ista.ac.at/~vnk/software.html}.
 
 In brief, paper \cite{kolmogorovBlossomNewImplementation2009} presents Blossom~V, a practical implementation of Edmonds’ blossom algorithm for computing minimum-cost perfect matchings in undirected weighted graphs. While the theoretical worst-case bounds for the blossom family have steadily improved since Edmonds’ original $O(n^2m)$ algorithm, Blossom~V is designed for strong empirical performance rather than new asymptotic guarantees. It combines two ingredients that had proven effective separately in prior work: the variable $\delta$ (variable dual updates) strategy popularized by Blossom~IV, and systematic use of priority queues to efficiently select minimum-slack edges.

@@ -86,7 +86,7 @@ Notice that it is important to consider the order of the nodes of the two sets $
 
 Notice also that when we talk about the same $\treeset{1}$ node placed in $\treeset{2}$, we are referring to the corresponding node in $\treeset{2}$ that derives from the same node in the original tree $T$ since the nodes of the tree are ordered in both sets $\treeset{1}$ and $\treeset{2}$. In \cref{fig:bipartite_structure,fig:reduction_small_examples,fig:reduction_example}, the node's correspondence is achieved by putting the two nodes at the same level.
 \begin{example}[Vertices] \label{ex:reduction_vertices}
-    This example illustrates the structure of the bipartite graph vertices for the tree shown in \cref{fig:original_tree}. The nodes in this tree are labeled by their equivalence classes obtained from the minimization of the corresponding DAWG in \cref{ex:DAWG_minimization}. Our goal is to partition the tree's nodes into $p=2$ chains. The nodes of the tree are ordered according to \cref{alg:pathSort}, the order is the following: 
+    This example illustrates the structure of the bipartite graph vertices for the tree shown in \cref{fig:original_tree}. The nodes in this tree are labeled by their equivalence classes obtained from the minimization of the corresponding ADFA in \cref{ex:ADFA_minimization}. Our goal is to partition the tree's nodes into $p=2$ chains. The nodes of the tree are ordered according to \cref{alg:pathSort}, the order is the following: 
     \[
         a \prec b \prec d \prec h \prec l \prec f \prec c \prec e \prec i \prec m \prec g
     \]
@@ -128,7 +128,7 @@ Notice also that when we talk about the same $\treeset{1}$ node placed in $\tree
             child {node[accepting] (g) {D}}
             };
         \end{tikzpicture}
-        \caption{Tree DAWG of \cref{fig:example_dawg}. Each node is labeled with its equivalence class.}
+        \caption{Tree ADFA of \cref{fig:example_ADFA}. Each node is labeled with its equivalence class.}
         \label{fig:original_tree}
     \end{figure}
     
