@@ -1,13 +1,70 @@
 \chapter{Tree Compression Scheme} \label{chp:project_overview}
-As introduced in the first chapter, the primary goal of this thesis is to develop a novel tree compression scheme that effectively leverages repetitive structures within the input tree. The proposed algorithm is designed to identify and compactly represent these recurring patterns, thereby improving compression performance, particularly for highly repetitive trees. This chapter provides an overview of the proposed compression scheme.
+As introduced in the first chapter, the primary goal of this thesis is to develop a novel tree compression scheme that effectively leverages repetitive structures within the input trie. The proposed algorithm is designed to identify and compactly represent these recurring patterns, thereby improving compression performance, particularly for highly repetitive tries. This chapter provides an overview of the proposed compression scheme.
 
 \section{Compression Scheme Pipeline}
-Let $ T $ be an ordered tree of arbitrary fan-out, depth, and shape. $ T $ consists of $ n $ internal nodes and $ \ell $ leaves, for a total of $ t = n + \ell $ nodes. Every node of $ T $ is labeled with a symbol drawn from an alphabet $ \Sigma $. We assume that $ \Sigma $ is the set of labels effectively used in the nodes of $T$ and that these labels are encoded with the integers in the range $[1, |\Sigma|]$. Then we define the array $\pi$ where, for each node $u$, $\pi(u)$ is the string obtained by concatenating the labels on the \textbf{upward path} from the parent of $u$ to the root of the tree (the root has an empty $\pi$ component).
+The overall pipeline of our proposed method is outlined in Algorithm~\ref{alg:pipeline}. It takes an input trie $T$ and a width parameter $p$ and produces a compressed, $p$-sortable automaton.
+\begin{algorithm}[H]
+\caption{$CompressTrie(T,p)$}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\Require Input trie $T$, width integer parameter $p$
+\Ensure A compressed, $p$-sortable automaton $\mathcal{A}$
+    \State $V_{sorted} \gets \text{PathSort}(T)$ 
+    \State $N[1,\dots,|Q|] \gets \text{ComputeEquivalenceClasses}(T)$
+    \State $G_{bipartite} \gets \text{ConstructMWPBMInstance}(V_{sorted}, N, p)$
+    \State $M \gets \text{SolveMWPBM}(G_{bipartite})$ 
+    \State $C[1,\dots,p] \gets \text{ExtractChainsFromMatching}(M, V_{sorted})$ 
+    \State $\mathcal{A} \gets \text{CollapseChains}(C, N)$ 
+    \State \Return $\mathcal{A}$
+\end{algorithmic}
+\end{algorithm}
 
-The following pipeline is used to compress the tree $T$:
-\begin{enumerate}
-    \item Initially, the array $\pi$ is computed for $T$ by traversing the tree in a pre-order fashion. Then the nodes are stably sorted by the lexicographic order of their $\pi$ strings. To sort the nodes, the \textbf{Path Sort} algorithm introduced in \cref{sec:pathSort} is used, enabling the sorting of nodes in linear time and $O(t \log t)$ space. This sorting step is the one used in the XBWT transform described in \cref{chp:tree_compression}.
-    \item Then, using the \cref{alg:minimization-ADFA} for minimizing acyclic deterministic finite automata (ADFAs) described in \cref{sec:revuz}, the nodes are partitioned into equivalence classes where two nodes are equivalent if they have the same subtree rooted at them.
-    \item Given a width $p$, the previously sorted nodes are then divided into $p$ chains to minimize the run-length encoding of each chain (considering the equivalence classes). To do so, we reduce this problem --- which we call \emph{Chains-Division problem} --- to the Minimum Perfect Bipartite Matching problem (see \cref{chp:min_weight_perfect_bipartite_matching}), which can be solved in polynomial time as described in Section \cref{sec:mwpbm_solutions}.
-    \item Lastly, by collapsing consecutive equivalent nodes within each chain (i.e., nodes in the same equivalence class that appear one after the other in the chain), we create either a DFA or an NFA (for further details, see \cref{sec:collapsing}). This automaton can then be indexed using the scheme from \cite{cotumaccio2023co} (refer to \cref{chp:indexing}). %In future work, we could explore compressing the chains themselves using techniques such as run-length encoding, Huffman coding, or Elias-Fano encoding. This could lead to the development of a new self-indexed compressed structure that capitalizes on the repetitive nature of the tree.
-\end{enumerate}
+The first step of the pipeline (line 2) is to establish a total order on the nodes of the trie. This is achieved by sorting the nodes co-lexicographically using the \textbf{Path Sort} algorithm, which we detail in \cref{sec:pathSort}. This sorting is fundamental, as it arranges the nodes in the order required for a Wheeler automaton.
+
+Next, the algorithm identifies which nodes are candidates for merging (line 3). This is done by partitioning the nodes into equivalence classes based on the structure of the subtrees rooted at each node. Two nodes are in the same class if and only if their subtrees are isomorphic. This is equivalent to computing the Myhill-Nerode equivalence classes for the finite language accepted by the trie, a process we adapt from Revuz's algorithm for minimizing acyclic DFAs (\cref{sec:revuz}).
+
+The core of the algorithm lies in lines 5-7, where the problem of optimally partitioning the sorted nodes into $p$ chains is solved. As detailed in \cref{cha:mwpm}, we reduce this problem to finding a Minimum Weight Perfect Bipartite Matching (MWPBM). A bipartite graph is constructed where the weights on the edges correspond to the "cost" of placing two nodes in the same chain. By finding a perfect matching with minimum weight using standard algorithms (\cref{sec:mwpbm_solutions}), we can reconstruct a set of $p$ chains that minimizes the total number of runs (\cref{def:run}), thereby maximizing compression.
+
+Finally, the compressed automaton is constructed (line 8). The algorithm iterates through each of the $p$ chains and "collapses" any consecutive sequence of nodes belonging to the same equivalence class into a single state. This run-length compression, which we describe in \cref{sec:collapsing}, produces the final $p$-sortable automaton, which can then be indexed for efficient querying (\cref{chp:indexing}).
+
+\begin{example} \label{ex:string_example}
+    In our running example, we begin with the tree shown in \cref{fig:original_tree}. Each node in this tree is labeled with its corresponding Myhill-Nerode equivalence class, as determined in \cref{ex:ADFA_minimization}. By traversing the nodes in co-lexicographic order, we construct a string $S$ where each character represents the Myhill-Nerode equivalence class of a node:
+    \[
+        S = \text{ABCDDCBDDDD}
+    \]
+    This string $S$ then becomes the input to the \textsc{String Partitioning Problem} (see \cref{sec:string_partitioning}), where the objective is to partition it into $p$ subsequences while minimizing the total number of runs.
+
+    % First figure - Original tree
+    \begin{figure}[H]
+        \centering
+        \begin{tikzpicture}[
+            level distance=1.5cm,
+            sibling distance=3cm,
+            state/.style={circle, draw, minimum size=7mm},
+            accepting/.style={circle, draw, double, minimum size=7mm},
+            edge from parent/.style={draw, -latex},
+            level 1/.style={sibling distance=4cm},
+            level 2/.style={sibling distance=2.5cm},
+            level 3/.style={sibling distance=2cm}
+            ]
+        
+        \node[state] (a) {A}
+            child {node[state] (b) {B} 
+            child {node[state] (d) {C}
+                child {node[accepting] (h) {D}}
+                child {node[accepting] (i) {D}}
+            }
+            child {node[accepting] (e) {D}}
+            }
+            child {node[state] (c) {B}
+            child {node[state] (f) {C}
+                child {node[accepting] (l) {D}}
+                child {node[accepting] (m) {D}}
+            }
+            child {node[accepting] (g) {D}}
+            };
+        \end{tikzpicture}
+        \caption{Tree ADFA of \cref{fig:example_ADFA}. Each node is labeled with its equivalence class.}
+        \label{fig:original_tree}
+    \end{figure}
+\end{example}

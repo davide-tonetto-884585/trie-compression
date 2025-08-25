@@ -29,11 +29,40 @@ Now, let's define the formal concept of partial order and the width of a partial
     \end{itemize}
 \end{definition}
 
+A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In a Hasse diagram, each element of $S$ is represented by a node, and given $a,b,c \in S$ there is a line segment or curve going upward from $a$ to $b$ if $a \leq b$ and there is no element $c$ such that $a \leq c \leq b$. The direction of the relation is implicitly understood to be upwards, so arrows are not needed. Also, if two elements of $S$ are incomparable under $\leq$ they are displayed at the same level in the diagram. An example is given in \cref{ex:hasse}.
+
+\begin{example} \label{ex:hasse}
+    In the example shown in \cref{fig:hasse_diagram_example}, the set is composed of the divisors of 12, and the relation is divisibility. An edge is drawn from $a$ to $b$ if $a$ divides $b$ and there is no other element $c$ in the set such that $a/c$ and $c/b$. For instance, there is an edge from 2 to 4 because 2 divides 4, and no other element in the set is a multiple of 2 and a divisor of 4. There is no direct edge from 2 to 12 because the relationship is captured transitively through other elements, such as $2/4/12$ or $2/6/12$.
+    \begin{figure}[H]
+        \centering
+        \begin{tikzpicture}[node distance=1.5cm]
+            \node (1) at (0,0) {1};
+            \node (2) at (-1,1) {2};
+            \node (3) at (1,1) {3};
+            \node (4) at (-1,2) {4};
+            \node (6) at (1,2) {6};
+            \node (12) at (0,3) {12};
+
+            \draw (1) -- (2);
+            \draw (1) -- (3);
+            \draw (2) -- (4);
+            \draw (2) -- (6);
+            \draw (3) -- (6);
+            \draw (4) -- (12);
+            \draw (6) -- (12);
+        \end{tikzpicture}
+        \caption{Hasse diagram for the set $\{1, 2, 3, 4, 6, 12\}$ with the "divides" relation.}
+        \label{fig:hasse_diagram_example}
+    \end{figure}
+\end{example}
+
+Now we can define the concept of width of a partial order.
+
 \begin{definition}[Antichain]
     An antichain of a partially ordered set $(S, \leq)$ is a subset of $S$ where any two distinct elements are incomparable. That is, for any two distinct elements $a, b$ in the antichain, neither $a \leq b$ nor $b \leq a$ holds.
 \end{definition}
 
-\begin{definition}[Width, \cite{dilworth1990decomposition}]
+\begin{definition}[Width of a partial order, \cite{dilworth1990decomposition}]
     The width of a partially ordered set is the size of the largest possible antichain.
 \end{definition}
 
@@ -89,9 +118,9 @@ Consequently, we can introduce the concept of co-lex width of an automaton.
     $$
 \end{definition}
 
-The requirement of a Wheeler order is powerful but restrictive. Many automata, especially those resulting from DAG compression, may not satisfy it (see \cref{fig:incomparability-scenarios-combined}). This introduces a fundamental trade-off: while DAG compression minimizes an automaton's size, it can destroy the very structure that enables efficient indexing. In fact, it has been shown that indexing general graphs—and thus, highly compressed automata—to support fast string matching is computationally expensive, as showed in \cite{equiGraphsCannotBe2023}. The second axiom of \cref{def:colex_order_on_automaton} does not always enforce an ordering between any two states, leading to a partial order instead of a total one. This gives rise to the more general notion of a \textit{$p$-sortable automaton}, where $p$ is the co-lex width of the automaton. Under this definitions, a Wheeler automaton is a \textbf{1-sortable automaton}, as a total order has a width of 1 (the largest antichain is a single element).
+The requirement of a Wheeler order is powerful but restrictive. Many automata, especially those resulting from DAG compression, may not satisfy it (see \cref{ex:incomparability}). This introduces a fundamental trade-off: while DAG compression minimizes an automaton's size, it can destroy the very structure that enables efficient indexing. In fact, it has been shown that indexing general graphs—and thus, highly compressed automata—to support fast string matching is computationally expensive, as showed in \cite{equiGraphsCannotBe2023}. The second axiom of \cref{def:colex_order_on_automaton} does not always enforce an ordering between any two states, leading to a partial order instead of a total one. This gives rise to the more general notion of a \textit{$p$-sortable automaton}, where $p$ is the co-lex width of the automaton (see \cref{ex:p-sortable}). Under this definitions, a Wheeler automaton is a \textbf{1-sortable automaton}, as a total order has a width of 1 (the largest antichain is a single element).
 
-\begin{example}
+\begin{example} \label{ex:incomparability}
     State incomparability can arise in several situations. For example, consider two states $u$ and $u'$.
     \begin{itemize}
         \item As illustrated in Figure~\ref{fig:incomparability-scenarios-combined}-(a), if we have two same-labeled transitions where the target states $u$ and $v$ are incomparable, we have no information about the relative order of the source states $u'$ and $v'$. Consequently, they may also be incomparable.
@@ -158,6 +187,72 @@ The requirement of a Wheeler order is powerful but restrictive. Many automata, e
     \end{figure}
 \end{example}
 
+\begin{example} \label{ex:p-sortable}
+    Consider the following DFA $D$ of \cref{fig:non_wheeler_example}-(a) and its partial co-lex order \cref{fig:non_wheeler_example}-(b). The DFA is not Wheeler because states $v_3$ and $v_5$ and states $v_4$ and $v_7$ are incomparable (as shown in the Hasse diagram). $D$ admits a partition into $2$ $\leq$-chains, for example one possible $\leq$-chain partition is given by:
+    \begin{itemize}
+        \item Chain 1: $v_1 \leq v_2 \leq v_3 \leq v_4$
+        \item Chain 2: $v_5 \leq v_6 \leq v_7$
+    \end{itemize}
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+            \centering
+            \begin{tikzpicture}[->, >=stealth, node distance=1.5cm, auto]
+                \tikzset{
+                    state/.style={circle, draw, minimum size=0.8cm},
+                    accepting/.style={state, double}
+                }
+
+                \node[state, initial, initial text=] (v1) at (0,1) {$v_1$};
+                \node[state] (v2) at (2,1) {$v_2$};
+                \node[state] (v3) at (4,1) {$v_3$};
+                \node[accepting] (v5) at (4,-1) {$v_5$};
+                \node[accepting] (v6) at (6,1) {$v_6$};
+                \node[state] (v7) at (8,1) {$v_7$};
+                \node[accepting] (v4) at (8,-1) {$v_4$};
+
+                \path (v1) edge node {a} (v2)
+                      (v2) edge [bend left=30] node[above] {b} (v6)
+                      (v6) edge [bend left=0] node[above] {a} (v3)
+                      (v3) edge [bend left=20] node[right] {a} (v5)
+                      (v5) edge [bend left=20] node[left] {a} (v3)
+                      (v5) edge node[below] {b} (v7)
+                      (v6) edge [bend right=0] node[above] {b} (v7)
+                      (v7) edge [bend left=20] node[right] {b,c} (v4)
+                      (v4) edge [bend left=20] node[left] {b} (v7);
+            \end{tikzpicture}
+            \caption{}
+            \label{fig:non_wheeler_graph_example}
+        \end{subfigure}%
+        \hfill
+        \begin{subfigure}[b]{0.35\textwidth}
+            \centering
+            \begin{tikzpicture}
+                \node (v1) at (0,0) {$v_1$};
+                \node (v2) at (0,1) {$v_2$};
+                \node (v3) at (-0.75,2) {$v_3$};
+                \node (v5) at (0.75,2) {$v_5$};
+                \node (v6) at (0,3) {$v_6$};
+                \node (v4) at (0.75,4) {$v_4$};
+                \node (v7) at (-0.75,4) {$v_7$};
+
+                \draw (v1) -- (v2);
+                \draw (v2) -- (v3);
+                \draw (v2) -- (v5);
+                \draw (v3) -- (v6);
+                \draw (v5) -- (v6);
+                \draw (v6) -- (v4);
+                \draw (v6) -- (v7);
+            \end{tikzpicture}
+            \caption{}
+            \label{fig:non_wheeler_graph_poset}
+        \end{subfigure}
+        \caption{An example of a $2$-sortable DFA and its corresponding Hasse diagram of the partial order.}
+        \label{fig:non_wheeler_example}
+    \end{figure}
+\end{example}
+
 We now introduce another important result by \cite{manziniRationalConstructionWheeler2024}. Let $D = (Q, \Sigma, \delta, s, F)$ denote the minimal DFA accepting a Wheeler language $L$, and let $D^w = (Q^w, \Sigma, \delta^w, s^w, F^w)$ denote the minimal Wheeler DFA (WDFA) accepting $L$. Since $D^w$ is Wheeler, the rational embedding ensures that for any two distinct states $q, q' \in Q^w$, the associated intervals $I_q, I_{q'}$ are disjoint. This property does not generally hold for $D$, where states may correspond to overlapping sets of prefixes. As a consequence, when transforming $D$ into $D^w$, certain states of $D$ may need to be \emph{split} into several states in $D^w$, potentially leading to an exponential blow-up in the number of states.
 
 \begin{example}[\cite{manziniRationalConstructionWheeler2024}]
@@ -172,40 +267,44 @@ We now introduce another important result by \cite{manziniRationalConstructionWh
     ]
         \node[state, initial, initial text=] (start) at (0,0) {\#};
         
-        \node[state] (w1_1) at (2,1.5) {1};
-        \node[state] (w1_2) at (2,-1.5) {2};
-        \node[state] (q1) at (4,0) {3};
-        \node at (4, -0.7) {$q_1$};
-        \node at (2, -2.2) {$s_1$};
+        \node[state] (w1_1) at (1.5,1.3) {1};
+        \node[state] (w1_2) at (1.5,-1.3) {2};
+        \node[state] (q1) at (3,0) {3};
+        \node at (3, -0.7) {$q_1$};
 
         \path[->] (start) edge (w1_1);
         \path[->] (start) edge (w1_2);
-        \path[->] (w1_1) edge node[above] {$w_1$} (q1);
-        \path[->] (w1_2) edge node[below] {$w_1$} (q1);
+        \path[->] (w1_1) edge node[above] {} (q1);
+        \path[->] (w1_2) edge node[below] {} (q1);
 
-        \node[state] (w2_1) at (6,1.5) {1};
-        \node[state] (w2_2) at (6,-1.5) {2};
-        \node[state] (q2) at (8,0) {3};
-        \node at (8, -0.7) {$q_2$};
-        \node at (6, -2.2) {$s_2$};
+        \node[state] (w2_1) at (4.5,1.3) {1};
+        \node[state] (w2_2) at (4.5,-1.3) {2};
+        \node[state] (q2) at (6,0) {3};
+        \node at (6, -0.7) {$q_2$};
+        \node at (4.5, -2) {$s_1$};
+        \node at (4.5, 2) {$w_2$};
 
         \path[->] (q1) edge (w2_1);
         \path[->] (q1) edge (w2_2);
-        \path[->] (w2_1) edge node[above] {$w_2$} (q2);
-        \path[->] (w2_2) edge node[below] {$w_2$} (q2);
+        \path[->] (w2_1) edge node[above] {} (q2);
+        \path[->] (w2_2) edge node[below] {} (q2);
 
-        \node at (9.5, 0) {$\cdots$};
+        \node at (7.5, 0) {$\cdots\cdots\cdots$};
 
-        \node[state] (wn_1) at (11,1.5) {1};
-        \node[state] (wn_2) at (11,-1.5) {2};
-        \node[state, accepting] (t) at (13,0) {3};
-        \node at (13, -0.7) {$t$};
-        \node at (11, -2.2) {$s_n$};
+        \node[state] (qn) at (9,0) {3};
 
-        \path[->] (q2) edge[dotted] (wn_1);
-        \path[->] (q2) edge[dotted] (wn_2);
-        \path[->] (wn_1) edge node[above] {$w_n$} (t);
-        \path[->] (wn_2) edge node[below] {$w_n$} (t);
+        \node[state] (wn_1) at (10.5,1.3) {1};
+        \node[state] (wn_2) at (10.5,-1.3) {2};
+        \node[state, accepting] (t) at (12,0) {3};
+        \node at (9, -0.7) {$q_n$};
+        \node at (12, -0.7) {$t$};
+        \node at (10.5, -2) {$s_n$};
+        \node at (10.5, 2) {$w_n$};
+
+        \path[->] (qn) edge (wn_1);
+        \path[->] (qn) edge (wn_2);
+        \path[->] (wn_1) edge node[above] {} (t);
+        \path[->] (wn_2) edge node[below] {} (t);
 
     \end{tikzpicture}
     \caption{A DFA accepting a finite (and thus Wheeler) language, for which the minimal equivalent Wheeler DFA is exponentially larger.}

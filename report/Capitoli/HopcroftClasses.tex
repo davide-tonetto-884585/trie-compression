@@ -132,7 +132,7 @@ R\!\left(\mathrm{l}(s)\right) \;=\; \big(b,\, l_1,\, N[s.l_1],\, l_2,\, N[s.l_2]
 It is importanto to notice that, since the automaton is acyclic, every transition $s \xrightarrow{a} t$ strictly decreases the height: $h(t) < h(s)$. The main loop of \cref{alg:minimization-ADFA} processes levels in increasing order $i=0,1,\dots$, so by the time we handle a state $s\in\Pi_i$, all its targets $t$ lie in $\bigcup_{j<i}\Pi_j$ and have already been assigned a Myhill-Nerode equivalence class.
 
 \begin{algorithm}[H]
-    \caption{Revuz' Minimization Algorithm for ADFAs}
+    \caption{RevuzMinimization(ADFA)}
     \label{alg:minimization-ADFA}
     \begin{algorithmic}[1]
     \Require ADFA $M=(Q,\Sigma,\delta,q_0,F)$
