@@ -1,5 +1,5 @@
 \chapter{Introduction} \label{chp:introduction}
-The problem of compressing large sets of strings, or finite languages, is a fundamental challenge in computer science with applications in areas like bioinformatics, natural language processing, and data indexing. A finite language can be naturally represented by an acyclic deterministic finite automaton (ADFA), commonly known as a trie. In this representation, each string in the language corresponds to a unique path from the root to a final state. Compressing the language is therefore equivalent to compressing its corresponding trie structure.
+The problem of compressing large sets of strings, or finite languages, is a fundamental challenge in computer science with applications in areas like bioinformatics, natural language processing, and data indexing. A finite language can be naturally represented by an acyclic deterministic finite automaton (ADFA). \draft{A special case of ADFAs are tries.} In this representation, each string in the language corresponds to a unique path from the root to a final state. Compressing the language is therefore equivalent to compressing its corresponding trie structure.
 
 Traditional compression algorithms often fail to exploit the inherent structural properties of tries. To address this, specialized techniques have been developed. Among the most prominent is the \textit{Extended Burrows-Wheeler Transform (XBWT)} \cite{ferragina2009compressing}, which extends the classical Burrows-Wheeler Transform \cite{burrows1994block} to labeled trees and can be applied to tries to achieve significant compression by capturing their structural regularities.
 
@@ -16,7 +16,7 @@ The primary goal of this thesis is to develop a data structure that both compres
 
 This thesis proposes a novel algorithm that finds a sweet spot in this trade-off, which we develop throughout \cref{chp:tree_compression}. The central idea is to partially minimize the input trie while ensuring the resulting automaton remains efficiently indexable. We achieve this by leveraging the theory of $p$-sortable graphs (see \cref{sec:wheeler_and_psortable_graphs}), developing a method that strategically increases the sortability parameter $p$ just enough to enable significant compression. The motivation for this approach is rooted in the observation that a small increase in $p$ can lead to substantial compression. As noted by Policriti et al. \cite{manziniRationalConstructionWheeler2024}, there are cases where increasing $p$ from 1 to 2 allows for an exponential reduction in the automaton's size, a phenomenon we explore in detail in \cref{sec:wheeler_and_psortable_graphs}.
 
-Our compression scheme, presented in \cref{chp:tree_compression}, works by partitioning the trie's nodes into a predefined number $p$ of chains and then optimizing this partition to merge the maximum number of equivalent states while ensuring $p$-sortability. To make this optimization problem more concrete, we can frame it as a string partitioning problem. Consider the sequence of nodes in the trie, when read in co-lexicographic order (see \cref{def:colex_order_on_automaton}), as a single long string. The "character" corresponding to each node is its Myhill-Nerode equivalence class (see \cref{def:myhill-nerode}), which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ subsequences such that the number of runs (\cref{def:run}) is minimized. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton. We call this problem the \textsc{String Partitioning Problem} (\cref{def:string_partitioning_problem}).
+Our compression scheme, presented in \cref{chp:tree_compression}, works by partitioning the trie's nodes into a predefined number $p$ of chains and then optimizing this partition to merge the maximum number of equivalent states while ensuring $p$-sortability. To make this optimization problem more concrete, we can frame it as a string partitioning problem. Consider the sequence of nodes in the trie, when read in co-lexicographic order (see \cref{def:colex_order_on_automaton}), as a single long string. The ``character'' corresponding to each node is its Myhill-Nerode equivalence class (see \cref{def:myhill-nerode}), which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ substrings such that the number of runs (\cref{def:run}) is minimized. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton. We call this problem the String Partitioning Problem (\cref{def:string_partitioning_problem}).
 
 \begin{definition}[Run]
     \label{def:run}
@@ -31,15 +31,39 @@ Our compression scheme, presented in \cref{chp:tree_compression}, works by parti
     \end{enumerate}
 \end{definition}
 
-\begin{example}[Run]
-    For example, in the string $S = AAABBC$, the runs are $AAA$, $BB$, and $C$.
-\end{example}
+\begin{definition}
+    For a string $S$ over an alphabet $\Sigma$, and a set $I=\{i_1, i_2, \ldots, i_k\} \in [n]$ with $i_1 < i_2 < \ldots < i_k$, we define $S[I] := s_{i_1} s_{i_2} \ldots s_{i_k}$ as the substring indexed by $I$.
+\end{definition}
+
+\begin{definition}
+    Let $\tau(S)$ be the number of runs in a string $S$, i.e. $\tau(S) = 1 + |\{i \in [n-1]:S_i \neq S_{i+1}\}|$.
+\end{definition}
 
 \begin{definition}[String Partitioning Problem]
     \label{def:string_partitioning_problem}
-    Let $S$ be a string of length $n$ over an alphabet $\Sigma$, and let $p\in[2,n]$ be a positive integer. A $p$-partition of $S$ is a set of $p$ subsequences $S_1, S_2, \ldots, S_p$ such that every character of $S$ belongs to exactly one subsequence. The total number of runs in a $p$-partition is the sum of the number of runs in each subsequence $S_i$. The goal of the \textsc{String Partitioning Problem} is to find a $p$-partition of $S$ that minimizes the total number of runs.
+    Let $\mathcal{I} = (S, p)$ be an instance of the String Partitioning Problem where $S$ is a string of length $n$ over an alphabet $\Sigma$, and $p$ is a positive integer. The output of the problem is a partition $I_1,\dots,I_p$ of $[n]$ such that $\sum_{i=1}^p \tau(S[I_i])$ is minimized.
 \end{definition}
 
-This thesis shows that the \textsc{String Partitioning Problem} can be reduced to the problem of finding a minimum weight perfect matching on a bipartite graph (MWPBM), allowing us to use efficient, well-studied algorithms to find the optimal solution. The result is a compressed automaton that is $p$-sortable by construction and thus supports efficient queries using the data structure developed by Cotumaccio et al. \cite{cotumaccio2023co}. As our experimental results in \cref{chp:experiments} will show, this method is particularly effective for the highly repetitive datasets common in real-world applications, achieving a balance of compression and indexability that prior methods could not attain.
+\begin{example}[String Partitioning]
+\label{ex:string-partitioning}
+    Let us consider the string $S = \texttt{2213122152}$ of length 10. The number of runs in $S$ is 8, given by the decomposition $\texttt{(22)(1)(3)(1)(22)(1)(5)(2)}$.
+    We want to partition the set of indices $\{1, \dots, 10\}$ into two sets, $I_1$ and $I_2$, to minimize the total number of runs in the corresponding substrings.
+
+    A possible partition is:
+    \begin{itemize}
+        \item $I_1 = \{3, 5, 8, 9\}$
+        \item $I_2 = \{1, 2, 4, 6, 7, 10\}$
+    \end{itemize}
+
+    This partition yields the following substrings:
+    \begin{itemize}
+        \item The substring corresponding to $I_1$ is $S[I_1] = \texttt{1115}$. This substring has 2 runs: $(\texttt{111})$ and $(\texttt{5})$.
+        \item The substring corresponding to $I_2$ is $S[I_2] = \texttt{223222}$. This substring has 3 runs: $(\texttt{22})$, $(\texttt{3})$, and $(\texttt{222})$.
+    \end{itemize}
+
+    The total number of runs for this partition is $2 + 3 = 5$. This is a reduction from the original 8 runs in $S$. This example illustrates how partitioning a string's indices can reduce the total number of runs in the resulting substrings.
+\end{example}
+
+This thesis shows that the String Partitioning Problem can be reduced to the problem of finding a minimum weight perfect matching on a bipartite graph (MWPBM), allowing us to use efficient, well-studied algorithms to find the optimal solution. The result is a compressed automaton that is $p$-sortable by construction and thus supports efficient queries using the data structure developed by Cotumaccio et al. \cite{cotumaccio2023co}. As our experimental results in \cref{chp:experiments} will show, this method is particularly effective for the highly repetitive datasets common in real-world applications, achieving a balance of compression and indexability that prior methods could not attain.
 
 \section{Structure of The Thesis}

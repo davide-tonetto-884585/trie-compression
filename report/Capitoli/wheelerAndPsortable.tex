@@ -1,4 +1,4 @@
-\section{Wheeler and $p$-sortable Graphs}
+\section{Wheeler and \texorpdfstring{$p$}{p}-sortable Graphs}
 \label{sec:wheeler_and_psortable_graphs}
 
 \subsection{Introduction and Motivation}
@@ -13,23 +13,23 @@ The core property that makes Wheeler and $p$-sortable graphs efficiently indexab
 
 \begin{definition} [Co-lexicographic Order on $\Sigma^*$]
     The co-lex order $\preceq$ is defined as follows. Given two strings $\alpha, \beta \in \Sigma^*$, we say that $\alpha \preceq \beta$ if and only if either:
-    \begin{itemize}[leftmargin=25pt]
+    \begin{itemize}
         \item $\alpha$ is a suffix of $\beta$, or
         \item there exist strings $\alpha', \beta', \gamma \in \Sigma^*$ and symbols $a, b \in \Sigma$, such that $\alpha = \alpha'a\gamma$, $\beta = \beta'b\gamma$, and $a \prec b$.
     \end{itemize}
 \end{definition}
 
-Now, let's define the formal concept of partial order and the width of a partial order. 
+Now, let us define the formal concept of partial order and the width of a partial order. 
 \begin{definition}[Partial Order]
     A partial order is a binary relation $\leq$ over a set $S$ that is reflexive, antisymmetric, and transitive. That is, for all $a, b, c \in S$:
-    \begin{itemize}[leftmargin=25pt]
+    \begin{itemize}
         \item $a \leq a$ (reflexivity)
         \item if $a \leq b$ and $b \leq a$, then $a = b$ (antisymmetry)
         \item if $a \leq b$ and $b \leq c$, then $a \leq c$ (transitivity)
     \end{itemize}
 \end{definition}
 
-A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In a Hasse diagram, each element of $S$ is represented by a node, and given $a,b,c \in S$ there is a line segment or curve going upward from $a$ to $b$ if $a \leq b$ and there is no element $c$ such that $a \leq c \leq b$. The direction of the relation is implicitly understood to be upwards, so arrows are not needed. Also, if two elements of $S$ are incomparable under $\leq$ they are displayed at the same level in the diagram. An example is given in \cref{ex:hasse}.
+A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In a Hasse diagram, each element of $S$ is represented by a node, and given $a,b \in S$ there is a line segment or curve going upward from $a$ to $b$ if $a \leq b$ and there is no element $c\in S$ such that $a \leq c \leq b$. The direction of the relation is implicitly understood to be upwards, so arrows are not needed. Also, if two elements of $S$ are incomparable under $\leq$ they are displayed at the same level in the diagram. An example is given in \cref{ex:hasse}.
 
 \begin{example} \label{ex:hasse}
     In the example shown in \cref{fig:hasse_diagram_example}, the set is composed of the divisors of 12, and the relation is divisibility. An edge is drawn from $a$ to $b$ if $a$ divides $b$ and there is no other element $c$ in the set such that $a/c$ and $c/b$. For instance, there is an edge from 2 to 4 because 2 divides 4, and no other element in the set is a multiple of 2 and a divisor of 4. There is no direct edge from 2 to 12 because the relationship is captured transitively through other elements, such as $2/4/12$ or $2/6/12$.
@@ -59,11 +59,11 @@ A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In
 Now we can define the concept of width of a partial order.
 
 \begin{definition}[Antichain]
-    An antichain of a partially ordered set $(S, \leq)$ is a subset of $S$ where any two distinct elements are incomparable. That is, for any two distinct elements $a, b$ in the antichain, neither $a \leq b$ nor $b \leq a$ holds.
+    An antichain of a partial order $(S, \leq)$ is a subset of $S$ where any two distinct elements are incomparable. That is, for any two distinct elements $a, b$ in the antichain, neither $a \leq b$ nor $b \leq a$ holds.
 \end{definition}
 
 \begin{definition}[Width of a partial order, \cite{dilworth1990decomposition}]
-    The width of a partially ordered set is the size of the largest possible antichain.
+    The width of a partial order $\leq$, denoted by $width(\leq)$, is the size of the largest possible antichain.
 \end{definition}
 
 By Dilworth's Theorem \cite{dilworth1990decomposition}, the width of a partially ordered set $(S, \leq)$ is equal to the cardinality of its largest antichain; this can be equivalently defined as the minimum number of chains needed to partition $S$, where each chain is a totally ordered subset of $S$ under the relation $\leq$. 
@@ -75,11 +75,11 @@ With the concept of co-lex order established, we can now define the class of gra
     \label{def:wheeler_automaton}
     A finite state automaton \\
     $\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$ is a \textit{Wheeler automaton} if there exists a total order $\leq$ on its set of states $Q$ that satisfies the following axioms:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item The initial state precede all other states in the order.
     \suspend{enumerate}
     For any two transitions $u \in \delta(u', a)$ and $v \in \delta(v', b)$:
-    \resume{enumerate}[{[leftmargin=25pt]}]
+    \resume{enumerate}[{}]
         \item $a<b \implies u \leq v$,
         \item $a=b \wedge u' < v' \implies u \leq v$.
     \end{enumerate}
@@ -96,34 +96,40 @@ The most important example for Wheeler automaton in this thesis is the trie. Any
 \subsection{The Co-lex Width of an Automaton}
 Now that we have the concepts of co-lex order and width, we can combine them to formally define the class of indexable automata that are central to this thesis. The width of the co-lex partial order on an automaton's states is the critical measure of its structural complexity from an indexing perspective.
 
-The co-lex order can be extended to the set of states of an automaton. The idea of co-lex order on the states of an automaton was first introduced with the notion of Wheeler graphs by Gagie et al.~\cite{gagie2017wheeler} and was later generalized to arbitrary finite automata by Cotumaccio and Prezza~\cite{cotumaccio2021indexing}, where a partial order replaces the total order. The definition of co-lex order on an automaton is as follows:
+The co-lex order can be extended to the set of states of an automaton. The idea of co-lex order on the states of an automaton was first introduced with the notion of Wheeler graphs by Gagie et al.~\cite{gagie2017wheeler} and was later generalized to arbitrary finite automata by Cotumaccio and Prezza~\cite{cotumaccio2021indexing}, where a partial order replaces the total order. 
 
+Let $\lambda(q)$ denotes the set of labels of transitions entering in state $q$, and $\min\lambda(q)$ and $\max\lambda(q)$ represent the minimum and maximum element of the set, respectively. The definition of co-lex order on an automaton is as follows:
 \begin{definition}[\cite{cotumaccio2023co}]
     \label{def:colex_order_on_automaton}
     Let $N = (Q, \Sigma, \delta, q_0, F)$ be an NFA. A co-lex order on $N$ is a partial order $\leq$ on $Q$ that satisfies the following two axioms:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item For every $u, v \in Q$, if $u < v$, then $\max\lambda(u) < \min\lambda(v)$
         \item For every $a \in \Sigma$ and $u, v, u', v' \in Q$, if $u \in \delta(u', a)$, $v \in \delta(v', a)$ and $u < v$, then $u' \leq v'$
     \end{enumerate}
 \end{definition}
-Where $\lambda(q)$ denotes the set of labels of transitions entering state $q$, and $\min\lambda(q)$ and $\max\lambda(q)$ represent the minimum and maximum element of the set, respectively.
 
-The two axioms in \cref{def:colex_order_on_automaton} allow for pair of states of a finite automaton to be compared. When $\leq$ is total, we say that the co-lex order is a Wheeler order (introduced in \cite{gagie2017wheeler}). 
+The two axioms in \cref{def:colex_order_on_automaton} allow for states of a finite automaton to be compared. When $\leq$ is total, we say that the co-lex order is a Wheeler order (introduced in \cite{gagie2017wheeler} and \cref{def:wheeler_automaton}). 
 
 Consequently, we can introduce the concept of co-lex width of an automaton.
 \begin{definition}[\cite{cotumaccio2023co}]
-    The co-lex width of an NFA N is the minimum width of a co-lex order on N.
+    The co-lex width of an NFA N is the minimum width of a co-lex order on N, i.e.,
     $$
         width(N) = \min \{width(\leq)|\leq \text{ is a co-lex order on } N\}
     $$
 \end{definition}
 
-The requirement of a Wheeler order is powerful but restrictive. Many automata, especially those resulting from DAG compression, may not satisfy it (see \cref{ex:incomparability}). This introduces a fundamental trade-off: while DAG compression minimizes an automaton's size, it can destroy the very structure that enables efficient indexing. In fact, it has been shown that indexing general graphs—and thus, highly compressed automata—to support fast string matching is computationally expensive, as showed in \cite{equiGraphsCannotBe2023}. The second axiom of \cref{def:colex_order_on_automaton} does not always enforce an ordering between any two states, leading to a partial order instead of a total one. This gives rise to the more general notion of a \textit{$p$-sortable automaton}, where $p$ is the co-lex width of the automaton (see \cref{ex:p-sortable}). Under this definitions, a Wheeler automaton is a \textbf{1-sortable automaton}, as a total order has a width of 1 (the largest antichain is a single element).
+The requirement of a Wheeler order is powerful but restrictive. Many automata, especially those resulting from DAG compression, may not satisfy it (see \cref{ex:incomparability}). This introduces a fundamental trade-off: while DAG compression minimizes an automaton's size, it can destroy the very structure that enables efficient indexing. In fact, it has been shown that indexing general graphs—and thus, highly compressed automata—to support fast string matching is computationally expensive, as showed in \cite{equiGraphsCannotBe2023}. The second axiom of \cref{def:colex_order_on_automaton} does not always enforce an ordering between any two states, leading to a partial order instead of a total one. This gives rise to the more general notion of a \textit{$p$-sortable automaton}: 
+
+\begin{definition}[$p$-sortable automaton] \label{def:p-sorable-automaton}
+    Let $\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$ be a finite-state automaton. We call $\mathcal{A}$ \emph{$p$-sortable} if there exists a co-lexicographic order $\leq$ on $Q$ such that $Q$ can be partitioned into $p$ chains $\{Q_i\}_{i=1}^p$, where each $(Q_i, \leq)$ is totally ordered.
+\end{definition}
+
+Under these definitions, a Wheeler automaton is a \textbf{1-sortable automaton}, as a total order has a width of 1 (the largest antichain is a single element).
 
 \begin{example} \label{ex:incomparability}
     State incomparability can arise in several situations. For example, consider two states $u$ and $u'$.
     \begin{itemize}
-        \item As illustrated in Figure~\ref{fig:incomparability-scenarios-combined}-(a), if we have two same-labeled transitions where the target states $u$ and $v$ are incomparable, we have no information about the relative order of the source states $u'$ and $v'$. Consequently, they may also be incomparable.
+        \item As illustrated in Figure~\ref{fig:incomparability-scenarios-combined}-(a), if there are two same-labeled transitions to the target states $u$ and $v$ from two incomparable states $u’$ and $v’$, then $u$ and $v$ are also incomparable.
         \item Conflicting constraints from different labels can force incomparability, as shown in Figure~\ref{fig:incomparability-scenarios-combined}-(b). An existing order on the sources of $a$-transitions (e.g., $u' < v'$) may require $u < v$ to satisfy the Wheeler axioms, while an order on the sources of $b$-transitions (e.g., $v'' < u''$) may require the opposite, $v < u$. Since both cannot be true, the targets $u$ and $v$ must be incomparable.
     \end{itemize}
 
@@ -188,7 +194,7 @@ The requirement of a Wheeler order is powerful but restrictive. Many automata, e
 \end{example}
 
 \begin{example} \label{ex:p-sortable}
-    Consider the following DFA $D$ of \cref{fig:non_wheeler_example}-(a) and its partial co-lex order \cref{fig:non_wheeler_example}-(b). The DFA is not Wheeler because states $v_3$ and $v_5$ and states $v_4$ and $v_7$ are incomparable (as shown in the Hasse diagram). $D$ admits a partition into $2$ $\leq$-chains, for example one possible $\leq$-chain partition is given by:
+    Consider the following DFA $D$ of \cref{fig:non_wheeler_example}-(a) and its partial co-lex order \cref{fig:non_wheeler_example}-(b). The DFA is not Wheeler because states $v_3$ and $v_5$ and states $v_4$ and $v_7$ are incomparable (as shown in the Hasse diagram). $D$ admits a partition into two chains of totally ordered states, for example one possible chain partition is given by:
     \begin{itemize}
         \item Chain 1: $v_1 \leq v_2 \leq v_3 \leq v_4$
         \item Chain 2: $v_5 \leq v_6 \leq v_7$
@@ -253,7 +259,7 @@ The requirement of a Wheeler order is powerful but restrictive. Many automata, e
     \end{figure}
 \end{example}
 
-We now introduce another important result by \cite{manziniRationalConstructionWheeler2024}. Let $D = (Q, \Sigma, \delta, s, F)$ denote the minimal DFA accepting a Wheeler language $L$, and let $D^w = (Q^w, \Sigma, \delta^w, s^w, F^w)$ denote the minimal Wheeler DFA (WDFA) accepting $L$. Since $D^w$ is Wheeler, the rational embedding ensures that for any two distinct states $q, q' \in Q^w$, the associated intervals $I_q, I_{q'}$ are disjoint. This property does not generally hold for $D$, where states may correspond to overlapping sets of prefixes. As a consequence, when transforming $D$ into $D^w$, certain states of $D$ may need to be \emph{split} into several states in $D^w$, potentially leading to an exponential blow-up in the number of states.
+We now introduce another important result by \cite{manziniRationalConstructionWheeler2024}. Let $D = (Q, \Sigma, \delta, s, F)$ denote the minimal DFA accepting a Wheeler language $L$, and let $D^w = (Q^w, \Sigma, \delta^w, s^w, F^w)$ denote the minimal Wheeler DFA (WDFA) accepting $L$, i.e.\ the DFA with the minimum number of states among all Wheeler DFAs accepting $L$. Since $D^w$ is Wheeler for any two distinct states $q, q' \in Q^w$, the associated intervals $I_q, I_{q'}$ are disjoint. This property does not generally hold for $D$, where states may correspond to overlapping sets of prefixes. As a consequence, when transforming $D$ into $D^w$, certain states of $D$ may need to be \emph{split} into several states in $D^w$, potentially leading to an exponential blow-up in the number of states.
 
 \begin{example}[\cite{manziniRationalConstructionWheeler2024}]
     We now provide a simple example of an automaton $D$ with width $n$ that accepts a Wheeler language, yet its minimum equivalent Wheeler DFA, $D^w$, is exponentially larger. Let $D$ be the automaton depicted in Figure~\ref{fig:exponential-gap-dfa}.
@@ -265,64 +271,73 @@ We now introduce another important result by \cite{manziniRationalConstructionWh
         auto,
         state/.style={circle, draw, minimum size=0.8cm, inner sep=0pt}
     ]
-        \node[state, initial, initial text=] (start) at (0,0) {\#};
+        \node[state, initial, initial text=] (start) at (0,0) {$V_0$};
         
-        \node[state] (w1_1) at (1.5,1.3) {1};
-        \node[state] (w1_2) at (1.5,-1.3) {2};
-        \node[state] (q1) at (3,0) {3};
-        \node at (3, -0.7) {$q_1$};
+        \node[state] (w1_1) at (1.5,1.3) {$V_1$};
+        \node[state] (w1_2) at (1.5,-1.3) {$V_2$};
+        \node[state] (q1) at (3,0) {$V_3$};
+        %\node at (3, -0.7) {$q_1$};
 
-        \path[->] (start) edge (w1_1);
-        \path[->] (start) edge (w1_2);
-        \path[->] (w1_1) edge node[above] {} (q1);
-        \path[->] (w1_2) edge node[below] {} (q1);
+        \path[->] (start) edge node[above] {a} (w1_1);
+        \path[->] (start) edge node[below] {b} (w1_2);
+        \path[->] (w1_1) edge node[above] {c} (q1);
+        \path[->] (w1_2) edge node[below] {c} (q1);
 
-        \node[state] (w2_1) at (4.5,1.3) {1};
-        \node[state] (w2_2) at (4.5,-1.3) {2};
-        \node[state] (q2) at (6,0) {3};
-        \node at (6, -0.7) {$q_2$};
-        \node at (4.5, -2) {$s_1$};
-        \node at (4.5, 2) {$w_2$};
+        \node[state] (w2_1) at (4.5,1.3) {};
+        \node[state] (w2_2) at (4.5,-1.3) {};
+        \node[state] (q2) at (6,0) {};
+        %\node at (6, -0.7) {$q_2$};
 
-        \path[->] (q1) edge (w2_1);
-        \path[->] (q1) edge (w2_2);
-        \path[->] (w2_1) edge node[above] {} (q2);
-        \path[->] (w2_2) edge node[below] {} (q2);
+        \path[->] (q1) edge node[above] {a} (w2_1);
+        \path[->] (q1) edge node[below] {b} (w2_2);
+        \path[->] (w2_1) edge node[above] {c} (q2);
+        \path[->] (w2_2) edge node[below] {c} (q2);
 
         \node at (7.5, 0) {$\cdots\cdots\cdots$};
 
-        \node[state] (qn) at (9,0) {3};
+        \node[state] (qn) at (9,0) {};
+        \node[state] (wn_1) at (10.5,1.3) {};
+        \node[state] (wn_2) at (10.5,-1.3) {};
+        \node[state, accepting] (t) at (12,0) {$t$};
+        %\node at (9, -0.7) {$q_{n-1}$};
+        %\node at (12, -0.7) {$q_n$};
 
-        \node[state] (wn_1) at (10.5,1.3) {1};
-        \node[state] (wn_2) at (10.5,-1.3) {2};
-        \node[state, accepting] (t) at (12,0) {3};
-        \node at (9, -0.7) {$q_n$};
-        \node at (12, -0.7) {$t$};
-        \node at (10.5, -2) {$s_n$};
-        \node at (10.5, 2) {$w_n$};
-
-        \path[->] (qn) edge (wn_1);
-        \path[->] (qn) edge (wn_2);
-        \path[->] (wn_1) edge node[above] {} (t);
-        \path[->] (wn_2) edge node[below] {} (t);
+        \path[->] (qn) edge node[above] {a} (wn_1);
+        \path[->] (qn) edge node[below] {b} (wn_2);
+        \path[->] (wn_1) edge node[above] {c} (t);
+        \path[->] (wn_2) edge node[below] {c} (t);
 
     \end{tikzpicture}
     \caption{A DFA accepting a finite (and thus Wheeler) language, for which the minimal equivalent Wheeler DFA is exponentially larger.}
     \label{fig:exponential-gap-dfa}
     \end{figure}
 
-    The language $L = \mathcal{L}(D)$, being finite, is a Wheeler language \cite{alanko2021wheeler}. However, any Wheeler automaton accepting $L$ must have a number of states that is exponential in $n$. This is because for any pair of distinct strings $\alpha, \gamma \in I_t$, it is possible to find another string $\beta$ such that the co-lexicographic order of the strings is $\alpha < \beta < \gamma$. Since there are exponentially many such pairwise distinct strings leading to $t$, a Wheeler automaton must partition the set $I_t$ into an exponential number of sub-intervals. This forces the state $t$ to be "split" into exponentially many copies, leading to an exponential blow-up in the size of the minimal Wheeler DFA, $D_w$.
+    The language $L = \mathcal{L}(D)$, being finite, is a Wheeler language \cite{alanko2021wheeler}. However, any Wheeler automaton accepting $L$ must have a number of states that is exponential in $n$. Since there are exponentially many such pairwise distinct strings leading to $t$, a Wheeler automaton must partition the set $I_t$ into an exponential number of sub-intervals. This forces the state $t$ to be ``split'' into exponentially many copies, leading to an exponential blow-up in the size of the minimal Wheeler DFA.
 \end{example}
 
-The previous example highlights a crucial trade-off: enforcing the strict ordering of a Wheeler DFA can lead to an exponential increase in the number of states compared to a minimal DFA. \cref{thm:exp_increase} formalizes this observation, showing that the size of a minimal Wheeler DFA cannot be bounded by a polynomial in the size of the minimal DFA.
+The previous example highlights a crucial trade-off: enforcing the strict ordering of a Wheeler DFA can lead to an exponential increase in the number of states compared to a minimal DFA. 
+
+\begin{comment}
+\cref{thm:exp_increase} formalizes this observation, showing that the size of a minimal Wheeler DFA cannot be bounded by a polynomial in the size of the minimal DFA.
 \begin{theorem}[\cite{manziniRationalConstructionWheeler2024}, Theorem 29] \label{thm:exp_increase}
     Let $L = \mathcal{L}(D) = \mathcal{L}(D^w)$, where $L$ is Wheeler, $D$ is minimal, $D^w$ is minimal Wheeler, and let $f(\cdot,\cdot)$ be such that \\
     $|D^w| = \mathcal{O}(f(|D|,width(D)))$. Then, for any $k,p \in \mathbb{N}$, $f(n,p) \notin \mathcal{O}(n^k + 2^p)$.
 \end{theorem}
+\end{comment}
 
 Since this work aims to transform a trie (a 1-sortable automaton) into a more general $p$-sortable graph (with width $p>1$) in a way that introduces DAG compression while maintaining efficient indexability, it is motivated by the powerful result of \cref{thm:exp_increase} leading to the fact that even a small increase in sortability (for example from $p=1$ to $p=2$) can yield exponential compression. This highlights the potential of exploring the trade-off between sortability and size, which is the central theme of this thesis.
 
-\subsection{Indexing Finite State Automata}
-Now we introduce the current state of the art in indexing finite state automata. In 2023, Cotumaccio et al. \cite{cotumaccio2021indexing} introduced a compressed data structure for automata whose performance and space complexity are directly tied to the automaton's co-lex width, $p$. This structure generalize the famous Burros-Wheeler transform \cite{burrows1994block} and supports subpath queries (\cref{def:tree_operations}) on a query word $\alpha$ of length $m$ in $O(mp^2\log(p|\Sigma|))$ time. The space required is $\log(|\Sigma|) + \log p +2$ bits per edge for DFAs and $\log(|\Sigma|) + 2\log p +2$ bits per edge for NFAs. This highlights a direct trade-off: both query time and space per edge depend on the width parameter $p$, which governs the automaton's compressibility.
+\subsection{Indexing Finite State Automata} \label{sec:indexing}
+Now we introduce the current state of the art in indexing finite state automata. In 2023, Cotumaccio et al. \cite{cotumaccio2021indexing} introduced a compressed data structure for automata whose performance and space complexity are directly tied to the automaton's co-lex width $p$. This structure generalize the famous Burros-Wheeler transform \cite{burrows1994block}. 
+
+\begin{theorem}[Cotumaccio et\ al.\ \cite{cotumaccio2021indexing}]
+    \label{thm:indexing}
+    Let $A$ be a $p$-sortable automaton. There exists a compressed data structure for $A$ that supports subpath queries (\cref{def:tree_operations}) on a query word $\alpha$ of length $m$ in $O(mp^2\log(p|\Sigma|))$ time. The space required is:
+    \begin{itemize}
+        \item $\log(|\Sigma|) + \log p + 2$ bits per edge for DFAs
+        \item $\log(|\Sigma|) + 2\log p + 2$ bits per edge for NFAs
+    \end{itemize}
+\end{theorem}
+This highlights a direct trade-off: both query time and space per edge depend on the width parameter $p$, which governs the automaton's compressibility.
 
 To highlight the importance of this data structure, we recall that the final output of our compression pipeline is a $p$-sortable DAG compressed automaton with a controlled co-lex width $p$. This allows us to leverage these advanced indexing capabilities on the compressed automata produced by our method.

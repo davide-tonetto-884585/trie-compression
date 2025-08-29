@@ -66,13 +66,13 @@ Now, we will show how to construct a bipartite graph that allows us to solve the
 
 \begin{definition}[Bipartite graph construction] \label{def:bip_construction}
     Let $T$ be a tree with $t$ nodes, and $p$ the number of chains we want to partition the nodes into. Let $\equivset$ be the set of equivalence classes of the nodes of $T$. We can construct a bipartite graph $G = (V, E)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ in the following way:
-    \begin{itemize}[leftmargin=25pt]
+    \begin{itemize}
         \item $V_1$ contains $t + p$ nodes composed by $p$ source nodes $s_1, s_2, \dots, s_p$ (referred to collectively as $\sourceset$) followed by the $t$ elements (referred to collectively as $\treeset{1}$) of $\equivset$. The nodes in $V_1$ follow a strict ordering $s_1 \prec s_2 \prec \dots \prec s_p \prec u_1 \prec u_2 \prec \dots \prec u_t$, where $u_i$ are the tree nodes ordered according to the upward path $\pi$ as defined in \cref{def:node_informations}.
         \item $V_2$ contains $t + p$ nodes composed by the $t$ elements (referred to collectively as $\treeset{2}$) of $\equivset$ followed by $p$ destination nodes $d_1, d_2, \dots, d_p$ (referred to collectively as $\destset$). The nodes in $V_2$ follow a strict ordering $v_1 \prec v_2 \prec \dots \prec v_t \prec d_1 \prec d_2 \prec \dots \prec d_p$, where $v_i$ are the tree nodes ordered according to the upward path $\pi$ as defined in \cref{def:node_informations}.
     \end{itemize}
 
     Then the edges of the graph $G$ are constructed in the following way:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item The $\sourceset$ nodes are connected to the first $p$ nodes with distinct equivalence class in $V_2$, with weight $1$.
         \item Let $u_i \in \treeset{1}$. We define $\equivsetfunc{u_i}$ as the equivalence class of node $u_i$. For each node $u_i$, we construct the following edges:
         
@@ -392,7 +392,7 @@ Therefore, for the proof of the reduction, we will only consider instances of th
 In other words, every node in $V_1$ is connected to at least another node in $V_2$.
 \begin{proof}
     Let $u_i \in \treeset{1}$ be an arbitrary node. We analyze the construction of its outgoing edges based on \cref{def:bip_construction}. There are two mutually exclusive cases for $u_i$:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item There exists at least one node $v_k \in \treeset{2}$ with $k > i$ that has the same equivalence class as $u_i$, i.e., $\equivsetfunc{v_k} = \equivsetfunc{u_i}$. In this case, the construction specifies that an edge is added between $u_i$ and the first such node $v_k$. This guarantees $u_i$ has at least one neighbor.
         \item There are no nodes $v_k \in \treeset{2}$ with $k > i$ that share the same equivalence class as $u_i$. This occurs when $u_i$ is the last node of its equivalence class in the specified ordering. In this scenario, the construction adds $p$ edges from $u_i$ to each of the destination nodes $d_j \in \destset$. Since $p \geq 2$, $u_i$ is connected to at least two nodes.
     \end{enumerate}
@@ -440,7 +440,7 @@ Dimostrando questo, puoi dire che ogni nodo aggiunge sempre almeno un nodo in pi
     The proof comes from the construction of the bipartite graph $G$ and from \cref{thm:halls_marriage_theorem}. We are going to prove that $G$ satisfies Hall's condition (see \cref{thm:halls_marriage_theorem}) and so, since by construction $|V_1| = |V_2|$, a perfect matching for $G$ exists.
 
     To verify Hall's condition, we need to prove that for any subset $W \subseteq V_1$ we have that $|N(W)| \geq |W|$, where $N(W)$ is the neighborhood of $W$ (\cref{def:neighborhood}). We have the following cases:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item $W \subseteq \sourceset$: Let $W$ be a subset of $S$ of size $k$. By construction, every source node $s_i \in \sourceset$ is connected to the same set of $p$ nodes in $V_2$, which are the first $p$ nodes with distinct equivalence classes in the ordering. Therefore, for any non-empty $W \subseteq \sourceset$, the neighborhood $N(W)$ consists of exactly these $p$ nodes, so $|N(W)| = p$. From \cref{lemma:optimal_cost} and \cref{claim:p_less_than_E}, we only consider instances where $p \leq |\equivset|$, ensuring that at least $p$ such nodes exist. Since $|\sourceset|=p$, we have $|W| = k \leq p$. Thus, $|N(W)| \geq |W|$.
         
         \item $W \subseteq \treeset{1}$: Let $W = \{u_{i_1}, \dots, u_{i_k}\} \subseteq \treeset{1}$ with $i_1 < i_2 < \dots < i_k$. We analyze two subcases:
@@ -847,7 +847,7 @@ This will reduce the number of edges by a factor of $p-1$.
     Therefore, $w(u'',v) - w(u',z) \le 1$, which implies $W(M') \leq W(M)$. Thus, the edge $(u,v)$ can be removed from the graph without affecting the weight of the optimal solution.
 
     Finally, we need to prove that \cref{lemma:matching_existence} still holds. The proof follows from showing that the two fundamental neighborhood properties remain valid after edge removal:
-    \begin{enumerate}[leftmargin=25pt]
+    \begin{enumerate}
         \item \cref{lemma:distinct_neighborhoods} remains valid because it relies on the fact that each node $u_i \in \treeset{1}$ is connected to $v_{i+1} \in \treeset{2}$. The edge $(u,v)$ we remove cannot be this critical edge $(u_i,v_{i+1})$ since, by our optimization condition, there exists a node $z \prec v$ connected to $u$ with weight 0; the edge $(u_i,v_{i+1})$ is always the first valid connection for $u_i$ in the ordering. Therefore, $v$ cannot be $v_{i+1}$ for the node $u$.
         \item \cref{lemma:distinct_neighborhoods_2} is preserved because it concerns edges between nodes of the same equivalence class. Our optimization only removes an edge when there exists a better alternative to a preceding node, meaning that the same-class connectivity pattern is unaffected by this edge removal.
         \item The edge removal does not affect source and destination nodes' connections, as we only remove tree node edges.

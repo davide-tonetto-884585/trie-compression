@@ -27,26 +27,25 @@ Now, we will show how to construct a bipartite graph that allows us to solve the
 String Partitioning problem.
 
 \begin{definition}[Bipartite graph construction] \label{def:bip_construction}
-    Let $A=a_1a_2\dots a_n$ be a string from an alphabet $\Sigma$ and let $p$ be the number of subsequences we want to partition $S$ in. 
+    Let $S$ be a string of size $n$ from an alphabet $\Sigma$ and let $p$ be the number of subsequences we want to partition $S$ into. 
     We can construct a weighted bipartite graph $G = (V,E,w)$ such that vertices are divided in two disjoint sets $V = V_1 \cup V_2$ in the following way:
     \begin{itemize}[leftmargin=25pt]
-        \item $V_1$ contains $n+p$ nodes composed by $p$ source nodes $s_1,s_2,\dots,s_p$ (referred to collectively as $\sourceset$) followed by the $n$ characters $a_1,a_2,\dots,a_n$ (referred to collectively as $\treeset{1}$) of $A$. The nodes in $V_1$ follow a strict ordering $s_1 \prec s_2 \prec \dots \prec s_p \prec a_1 \prec a_2 \prec \dots \prec a_n$.
-        \item $V_2$ contains $n+p$ nodes composed by the $n$ characters $a_1,a_2,\dots,a_n$ (referred to collectively as $\treeset{2}$) of $A$ followed by $p$ destination nodes $d_1,d_2,\dots,d_p$ (referred to collectively as $\destset$). The nodes in $V_2$ follow a strict ordering $a_1 \prec a_2 \prec \dots \prec a_n \prec d_1 \prec d_2 \prec \dots \prec d_p$.
+        \item $V_1$ contains $n+p$ nodes composed by $p$ source nodes $s_1,s_2,\dots,s_p$ (referred to collectively as $\sourceset$) followed by the $n$ characters $a_1,a_2,\dots,a_n$ (referred to collectively as $\treeset{1}$) of $S$.
+        \item $V_2$ contains $n+p$ nodes composed by the $n$ characters $b_1,b_2,\dots,b_n$ (referred to collectively as $\treeset{2}$) of $S$ followed by $p$ destination nodes $d_1,d_2,\dots,d_p$ (referred to collectively as $\destset$).
     \end{itemize}
     Then the edges of the graph $G$ are constructed in the following way:
     \begin{itemize}[leftmargin=25pt]
-        \item \textbf{Source Edges:} For each source node $s \in \sourceset$ and each node $v_j \in \treeset{2}$, an edge $(s, v_j)$ is created with weight $w(s, v_j) = 1$. These edges represent the start of a new subsequence.
+        \item \textbf{Source Edges:} For each source node $s \in \sourceset$ and each node $v_j \in \treeset{2}$, an edge $(s, v_j)$ is created with weight $w(s, v_j) = 1$. 
 
-        \item \textbf{Internal nodes Edges:} For each pair of indices $i, j$ such that $1 \le i < j \le n$, an edge is created between $u_i \in \treeset{1}$ and $v_j \in \treeset{2}$. The weight of this edge, $w(u_i, v_j)$, is 0 if the characters $A[i]$ and $A[j]$ are the same, and 1 otherwise. Formally:
+        \item \textbf{Internal nodes Edges:} For each pair of indices $i, j$ such that $1 \le i < j \le n$, an edge is created between $u_i \in \treeset{1}$ and $v_j \in \treeset{2}$. The weight of this edge, $w(u_i, v_j)$, is 0 if the characters $S_i$ and $S_j$ are the same, and 1 otherwise. Formally:
         \[ w(u_i, v_j) = 
             \begin{cases} 
-                0 & \text{if } A[i] = A[j] \\
-                1 & \text{if } A[i] \neq A[j] 
+                0 & \text{if } S_i = S_j \\
+                1 & \text{if } S_i \neq S_j 
             \end{cases}
         \]
-        This weight represents the cost of adding character $A[j]$ after $A[i]$ in a subsequence, where a cost of 1 is incurred if a new run is started.
 
-        \item \textbf{Destination Edges:} For each node $u_i \in \treeset{1}$ and each destination node $d \in \destset$, an edge $(u_i, d)$ is created with weight $w(u_i, d) = 1$. These edges represent the end of a subsequence.
+        \item \textbf{Destination Edges:} For each node $u_i \in \treeset{1}$ and each destination node $d \in \destset$, an edge $(u_i, d)$ is created with weight $w(u_i, d) = 1$.
     \end{itemize}
 \end{definition}
 
@@ -111,14 +110,14 @@ String Partitioning problem.
             \draw[blue, thick, rounded corners] ([xshift=-0.4cm,yshift=0.25cm]d1.north west) rectangle ([xshift=0.4cm,yshift=-0.25cm]d2.south east);
             
             % Add labels
-            \node[green!100, font=\small\bfseries] at ([xshift=1.5cm]s1.east) {Source};
-            \node[green!100, font=\small\bfseries] at ([xshift=1.5cm]s2.east) {nodes};
+            \node[font=\large\bfseries] at ([xshift=0.8cm,yshift=-0.5cm]s1.east) {$\sourceset$};
+            % \node[green!100, font=\small\bfseries] at ([xshift=1.5cm]s2.east) {nodes};
             
-            \node[red, font=\small\bfseries] at ([xshift=1.5cm]t5.east) {String};
-            \node[red, font=\small\bfseries] at ([xshift=1.5cm]t6.east) {nodes};
+            \node[font=\large\bfseries] at ([xshift=0.8cm]t6.east) {$\treeset{1}$};
+            \node[font=\large\bfseries] at ([xshift=-0.8cm]r6.west) {$\treeset{2}$};
             
-            \node[blue, font=\small\bfseries] at ([xshift=-1.5cm]d1.west) {Destination};
-            \node[blue, font=\small\bfseries] at ([xshift=-1.5cm]d2.west) {nodes};
+            \node[font=\large\bfseries] at ([xshift=-0.8cm,yshift=-0.5cm]d1.west) {$\destset$};
+            %\node[blue, font=\small\bfseries] at ([xshift=-1.5cm]d2.west) {nodes};
             
             % Add "Corresponding tree node" label with arrow
             % \draw[<->, thick] (t1.east) -- (r1.west);
@@ -132,11 +131,11 @@ String Partitioning problem.
 \end{example}
 
 \begin{example}[Edges]
-    Let's see a small example for each case of \cref{def:bip_construction}. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, each source is connected with weight $1$ to all nodes in $\treeset{2}$.
+    Let us see a small example for each case of \cref{def:bip_construction}. Consider $p=2$. In \cref{fig:reduction_small_examples}-(a), there is an example for the sources' edges. As stated before, each source is connected with weight $1$ to all nodes in $\treeset{2}$.
 
-    In \cref{fig:reduction_small_examples}-(b), we illustrate the edges from $\treeset{1}$ to $\treeset{2}$. These edges model the cost of appending a character to a subsequence. An edge from $u_i$ to $v_j$ (for $j>i$) has weight 1 if $S[i] \neq S[j]$ (starting a new run) and weight 0 if $S[i] = S[j]$ (extending an existing run). For instance, the node for the first 'A' connects to the nodes for 'B' and 'C' with weight 1, but connects to the node for 'A' with weight 0.
+    In \cref{fig:reduction_small_examples}-(b), we illustrate the edges from $\treeset{1}$ to $\treeset{2}$. These edges model the cost of appending a character to a subsequence. An edge from $u_i$ to $v_j$ (for $j>i$) has weight 1 if $S[i] \neq S[j]$ (starting a new run) and weight 0 if $S[i] = S[j]$ (extending an existing run). For instance, the node for the first 'A' connects to the nodes for 'B' and 'C' with weight 1, and to the node for 'A' with weight 0.
 
-    Lastly, \cref{fig:reduction_small_examples}-(c) shows the destination edges. These edges terminate a subsequence. An edge from any node $u_i \in \treeset{1}$ to any destination node $d_k \in \destset$ has a weight of 0, ensuring that ending a chain does not increase the run count. For example, if the node for 'B' is the last element of a subsequence, it is matched with a destination node, and this edge $(u_B, d_k)$ contributes 0 to the total weight.
+    Lastly, \cref{fig:reduction_small_examples}-(c) shows the destination edges. These edges terminate a subsequence. An edge from any node $u_i \in \treeset{1}$ to any destination node $d_k \in \destset$ has weights 0, ensuring that ending a chain does not increase the run count. For example, if the node for 'B' is the last element of a subsequence, it is matched with a destination node, and this edge $(u_B, d_k)$ contributes 0 to the total weight.
 
     \begin{figure}[H]
         \centering
@@ -259,7 +258,7 @@ String Partitioning problem.
     \end{figure}
 \end{example}
 
-let now state the following theorem regarding the number of edges in the bipartite graph resulting from \cref{def:bip_construction}. This theorem is essential for understanding the complexity of the final algorithm employed to solve the MWPBM problem and so, the String Partitioning problem.
+Let us now state the following theorem regarding the number of edges in the bipartite graph resulting from \cref{def:bip_construction}. This theorem is essential for understanding the complexity of the final algorithm employed to solve the MWPBM problem and, thus, the String Partitioning problem.
 
 \begin{theorem}[Bipartite graph properties] \label{thm:bip_graph_properties}
     The bipartite graph $G$ constructed as stated in \cref{def:bip_construction} has $2n + 2p$ nodes and $2np + \frac{n(n-1)}{2}$ edges.
@@ -279,16 +278,123 @@ let now state the following theorem regarding the number of edges in the biparti
 \end{proof}
 
 \subsection{Proof}
-In this section, we will prove that a minimum-weight perfect matching in a bipartite graph constructed as stated in \cref{def:bip_construction} directly corresponds to an optimal solution for the String Partitioning problem. 
+In this section, we will prove that a minimum-weight perfect matching in a bipartite graph constructed as stated in \cref{def:bip_construction} directly corresponds to an optimal solution for the String Partitioning problem defined as follows.
 
-Let's start by defining the concept of valid partition:
+\begin{definition}[String Partitioning Problem]
+    Let $\mathcal{I} = (S, p)$ be an instance of the String Partitioning Problem where $S$ is a string of length $n$ over an alphabet $\Sigma$, and $p$ is a positive integer. The output of the problem is a partition $\mathcal{P}=I_1,\dots,I_p$ of $[n]$ such that $\delta(\mathcal{P}) = \sum_{i=1}^p \tau(S[I_i])$ is minimized.
+\end{definition}
+
+We introduce the following notation:
+\begin{definition}
+    Let $r:\mathcal{I}_{String Partitioning} \rightarrow \mathcal{M}_{MWPBM}$ be the reduction function that maps an instance $\mathcal{I}=(S, p)$ of the String Partitioning Problem to an instance $\mathcal{M}=(G)$ of the MWPBM Problem, where $G$ is the bipartite graph constructed as stated in \cref{def:bip_construction}.
+\end{definition}
+
+\begin{lemma} \label{lemma:partition_induces_matching}
+    Let $\mathcal{I}=(S, p)$ be an instance of the String Partitioning Problem. Any partition $\mathcal{P}=I_1,\dots,I_p$ of $[n]$ induces a perfect matching $M(\mathcal{P})$ in the bipartite graph $G = r(\mathcal{I})$.
+\end{lemma}
+\begin{proof}
+    Let $\mathcal{P}=I_1,\dots,I_p$ be a partition. Write $I_q$ as $I_q = \{i_1, i_2, \dots, i_k\}$ such that $i_1 <i_2<\dots<i_k$, then define 
+    $$
+        M(I_q) := \{(s_q, b_{i_1}), (a_{i_k}, d_q)\} \cup \{a_{i_j}, b_{i_{j+1}} : j \in [k-1]\}
+    $$
+    and 
+    $$
+        M(\mathcal{P}) := \bigcup_{i=1}^p M(I_i).
+    $$
+    
+    To see that $M(\mathcal{P})$ is a perfect matching, observe that every node in $G$ is covered exactly once. For each $q \in [p]$, the source $s_q$ and destination $d_q$ are used once in $M(I_q)$ and are not part of any other $M(I_z)$ for $z \neq q$. Furthermore, as $\mathcal{P}$ is a partition of $[n]$, every index $j \in [n]$ belongs to exactly one set $I_q$. The definition of $M(I_q)$ creates a chain of edges for the indices in $I_q$, covering each corresponding node $a_j$ and $b_j$ exactly once within that chain. Thus, every node in $G$ is included in precisely one edge of $M(\mathcal{P})$.
+\end{proof}
+
+\begin{lemma} \label{lemma:matching_induces_partition}
+    Let $\mathcal{I}=(S, p)$ be an instance of the String Partitioning Problem. Every perfect matching $M$ on $G = r(\mathcal{I})$ induces a partition $\mathcal{P}(M)$ of $[n]$.
+\end{lemma}
+\begin{proof}
+    Let $M$ be a perfect matching on $G$. For a node $u$ in the bipartite graph, we let $M(u)$ be the node matched to $u$ in $M$. The matching $M$ naturally defines $p$ sets $I_q=\{i_1,\dots,i_k\}$ such that $i_1 <i_2<\dots<i_k$, that can be inductively defined as follows: $i_1$ is such that $b_{i_1} = M(s_i)$, $i_2$ is such that $b_{i_2} = M(a_{i_1})$, $\dots$, $i_k$ is such that $t_i = M(a_{i_k})$. It remains to show that $I_1,\dots,I_p$ form a partition of $S$.
+
+    Assume that an index $j \in [n]$ does not appear in any set $I_q$. By the construction of our bipartite graph, the node $b_j$ corresponds to position $j$ in the string. If $j$ is not included in any partition, then $b_j$ cannot be matched to any node in $V_1$, contradicting the requirement that $M$ is a perfect matching. 
+    
+    Moreover, assume that an index $j \in [n]$ appears in two distinct sets $I_i$ and $I_z$ where $i \neq z$. Assume also, without loss of generality, that $j$ is the smaller index in the sets $I_i$ and $I_z$. For the definition of $M(I_q)$, where $I_q=\{i_1, i_2, \dots, i_k\}$ such that $i_1 <i_2<\dots<i_k$, we know that $s_q = M(b_{i_1})$. This leads to a contradiction since if $j$ is the smaller index in both $I_i$ and $I_z$ then it has to be matched with two distinct sources $s_i$ and $s_z$. However, in a matching, each node can be incident to at most one edge. Therefore, $b_j$ cannot be matched to multiple nodes, which contradicts the definition of a matching. Hence, if $I_i \neq I_z$, then $I_i \cap I_z = \emptyset$.
+    
+    \begin{comment}
+    By the inductive definition of the sets, we have: For set $I_i$: $j$ appears as some $i_q$ in the sequence $I_i = \{i_1, i_2, \ldots, i_{|I_i|}\}$ where $i_1 < i_2 < \ldots < i_{|I_i|}$. For set $I_z$: $j$ appears as some $z_l$ in the sequence $I_z = \{z_1, z_2, \ldots, z_{|I_z|}\}$ where $z_1 < z_2 < \ldots < z_{|I_z|}$.
+
+    By the inductive construction, if $j = i_q$ for some $q$, then either:
+    \begin{enumerate}
+        \item $j = i_1$ and $b_j = M(s_i)$, or
+        \item $j = i_k$ for $k > 1$ and $b_j = M(a_{i_{k-1}})$.
+    \end{enumerate}
+    Similarly, if $j = z_l$ for some $l$, then either:
+    \begin{enumerate}
+        \item $j = z_1$ and $b_j = M(s_z)$, or
+        \item $j = z_l$ for $l > 1$ and $b_j = M(a_{z_{l-1}})$.
+    \end{enumerate}
+    Since $i \neq z$, we have $s_i \neq s_z$. If $j$ appears in both sets, then by the inductive construction:
+    \begin{itemize}
+        \item In set $I_i$: node $b_j$ is part of a matching path that originates from source $s_i$
+        \item In set $I_z$: node $b_j$ is part of a matching path that originates from source $s_z$
+    \end{itemize}
+    This means $b_j$ would need to be connected to two different matching paths. However, in a matching, each node can be incident to at most one edge. Therefore, $b_j$ cannot be matched to multiple nodes, which contradicts the definition of a matching. Hence, if $I_i \neq I_z$, then $I_i \cap I_z = \emptyset$.
+    \end{comment}
+
+    Hence, for $M$ to be a perfect matching, each index $j \in [n]$ must appear in exactly one set $I_i$, ensuring that the sets $\{I_1, I_2, \ldots, I_p\}$ form a partition of $[n]$.
+\end{proof}
+
+\begin{lemma} \label{lemma:same_cost}
+    Let $\mathcal{I}=(S, p)$ be an instance of the String Partitioning Problem. Let moreover $M$ be a perfect matching on $G = r(\mathcal{I})$. Then $W(M) = \delta(\mathcal{P}(M))$. Conversely, let $\mathcal{P}$ be a partition of $S$, then $\delta(\mathcal{P})=W(M(\mathcal{P}))$.
+\end{lemma}
+\begin{proof}    
+    The weight $W(M)$ is the sum of the weights of all edges in the matching. By construction of the bipartite graph:
+    \begin{itemize}
+        \item Each source node $s_i$ contributes weight 1 to connect to the first element of $I_i$,
+        \item Each edge $(a_j, b_k)$ with $j < k$ contributes weight $0$ if $S_j = S_k$, or weight $1$ if $S_j \neq S_k$,
+        \item Each edge to destination node $d_i$ contributes weight $0$.
+    \end{itemize}
+    
+    Therefore, let $M$ be a perfect matching on $G$. By \cref{lemma:matching_induces_partition}, $M$ induces a partition $\mathcal{P}(M) = \{I_1, \ldots, I_p\}$ of $[n]$. The matching $M$ naturally defines $p$ sets $I_q=\{i_1,\dots,i_k\}$ such that $i_1 <i_2<\dots<i_k$, that can be inductively defined as follows: $i_1$ is such that $b_{i_1} = M(s_i)$, $i_2$ is such that $b_{i_2} = M(a_{i_1})$, $\dots$, $i_k$ is such that $t_i = M(a_{i_k})$. Thus, the following equation holds.
+    \begin{align*}
+        W(M) &= p + |\{(a_j, b_k) \in M:S_j \neq S_k\}| \\
+        &= p + \sum_{i=1}^p |\{j \in [|I_i| - 1]:S[I_i]_j \neq S[I_i]_{j+1}\}| \\
+        &= \sum_{i=1}^p \big( 1 + |\{j \in [|I_i| - 1]:S[I_i]_j \neq S[I_i]_{j+1}\}| \big) \\
+        &= \sum_{i=1}^p \tau(S[I_i]) \\
+        &= \delta(\mathcal{P}(M))
+    \end{align*}
+
+    The first equality holds because the total weight $W(M)$ is the sum of weights from the $p$ source edges (each with weight 1) and the internal edges with weight 1. The second equality rewrites this count by summing the run boundaries for each partition set $I_i$. The third equality distributes the constant $p$ into the summation. The fourth holds by the definition of $\tau(S[I_i])$ as the number of runs (1 plus the number of character changes). The final equality is by the definition of $\delta(\mathcal{P}(M))$.
+    
+    Conversely, let $\mathcal{P} = \{I_1, \ldots, I_p\}$ be a partition of $S$. By \cref{lemma:partition_induces_matching}, $\mathcal{P}$ induces a perfect matching $M(\mathcal{P}) = \bigcup_{q=1}^p M(I_q)$. Since the edge sets $M(I_q)$ are disjoint, the total weight of the matching is the sum of the weights of each part: $W(M(\mathcal{P})) = \sum_{q=1}^p W(M(I_q))$.
+
+    Let's analyze the weight of a single component $M(I_q)$ for a set $I_q = \{i_1, \dots, i_k\}$ with $i_1 < \dots < i_k$. The edges in $M(I_q)$ are $(s_q, b_{i_1})$, $(a_{i_k}, d_q)$, and $(a_{i_j}, b_{i_{j+1}})$ for $j \in [k-1]$. According to the weight definitions, $w(s_q, b_{i_1})=1$, $w(a_{i_k}, d_q)=0$, and $w(a_{i_j}, b_{i_{j+1}})$ is 1 if $S_{i_j} \neq S_{i_{j+1}}$ and 0 otherwise. The weight of $M(I_q)$ is therefore:
+    \begin{align*}
+        W(M(I_q)) &= w(s_q, b_{i_1}) + \sum_{j=1}^{k-1} w(a_{i_j}, b_{i_{j+1}}) + w(a_{i_k}, d_q) \\
+                  &= 1 + |\{j \in [k-1] : S_{i_j} \neq S_{i_{j+1}}\}| \\
+                  &= \tau(S[I_q])
+    \end{align*}
+    Summing over all sets in the partition, we directly equate the matching weight to the partition cost:
+    $$
+        W(M(\mathcal{P})) = \sum_{q=1}^p W(M(I_q)) = \sum_{q=1}^p \tau(S[I_q]) = \delta(\mathcal{P})
+    $$
+    This confirms that the weight of the induced matching is equal to the cost of the partition.
+\end{proof}
+
+\begin{theorem}
+    Let $\mathcal{I}=(S,p)$ be an instance of the String Partitioning problem with $S=a_1a_2\dots a_n$. An optimal solution of $r(\mathcal{I})$ can be used to compute an optimal solution of $\mathcal{I}$.
+\end{theorem}
+\begin{proof}
+    By the previous lemmas, we have established a bijective correspondence between partitions of $S$ and perfect matchings in the bipartite graph $G$ constructed by $r(\mathcal{I})$:
+    \begin{itemize}
+        \item Any partition $\mathcal{P}$ of $S$ induces a perfect matching $M(\mathcal{P})$ in $G$ (\cref{lemma:partition_induces_matching}).
+        \item Any perfect matching $M$ in $G$ induces a partition $\mathcal{P}(M)$ of $S$ (\cref{lemma:matching_induces_partition}).
+        \item The weight equivalence holds: $W(M) = \delta(\mathcal{P}(M))$ and $\delta(\mathcal{P}) = W(M(\mathcal{P}))$ (\cref{lemma:same_cost}).
+    \end{itemize}
+    
+    Therefore, finding a minimum weight perfect matching $M$ in $G$ is equivalent to finding an optimal partition $\mathcal{P}$ for the String Partitioning Problem.
+\end{proof}
+
+\begin{comment}
+Let's start by defining the concept of a valid partition:
 \begin{definition}[Valid Partition]
     \label{def:valid_partition}
-    A partition of a string $S$ into $p$ subsequences, denoted $\Pi = \{S_1, S_2, \dots, S_p\}$, is \textbf{valid} if it satisfies two conditions:
-    \begin{enumerate}[leftmargin=25pt]
-        \item \textbf{Character Conservation:} The multiset of characters in $S$ is the disjoint union of the multisets of characters in each subsequence $S_i$. This ensures every character from $S$ is used exactly once.
-        \item \textbf{Order Preservation:} For any subsequence $S_k \in \Pi$, if $S_k$ contains characters corresponding to $S[i]$ and $S[j]$ from the original string with $i < j$, then the character from $S[i]$ must appear before the character from $S[j]$ in $S_k$.
-    \end{enumerate}
+    A partition of a string $S$ into $p$ subsequences, denoted $\Pi = \{S_1, S_2, \dots, S_p\}$, is \textbf{valid} if, for any subsequence $S_k \in \Pi$, $S_k$ contains characters corresponding to $S[i]$ and $S[j]$ from the original string with $i < j$, then the character from $S[i]$ must appear before the character from $S[j]$ in $S_k$.
 \end{definition}
 
 We also define $runs(S)$ as the number of runs in the string $S$.
@@ -298,11 +404,7 @@ We also define $runs(S)$ as the number of runs in the string $S$.
 \end{lemma}
 
 \begin{proof}
-    Let $\Pi = \{S_1, S_2, \dots, S_p\}$ be any valid partition of the string $S$ into $p$ subsequences. The cost of this partition is the total number of runs, given by $\sum_{i=1}^{p} \text{runs}(S_i)$.
-
-    For any character $c \in \Sigma_S$, there must be at least one occurrence of $c$ in $S$. This occurrence must be placed in at least one of the subsequences, say $S_j$. The first occurrence of character $c$ in any subsequence $S_j$ will start a new run. For each distinct character in $\Sigma_S$, its occurrences must form at least one run in the partition. If a character appears in multiple subsequences, it will contribute at least one run for each subsequence it is in. If it appears only in one subsequence, it will contribute at least one run to that subsequence.
-
-    Therefore, every unique character $c \in \Sigma_S$ must contribute at least one run to the total cost. Summing over all unique characters, the total number of runs must be at least $|\Sigma_S|$.
+    To minimize the number of runs of each subsequence, we note that the minimum cost of a chain is $1$. Consequently, the optimal cost of the String Partitioning problem for a string $S$ is always greater than or equal to the cardinality of $\Sigma_S$. This is because if we partition them into $p = |\Sigma_S|$ subsequences, the cost will be equal to $|\Sigma_S|$, since each chain contains only nodes belonging to the same character. Conversely, if we partition them into $p < |\Sigma_S|$ subsequences, the cost will be greater than or equal to $|\Sigma_S|$ since we will need to include at least two different characters within a single subsequence.
 \end{proof}
 
 \begin{claim} \label{claim:p_greater_than_alphabet_size}
@@ -317,13 +419,13 @@ Therefore, we will only consider instances of the problem where $p < |\Sigma_S|$
 
 Let $r:\mathcal{I}_{String Partitioning} \rightarrow \mathcal{M}_{MWPBM}$ be the reduction function that maps an instance $\mathcal{I}=(S, p)$ of the String Partitioning Problem to an instance $\mathcal{M}=(G)$ of the MWPBM Problem, where $G$ is the bipartite graph constructed as stated in \cref{def:bip_construction}.
 \begin{claim} \label{lemma:greater_nodes}
-    Let $\mathcal{I}=(S, p)$ be an instance of the String Partitioning Problem. In any perfect matching on $r(\mathcal{I})$, a node $u_i \in \treeset{1}$ can only be matched with a node $v_j \in \treeset{2}$ if $j > i$.
+    Let $\mathcal{I}=(S, p)$ be an instance of the String Partitioning Problem. In any perfect matching on $G$ of $r(\mathcal{I})$, a node $u_i \in \treeset{1}$ can only be matched with a node $v_j \in \treeset{2}$ if $j > i$.
 \end{claim}
 
 \begin{proof}
     This property is a direct consequence of the definition of internal edges in the graph construction. Edges between the sets $\treeset{1}$ and $\treeset{2}$ are explicitly defined only for pairs of nodes $(u_i, v_j)$ where the index $j$ is strictly greater than $i$. No edges are created for any case where $j \le i$.
 
-    Since a matching is a subset of the graph's edges, it is impossible for a node $u_i$ to be matched with a node $v_j$ with an equal or smaller index. This structural constraint is fundamental to ensuring that the subsequences in the partition respect the original order of characters in the string $S$ leading to a valid partition of the string.
+    Since a matching is a subset of the graph's edges, it is impossible for a node $u_i$ to be matched with a node $v_j$ with an equal or smaller index. This structural constraint is fundamental to ensuring that the subsequences in the partition respect the original order of characters in the string $S$, leading to a valid partition of the string.
 \end{proof}
 
 \begin{lemma} \label{lemma:matching_existence}
@@ -333,7 +435,7 @@ Let $r:\mathcal{I}_{String Partitioning} \rightarrow \mathcal{M}_{MWPBM}$ be the
 \begin{proof}
     Let $G$ be the bipartite graph of the MWPBM instance $r(\mathcal{I})$. The proof comes from the construction of the bipartite graph $G$ and from \cref{thm:halls_marriage_theorem}. We are going to prove that $G$ satisfies Hall's condition (see \cref{thm:halls_marriage_theorem}) and so, since by construction $|V_1| = |V_2|$, a perfect matching for $G$ exists.
 
-    To verify Hall's condition, we need to prove that for any subset $W \subseteq V_1$ we have that $|N(W)| \geq |W|$, where $N(W)$ is the neighborhood of $W$ (\cref{def:neighborhood}). We have the following cases:
+    To verify Hall's condition, we need to prove that for any subset $W \subseteq V_1$ we have that $|N(W)| \geq |W|$, where $N(W)$ is the neighborhood of $W$ (\cref{def:neighborhood}). Let $S=s_1s_2\dots s_n$, we have the following cases:
     \begin{itemize}[leftmargin=25pt]
         \item If $W \subseteq \sourceset$: Let $|W| = k$, where $1 \le k \le p$. By construction, every source node in $\sourceset$ is connected to every node in $\treeset{2}$. Therefore, the neighborhood of any non-empty subset $W \subseteq \sourceset$ is the entire set $\treeset{2}$, so $N(W) = \treeset{2}$. The size of the neighborhood is $|N(W)| = |\treeset{2}| = n$. We need to show that $n \ge k$. From the problem definition, we can assume $p \le n$, since having more partitions than characters offers no advantage (\cref{claim:p_greater_than_alphabet_size}). As $W$ is a subset of $\sourceset$, we have $k \le p$. Therefore, $k \le p \le n$, which confirms that $|N(W)| \ge |W|$. 
         
@@ -349,7 +451,7 @@ Let $r:\mathcal{I}_{String Partitioning} \rightarrow \mathcal{M}_{MWPBM}$ be the
         
         Since the $k$ indices in $W$ are distinct and sorted, we know that $i_k \ge i_1 + k - 1$. As $i_k \le n$, it follows that $i_1 + k - 1 \le n$, which can be rearranged to $k \le n - i_1 + 1$.
         
-        Since $p \ge 2$ (as there is at least two partitions), we have $n - i_1 + p \ge n - i_1 + 2$.
+        Since from \cref{def:string_partitioning_problem} $p \ge 2$ (as there are at least two partitions), we have $n - i_1 + p \ge n - i_1 + 2$.
         Combining these inequalities, we get $|N(W)| = n - i_1 + p \ge n - i_1 + 2 \ge k$.
         
         Thus, $|N(W)| \ge |W|$ holds for this case. 
@@ -368,10 +470,10 @@ Let $r:\mathcal{I}_{String Partitioning} \rightarrow \mathcal{M}_{MWPBM}$ be the
     Since Hall's condition is satisfied for all possible non-empty subsets of $V_1$, a perfect matching always exists in the graph $G$.
 \end{proof}
 
-Before proving the main theorem, we need to define how to retrieve an optimal partitions for an instance of the String Partitioning Problem $\mathcal{I}=(S, p)$ from an optimal perfect matching in $r(\mathcal{I})$.
+Before proving the main theorem, we need to define how to retrieve an optimal partition for an instance of the String Partitioning Problem $\mathcal{I}=(S, p)$ from an optimal perfect matching in $r(\mathcal{I})$.
 
 \begin{definition}[Partition decomposition] \label{def:partition_decomposition}
-    Given an instance of the String Partitioning Problem $\mathcal{I}=(S, p)$ and an optimal perfect matching $M$ in the bipartite graph $G$ of $r(\mathcal{I})$, a \textbf{partition decomposition} of $M$ is a way to partition the nodes of $G$ into $p$ non-empty subsets, where each subset represents a path from a source to a destination, thus, leading to a partition of $S$. The partition decomposition proceed as follows:
+    Given an instance of the String Partitioning Problem $\mathcal{I}=(S, p)$ and an optimal perfect matching $M$ in the bipartite graph $G$ of $r(\mathcal{I})$, a \textbf{partition decomposition} of $M$ is a way to partition the nodes of $G$ into $p$ non-empty subsets, where each subset represents a path from a source to a destination, thus, leading to a partition of $S$. The partition decomposition proceeds as follows:
 
     Since $M$ is a perfect matching, each source node $s_k \in \sourceset$ begins exactly one path. This path is a sequence of characters from $S$ determined by following the edges of $M$. A path starting from $s_k$ corresponds to a sequence of indices $(j_1, j_2, \dots, j_m)$ such that:
     \begin{enumerate}[leftmargin=25pt]
@@ -445,9 +547,8 @@ Before proving the main theorem, we need to define how to retrieve an optimal pa
 Now we introduce the main theorem for the reduction.
 
 \begin{theorem}
-    Let $\mathcal{I}=(S,p)$ be an instance of the String Partition problem with $S=a_1a_2\dots a_n$. An optimal solution of $r(\mathcal{I})$ can be used to compute an optimal solution of $\mathcal{I}$ in time $O(2np + \frac{n(n-1)}{2})$.
+    Let $\mathcal{I}=(S,p)$ be an instance of the String Partitioning problem with $S=a_1a_2\dots a_n$. An optimal solution of $r(\mathcal{I})$ can be used to compute an optimal solution of $\mathcal{I}$ in time $O(2np + \frac{n(n-1)}{2})$.
 \end{theorem}
-
 \begin{proof}
     Let $\mathcal{I} = (S, p)$ be an instance of the String Partitioning problem. We assume $p \leq |\Sigma_S|$ where $\Sigma_S$ is the set of unique characters in $S$, per \cref{claim:p_greater_than_alphabet_size}. Let $G$ be the bipartite graph of instance $r(\mathcal{I})$. We will demonstrate a bijection between the set of valid partitions of $S$ (see \cref{def:valid_partition}) and the set of perfect matchings in $G$, such that the cost of a partition equals the weight of its corresponding perfect matching.
 
@@ -456,7 +557,7 @@ Now we introduce the main theorem for the reduction.
     Let $\Pi = \{S_1, \dots, S_p\}$ be a valid partition of $S$. We construct a perfect matching $M_\Pi$ by converting each subsequence $S_k \in \Pi$ into a path in $G$. Let the ordered indices of $S_k$ be $i_{k,1} < i_{k,2} < \dots < i_{k,l_k}$. The corresponding path in $G$ is formed by the following edges:
     \begin{itemize}[leftmargin=25pt]
         \item A \textbf{start edge} $(s_k, v_{i_{k,1}})$. This edge exists because all source nodes are connected to all nodes in $\treeset{2}$.
-        \item A set of \textbf{middle edges} $(u_{i_{k,j}}, v_{i_{k,j+1}})$ for $j=1, \dots, l_k-1$. These edges exist because the order preservation property of a valid partition ensures $i_{k,j} < i_{k,j+1}$, and our graph construction connects $u_i \in \treeset{1}$ to $v_j \in \treeset{2}$ for all $i < j$.
+        \item A set of \textbf{middle edges} $(u_{i_{k,j}}, v_{i_{k,j+1}})$ for $j=1, \dots, l_k-1$. These edges exist because the order preservation property of a valid partition ensures $i_{k,j} < i_{k,j+1}$, and our graph construction connects $u_i \in \treeset{1}$ to all nodes $v_j \in \treeset{2}$ such that $j > i$.
         \item An \textbf{end edge} $(u_{i_{k,l_k}}, d_k)$. This edge exists because all nodes in $\treeset{1}$ are connected to all destination nodes.
     \end{itemize}
     Since every character of $S$ belongs to exactly one subsequence, this process uses every node in $\treeset{1}$ and $\treeset{2}$ exactly once. By assigning each of the $p$ paths to a unique source $s_k$ and a unique destination $d_k$, we ensure that all source and destination nodes are also used exactly once. Therefore, the resulting set of edges $M_\Pi$ constitutes a perfect matching. The weight of a matching is given by:
@@ -464,18 +565,80 @@ Now we introduce the main theorem for the reduction.
         W(M) &= \sum_{(u,v) \in M} w(u,v) \\
         &= p + |\{ (u_i, u_j) \in M \mid u_i \in \treeset{1}, u_j \in \treeset{2}, S[i] \neq S[j] \}|
     \end{align*}
-    where $p$ represents the contribution from the source nodes $s_i$, as each source node must be connected with weight 1 to start a chain. A class change occurs exactly when a path in the matching uses a weight-1 edge between tree nodes.
+    where $p$ represents the contribution from the source nodes $s_i$, as each source node must be connected with weight 1 to start a chain. A run change occurs exactly when a path in the matching uses a weight-1 edge between two nodes.
     Therefore, $W(M_\Pi)$ is exactly equal to the total number of runs of the partition defined by the matching $M_\Pi$.
 
-    Conversely, let $M$ be a perfect matching in $G$. The structure of $G$ ensures that $M$ consists of $p$ disjoint paths starting from source nodes $\{s_1, \dots, s_p\}$ and ending at destination nodes $\{d_1, \dots, d_p\}$. From \cref{def:partition_decomposition} we know that each path defines a valid subsequence $S_k$ in $S$. By \cref{lemma:greater_nodes}, the node order within these chains is consistent with characters order in $S$. Thus, $M$ maps to a valid partition of $S$. The cost of this partition is equal to $W(M)$.
+    Conversely, let $M$ be a perfect matching in $G$. The structure of $G$ ensures that $M$ consists of $p$ disjoint paths starting from source nodes $\{s_1, \dots, s_p\}$ and ending at destination nodes $\{d_1, \dots, d_p\}$. From \cref{def:partition_decomposition} we know that each path defines a valid subsequence $S_k$ in $S$. By \cref{lemma:greater_nodes}, the node order within these chains is consistent with the order in $S$. Thus, $M$ maps to a valid partition of $S$. The cost of this partition is equal to $W(M)$.
 
     The construction of the graph $G$ takes time proportional to its number of edges. As established in \cref{thm:bip_graph_properties}, $G$ has $O(2np + \frac{n(n-1)}{2})$ edges. Therefore, finding a minimum weight perfect matching in $G$ allows us to solve the String Partitioning Problem for $\mathcal{I}$ in time polynomial in the input size.
 \end{proof}
+\end{comment}
+
+In the following example, we show how a perfect matching can be used to retrieve a partition.
+\begin{example}
+    Consider the example in \cref{fig:example_bipartite_read}, which shows a perfect matching for the instance $r(\mathcal{I})$ with $\mathcal{I}=(S=\text{AAB}, p=2)$. The solid arrows represent the edges of the matching $M$. The dashed arrows are a visual aid showing the correspondence between a character's representation in $\treeset{2}$ (on the right) and its representation in $\treeset{1}$ (on the left), which is essential for tracing the paths.
+
+    We extract two substrings:
+
+    \begin{itemize}
+        \item \textbf{Substring 1 (red):}
+        \begin{enumerate}
+            \item Start at source $s_1$. The matching edge is $(s_1, v_1)$, where $v_1$ corresponds to the first character, $S_1 = \text{A}$. The subsequence is now ``A''.
+            \item Following the conceptual link to $u_1$, we find the matching edge $(u_1, v_2)$, where $v_2$ corresponds to the second character, $S_2 = \text{A}$. The subsequence is now ``AA''.
+            \item Following the link to $u_2$, we find the matching edge $(u_2, d_1)$. Since $d_1$ is a destination node, the path terminates.
+            \item The final subsequence is $S_1 = \text{'AA'}$.
+        \end{enumerate}
+
+        \item \textbf{Substring 2 (blue):}
+        \begin{enumerate}
+            \item Start at source $s_2$. The matching edge is $(s_2, v_3)$, where $v_3$ corresponds to the third character, $S_3 = \text{B}$. The subsequence is ``B''.
+            \item Following the link to $u_3$, we find the matching edge $(u_3, d_2)$. Since $d_2$ is a destination, the path terminates.
+            \item The final subsequence is $S_2 = \text{B}$.
+        \end{enumerate}
+    \end{itemize}
+    This example illustrates how the procedure correctly reconstructs the two substrings from the perfect matching, yielding the partition $\Pi = \{\text{AA}, \text{B}\}$.
+    \begin{figure}[H]
+        \centering
+        \tikzset{main/.style = {draw, circle, thick, minimum size=8mm, inner sep=0pt}}
+        \begin{tikzpicture}[node distance=10mm, auto=center]
+            \tikzstyle{main} = [circle, draw, minimum size=0.8cm, font=\small]
+            \tikzstyle{source} = [circle, draw, minimum size=0.8cm, font=\small, fill=green!20]
+            \tikzstyle{dest} = [circle, draw, minimum size=0.8cm, font=\small, fill=blue!20]
+
+            % Left column (original destinations)
+            \node[source] (1s) {$s_1$};
+            \node[source] (2s) [below of=1s] {$s_2$};
+            \node[main] (7s) [below of=2s] {A};
+            \node[main] (8s) [below of=7s] {A};
+            \node[main] (9s) [below of=8s] {B};
+
+            % Right column (bipartite graph destinations)
+            \node[main] (5d) [right=2.5cm of 7s] {A};
+            \node[main] (7d) [below of=5d] {A};
+            \node[main] (6d) [below of=7d] {B};
+            \node[dest] (8d) [below of=6d] {$d_1$};
+            \node[dest] (9d) [below of=8d] {$d_2$};
+
+            % Arrows
+            \draw[red, ->] (1s) -- (5d);
+            \draw[red, ->] (7s) -- (7d);
+            \draw[red, ->] (8s) -- (8d);
+            \draw[red, dashed, ->] (5d) -- (7s);
+            \draw[red, dashed, ->] (7d) -- (8s);
+
+            \draw[blue, ->] (2s) -- (6d);
+            \draw[blue, ->] (9s) -- (9d);
+            \draw[blue, dashed, ->] (6d) -- (9s);
+        \end{tikzpicture}
+        \caption{An example of a perfect matching (solid lines) in the constructed bipartite graph. The matching defines a partition into two paths (red and blue), which are traced by following the solid and dashed arrows.}
+        \label{fig:example_bipartite_read}
+    \end{figure}
+\end{example}
 
 \begin{example} \label{ex:reduction_ex}
     Let's apply the reduction to the string $S = \text{ABCDDCBDDDD}$ from our running example (\cref{ex:string_example}), with a target of $p=2$ subsequences. In \cref{fig:reduction_example} we have one of the possible minimum perfect matchings for the instance having weight $5$. 
     
-    By applying the partition decomposition procedure (\cref{def:partition_decomposition}) to this matching, we can trace the two paths from the source nodes to the destination nodes to obtain the following optimal partition:
+    We can trace the two paths from the source nodes to the destination nodes to obtain the following optimal partition:
     \begin{itemize}
         \item \textbf{Subsequence 1:} The path starting from $s_1$ traces the characters corresponding to indices (1, 3, 6, 7), yielding the subsequence $S_1 = \text{"ACCB"}$. The number of runs is $\text{runs}(S_1) = 3$.
         \item \textbf{Subsequence 2:} The path starting from $s_2$ traces the characters for indices (2, 4, 5, 8, 9, 10, 11), yielding the subsequence $S_2 = \text{"BDDDDDD"}$. The number of runs is $\text{runs}(S_2) = 2$.
@@ -542,3 +705,67 @@ Now we introduce the main theorem for the reduction.
         \label{fig:reduction_example}
     \end{figure}
 \end{example}
+
+\subsection{Future Improvements}
+\label{sec:future_improvements}
+The reduction proposed in this thesis allows us to find an optimal solution for the String Partitioning Problem. However, it requires the construction of a graph with $O(n^2)$ edges, where $n$ is the length of the input string. This is a significant drawback, as it makes the pipeline unfeasible for real-world datasets. 
+
+A more efficient bipartite graph construction is currently under study. The goal is to reduce the number of edges in the graph to $O(np)$, while maintaining the same optimal solution cost as the reduction with $O(n^2)$ edges.
+
+To improve the efficiency of the reduction, we are studying a more sparse construction for the bipartite graph, replacing the dense connection of each node $u_i \in \treeset{1}$ to every node $v_j \in \treeset{2}$ (where $j>i$). Consider an instance $\mathcal{I}=(S,p)$ of the String Partitioning problem. In the refined weighted bipartite graph $G = (V_1 \cup V_2, E, w)$ of $r(\mathcal{I})$, for each node $u_i \in V_1$, we define the edge set as follows:
+\begin{enumerate}
+    \item \textbf{Zero-weight edge:} If there exists $j \in \{i+1, i+2, \ldots, n\}$ such that $S_i = S_j$, then we add edge $(u_i, v_{j'})$ with weight $0$, where
+    $$j' = \min\{j \in \{i+1, i+2, \ldots, n\} : S_i = S_j\}$$
+    
+    \item \textbf{Unit-weight edges:} Let $\mathcal{C}_i = \{c \in \Sigma : c \neq S_i\}$ be the set of characters distinct from $S_i$. For each character $c \in \mathcal{C}_i$, define
+    $$j_c = \min\{j \in \{i+1, i+2, \ldots, n\} : S_j = c\}$$
+    if such $j$ exists. Then we add edges $(u_i, v_{j_c})$ with weight $1$ for the first $p$ distinct characters in $\mathcal{C}_i$.
+\end{enumerate}
+This leads to a graph with $O(np)$ edges, where $n$ is the size of $S$.
+
+\begin{example}
+    Consider the example in \cref{fig:improv_ex}, where $p = 2$. The first node labeled $A$ in $V_1$ is connected to the first node labeled $A$ in $V_2$ with weight $0$. Also, it is connected only to the first $p$ distinct nodes in $V_2$ with weight $1$.
+    \begin{figure}[H]
+        \centering
+        \begin{tikzpicture}[node distance=10mm, auto=center]
+            \tikzstyle{main} = [circle, draw, minimum size=0.8cm, font=\small]
+            \tikzstyle{source} = [circle, draw, minimum size=0.8cm, font=\small, fill=green!20]
+            \tikzstyle{dest} = [circle, draw, minimum size=0.8cm, font=\small, fill=blue!20]
+
+            % Left column (tree nodes)
+            \node (dots_s_top) {\vdots};
+            \node[main] (3s) [below of=dots_s_top] {A};
+            \node[main] (4s) [below of=3s] {B};
+            \node[right=0cm of 4s] {$\cdots$};
+            \node[main] (5s) [below of=4s] {A};
+            \node[right=0cm of 5s] {$\cdots$};
+            \node[main] (6s) [below of=5s] {C};
+            \node[right=0cm of 6s] {$\cdots$};
+            \node[main] (7s) [below of=6s] {A};
+            \node[right=0cm of 7s] {$\cdots$};
+            \node (dots_s_bottom) [below of=7s] {\vdots};
+
+            % Right column (destinations)
+            \node (dots_d_top) [right=2.5cm of dots_s_top] {\vdots};
+            \node[main] (1d) [below of=dots_d_top] {A};
+            \node[left=0cm of 1d] {$\cdots$};
+            \node[main] (2d) [below of=1d] {B};
+            \node[left=0cm of 2d] {$\cdots$};
+            \node[main] (3d) [below of=2d] {A};
+            \node[left=0cm of 3d] {$\cdots$};
+            \node[main] (4d) [below of=3d] {C};
+            \node[left=0cm of 4d] {$\cdots$};
+            \node[main] (5d) [below of=4d] {A};
+            \node[left=0cm of 5d] {$\cdots$};
+            \node (dots_d_bottom) [below of=5d] {\vdots};
+
+            % Arrows
+            \draw[red, ->] (3s) -- (2d);
+            \draw[red, ->] (3s) -- (4d);
+            \draw[green, ->] (3s) -- (3d);
+        \end{tikzpicture}
+        \caption{}
+        \label{fig:improv_ex}
+    \end{figure}
+\end{example}
+

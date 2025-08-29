@@ -11,24 +11,21 @@
 \usepackage{graphicx} % Per includere immagini esterne
 \usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=3cm]{geometry} %impaginazione e margini documento
 \usepackage[fontsize=12pt]{scrextend} %dimensione font
-\usepackage{graphicx}
 \usepackage[parfill]{parskip} % Disabilita l'indentazione dopo essere andati a capo
 % \usepackage[hang,flushmargin]{footmisc} % Disabilita l'indentazione nelle footnotes
 \usepackage{titlesec}
 \usepackage{float}
-\usepackage[font=scriptsize, skip=5pt]{caption} % Spazio tra la caption e l'immagine
-\usepackage[backend=biber, style=numeric, backref=true,defernumbers=true]{biblatex}
+\usepackage[font=small, skip=5pt, justification=centerlast]{caption} % Spazio tra la caption e l'immagine
+\usepackage[backend=biber, style=numeric, backref=true, defernumbers=true]{biblatex}
 \usepackage[immediate]{silence}
 \WarningFilter[temp]{latex}{Command} % silence the warning
 \usepackage{sectsty}
 \DeactivateWarningFilters[temp] % So nothing unrelated gets silenced
 \usepackage{hyperref} % Rende l'indice cliccabile
-\usepackage[justification=centering]{caption} % Per centrare le captions
 \usepackage[bottom]{footmisc} % Posiziona le footnotes alla fine della pagina
 \usepackage{tikz}
 \usepackage{forest}
 \usepackage{tabularx}
-\usepackage{multicol}
 \usepackage{multirow}
 \usepackage{lastpage}
 \usetikzlibrary{
@@ -37,7 +34,6 @@
   arrows.meta,
   calc,
   automata,
-  positioning,
   decorations.pathreplacing,
   tikzmark
 }
@@ -50,6 +46,8 @@
 \usepackage{cleveref}
 \usepackage{xspace}
 \usepackage{enumitem}
+\setlist[itemize]{leftmargin=25pt}
+\setlist[enumerate]{leftmargin=25pt}
 \usepackage{subcaption}
 
 % Algorithms
@@ -58,6 +56,8 @@
 
 \usepackage{csquotes}
 \usepackage[most]{tcolorbox}
+
+\input{macros.tex}
 
 \newtheorem{definition}{Definition}
 \newtheorem{lemma}{Lemma}
@@ -213,12 +213,16 @@
 \
 \newpage
 \input{Capitoli/ProjectIntroduction.tex}
-\input{Capitoli/Reduction.tex}
 \input{Capitoli/Collapsing.tex}
+\input{Capitoli/Reduction.tex}
 \newpage
 \
 \newpage
 \input{Capitoli/Experiments.tex}
+\newpage
+\
+\newpage
+\input{Capitoli/conclusionsAndFutureWork.tex}
 \newpage
 \
 % ----------------------

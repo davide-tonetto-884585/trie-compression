@@ -3,7 +3,7 @@
 \subsection{Introduction and Motivation}
 The fundamental goal of our compression scheme is to transform an input trie into a compressed, $p$-sortable automaton by partitioning its nodes into $p$ chains in an optimal way.
 
-To make this optimization problem more concrete, we can frame it as a string partitioning problem. Imagine the sequence of nodes in the trie, when read in co-lexicographic order, as a single long string. The "character" corresponding to each node is its Myhill-Nerode equivalence class, which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ subsequences such that the number of runs is minimized (consecutive nodes of the same equivalence class are merged into a single "run"). For instance, a subsequence $AAABBA$ contains three runs. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton.
+To make this optimization problem more concrete, we can frame it as a string partitioning problem. Imagine the sequence of nodes in the trie, when read in co-lexicographic order, as a single long string. The ``character'' corresponding to each node is its Myhill-Nerode equivalence class, which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ substrings such that the number of runs is minimized (consecutive nodes of the same MN-equivalence class are merged into a single run). For instance, a subsequence $AAABBA$ contains three runs. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton.
 
 In this sections, we will provide the necessary background on the Minimum Weight Perfect Bipartite Matching (MWPBM) problem, a fundamental challenge in combinatorial optimization. We will then demonstrate in \cref{chp:tree_compression} a formal reduction from our partitioning problem to MWPBM. This reduction is the key to our method, as it allows us to model our problem as a bipartite graph and leverage well-known, efficient algorithms to find the optimal solution for our compression task.
 
@@ -250,6 +250,7 @@ The determinant of the Tutte matrix is useful in testing whether a graph has a p
 \end{proof}
 \end{comment}
 
+\begin{comment}
 \subsection{Hall's Marriage Theorem}
 Hall's Marriage Theorem \cite{hall1935representatives} provides a necessary and sufficient condition for the existence of a matching that saturates an entire partition of a bipartite graph. Specifically, it allows us to determine if there is a matching that includes every vertex from the smaller of the two partitions. In the special case where the partitions are of equal size ($|V_1| = |V_2|$), the theorem gives a condition for the existence of a perfect matching.
 
@@ -269,6 +270,7 @@ For a subset of vertices $W \subseteq V_1$, the \textbf{neighborhood} of $W$, de
 This condition is known as \textbf{Hall's condition}.
 
 In simpler terms, a matching that covers all vertices in $V_1$ exists if and only if every group of vertices chosen from $V_1$ collectively has at least as many neighbors in $V_2$ as there are vertices in the chosen group.
+\end{comment}
 
 \begin{comment}
 \subsection{Problem Formulation}
@@ -324,12 +326,5 @@ There are several algorithms to solve the problem of finding a minimum weight pe
 
 The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denote the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
-In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = n^2 + m$ edges.
+In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = 2n + m$ edges.
 
-\davide{move in experiment chapter (?)}
-\subsection{Implementation}
-To run experiments for the proposed compression scheme, we used a C++ implementation by Vladimir Kolmogorov of the minimum cost perfect matching algorithm described in \cite{kolmogorovBlossomNewImplementation2009}. The implementation is available at \url{https://pub.ista.ac.at/~vnk/software.html}.
-
-In brief, paper \cite{kolmogorovBlossomNewImplementation2009} presents Blossom~V, a practical implementation of Edmonds’ blossom algorithm for computing minimum-cost perfect matchings in undirected weighted graphs. While the theoretical worst-case bounds for the blossom family have steadily improved since Edmonds’ original $O(n^2m)$ algorithm, Blossom~V is designed for strong empirical performance rather than new asymptotic guarantees. It combines two ingredients that had proven effective separately in prior work: the variable $\delta$ (variable dual updates) strategy popularized by Blossom~IV, and systematic use of priority queues to efficiently select minimum-slack edges.
-
-Blossom~V targets general (not necessarily bipartite) graphs, and thus directly applies to our bipartite instances as a special case. In our experiments we use the publicly available Blossom~V implementation as a black-box solver to compute minimum-cost perfect matchings for the graphs generated by our compression pipeline.

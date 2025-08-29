@@ -5,6 +5,7 @@ import os
 from tabnanny import verbose
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from multiprocessing import Pool, cpu_count
 
 
 @dataclass
@@ -403,6 +404,51 @@ class RepetitiveTreeGenerator:
                 print("-" * 30)
 
 
+def generate_single_tree(args: Tuple[int, int, Dict, int, str]) -> Dict:
+    """Worker function to generate a single tree in parallel."""
+    try_num, tries, config_params, seed, output_dir = args
+    
+    # Create generator with the provided seed
+    generator = RepetitiveTreeGenerator(
+        max_branching_factor=config_params['max_branching_factor'],
+        repetition_probability=config_params['repetition_probability'],
+        min_subtree_depth=config_params['min_subtree_depth'],
+        max_subtree_depth=config_params['max_subtree_depth'],
+        alphabet_type=config_params['alphabet_type'],
+        alphabet_size=config_params['alphabet_size'],
+        max_nodes=config_params['max_nodes'],
+        seed=seed
+    )
+    
+    # Generate the tree
+    tree = generator.generate_tree()
+    
+    # Get statistics
+    stats = generator.get_statistics(tree)
+    
+    # Generate balanced parentheses representation
+    parentheses_str = generator.tree_to_balanced_parentheses(tree)
+    
+    # Generate descriptive filename and save
+    filename = generate_filename(config_params)
+    if tries > 1:
+        # Add try number to filename for multiple tries
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_try{try_num:03d}{ext}"
+    
+    filepath = os.path.join(output_dir, filename)
+    generator.save_tree_to_parentheses(tree, filepath)
+    
+    return {
+        'try_num': try_num,
+        'stats': stats,
+        'filepath': filepath,
+        'tree_str': str(tree) if config_params.get('verbose', False) else None,
+        'parentheses_str': parentheses_str if config_params.get('verbose', False) else None,
+        'copy_stats': generator.copy_statistics if config_params.get('verbose', False) else None
+    }
+
+
 def generate_filename(config_params: Dict) -> str:
     """Generate a descriptive filename based on configuration parameters."""
     params = [
@@ -443,6 +489,8 @@ def load_config(config_file: str = "config.ini") -> Dict:
         'alphabet_type': tree_config.get('alphabet_type'),
         'alphabet_size': tree_config.getint('alphabet_size'),
         'seed': tree_config.getint('seed'),
+        'tries': tree_config.getint('tries', 1),
+        'parallel': tree_config.getboolean('parallel', False),
         'output_directory': tree_config.get('output_directory', './generated_trees'),
         'verbose': tree_config.getboolean('verbose'),
         'max_nodes': max_nodes
@@ -472,6 +520,8 @@ def main():
             'alphabet_type': 'letters',
             'alphabet_size': 10,
             'seed': 42,
+            'tries': 1,
+            'parallel': False,
             'output_directory': './generated_trees',
             'verbose': False,
             'max_nodes': 50000
@@ -481,50 +531,111 @@ def main():
     output_dir = config_params['output_directory']
     os.makedirs(output_dir, exist_ok=True)
     
-    # Generate tree with loaded parameters
-    generator = RepetitiveTreeGenerator(
-        max_branching_factor=config_params['max_branching_factor'],
-        repetition_probability=config_params['repetition_probability'],
-        min_subtree_depth=config_params['min_subtree_depth'],
-        max_subtree_depth=config_params['max_subtree_depth'],
-        alphabet_type=config_params['alphabet_type'],
-        alphabet_size=config_params['alphabet_size'],
-        max_nodes=config_params['max_nodes'],
-        seed=config_params['seed']
-    )
+    # Generate trees based on tries parameter
+    tries = config_params['tries']
+    parallel = config_params['parallel']
     
-    # Generate the tree
-    print("Generating tree...")
-    tree = generator.generate_tree()
-    print("Tree generated.")
+    print(f"Generating {tries} tree(s){'in parallel' if parallel and tries > 1 else ''}...")
     
-    if config_params['verbose']:
-        # Display tree information
-        print("Generated Tree:")
-        print(tree)
-        print("\nCopy-Paste Information:")
-        generator.print_copy_statistics()
+    # Generate array of seeds using original seed
+    base_seed = config_params['seed']
+    seeds = []
+    if base_seed is not None:
+        random.seed(base_seed)
+        seeds = [random.randint(0, 2**31 - 1) for _ in range(tries)]
+    else:
+        seeds = [None] * tries
     
-    # Get and display statistics
-    stats = generator.get_statistics(tree)
-    print(f"\nTree Statistics:")
-    print(f"  Total nodes: {stats['total_nodes']}")
-    print(f"  Tree depth: {stats['tree_depth']}")
-    print(f"  Copied subtrees count: {stats['copied_subtrees_count']}")
-    print(f"  Copied nodes count: {stats['copied_nodes_count']}")
-    print(f"  Repetition ratio: {stats['repetition_ratio']:.1%}")
+    if parallel and tries > 1:
+        # Parallel execution
+        print(f"Using parallel processing with {min(cpu_count(), tries)} processes...")
+        
+        # Prepare arguments for parallel processing
+        args_list = [(try_num, tries, config_params, seeds[try_num - 1], output_dir) 
+                    for try_num in range(1, tries + 1)]
+        
+        # Use multiprocessing pool
+        with Pool(processes=min(cpu_count(), tries)) as pool:
+            results = pool.map(generate_single_tree, args_list)
+        
+        # Sort results by try_num and display them
+        results.sort(key=lambda x: x['try_num'])
+        
+        for result in results:
+            try_num = result['try_num']
+            stats = result['stats']
+            filepath = result['filepath']
+            
+            print(f"\n--- Tree {try_num}/{tries} completed ---")
+            print(f"Tree {try_num} Statistics:")
+            print(f"  Total nodes: {stats['total_nodes']}")
+            print(f"  Tree depth: {stats['tree_depth']}")
+            print(f"  Copied subtrees count: {stats['copied_subtrees_count']}")
+            print(f"  Copied nodes count: {stats['copied_nodes_count']}")
+            print(f"  Repetition ratio: {stats['repetition_ratio']:.1%}")
+            print(f"Tree {try_num} saved to: {filepath}")
+            
+            if config_params['verbose'] and result['tree_str']:
+                print(f"Generated Tree {try_num}:")
+                print(result['tree_str'])
+                print(f"\nBalanced Parentheses String: {result['parentheses_str']}")
     
-    # Generate balanced parentheses representation
-    parentheses_str = generator.tree_to_balanced_parentheses(tree)
-    if config_params['verbose']:
-        print(f"\nBalanced Parentheses String: {parentheses_str}")
+    else:
+        # Sequential execution (original logic)
+        for try_num in range(1, tries + 1):
+            print(f"\n--- Generating tree {try_num}/{tries} ---")
+            
+            # Use pre-generated seed for this try
+            seed = seeds[try_num - 1]
+            
+            generator = RepetitiveTreeGenerator(
+                max_branching_factor=config_params['max_branching_factor'],
+                repetition_probability=config_params['repetition_probability'],
+                min_subtree_depth=config_params['min_subtree_depth'],
+                max_subtree_depth=config_params['max_subtree_depth'],
+                alphabet_type=config_params['alphabet_type'],
+                alphabet_size=config_params['alphabet_size'],
+                max_nodes=config_params['max_nodes'],
+                seed=seed
+            )
+            
+            # Generate the tree
+            tree = generator.generate_tree()
+            print(f"Tree {try_num} generated.")
+            
+            if config_params['verbose']:
+                # Display tree information
+                print(f"Generated Tree {try_num}:")
+                print(tree)
+                print("\nCopy-Paste Information:")
+                generator.print_copy_statistics()
+            
+            # Get and display statistics
+            stats = generator.get_statistics(tree)
+            print(f"Tree {try_num} Statistics:")
+            print(f"  Total nodes: {stats['total_nodes']}")
+            print(f"  Tree depth: {stats['tree_depth']}")
+            print(f"  Copied subtrees count: {stats['copied_subtrees_count']}")
+            print(f"  Copied nodes count: {stats['copied_nodes_count']}")
+            print(f"  Repetition ratio: {stats['repetition_ratio']:.1%}")
+            
+            # Generate balanced parentheses representation
+            parentheses_str = generator.tree_to_balanced_parentheses(tree)
+            if config_params['verbose']:
+                print(f"\nBalanced Parentheses String: {parentheses_str}")
+            
+            # Generate descriptive filename and save
+            filename = generate_filename(config_params)
+            if tries > 1:
+                # Add try number to filename for multiple tries
+                name, ext = os.path.splitext(filename)
+                filename = f"{name}_try{try_num:03d}{ext}"
+            
+            filepath = os.path.join(output_dir, filename)
+            generator.save_tree_to_parentheses(tree, filepath)
+            print(f"Tree {try_num} saved to: {filepath}")
     
-    # Generate descriptive filename and save
-    filename = generate_filename(config_params)
-    filepath = os.path.join(output_dir, filename)
-    
-    generator.save_tree_to_parentheses(tree, filepath)
-    print(f"\nTree saved to: {filepath}")
+    print(f"\nAll {tries} tree(s) generated successfully!")
 
 
 if __name__ == "__main__":

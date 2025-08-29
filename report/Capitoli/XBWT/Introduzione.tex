@@ -2,7 +2,11 @@
 The fundamental definitions, properties, and algorithms related to the Extended Burrows-Wheeler Transform presented in this chapter are based on the work introduced by Ferragina et al.~`Compressing and Indexing Labeled Trees, with Applications'~\cite{ferragina2009compressing}.
 
 \subsection{Introduction and Motivation}
-This chapter explores the Extended Burrows-Wheeler Transform (XBWT), introduced by Ferragina et al.~\cite{ferragina2009compressing}, a state of the art technique for labeled tree compression. Understanding the principles and performance of the XBWT is crucial as it will serve as the primary benchmark against which we will evaluate the novel compression scheme proposed in this thesis. By establishing a baseline with a well-regarded method like the XBWT, we can effectively demonstrate the potential advantages and contributions of our new approach, particularly for trees exhibiting high repetitiveness.
+This chapter explores the Extended Burrows-Wheeler Transform (XBWT), introduced by Ferragina et al.~\cite{ferragina2009compressing}, a state-of-the-art technique for labeled tree compression. Our interest in the XBWT has many reasons.
+
+First, it provides a powerful theoretical foundation for indexing labeled trees and tries. Tries are a special case of a broader class of graphs known as Wheeler graphs, and the XBWT can be understood as a compressed index specifically for this special case. This context is crucial, as the work of Cotumaccio et al.~\cite{cotumaccio2021indexing} later generalized the principles of the XBWT to the larger class of p-sortable graphs.
+
+Second, the XBWT serves as the primary benchmark against which we will evaluate the novel compression scheme proposed in this thesis. By establishing a baseline with a well-regarded and theoretically significant method like the XBWT, we can effectively demonstrate the potential advantages and contributions of our new approach, particularly for trees exhibiting high repetitiveness.
 
 In 2005, Ferragina et al.~\cite{ferragina2009compressing} introduced an innovative approach to labeled tree compression by transforming it into a more tractable string compression problem. Their key contribution, the Extended Burrows-Wheeler Transform (XBWT), is a sophisticated data structure that achieves highly efficient compression by combining entropy-compressed edge labels with a succinct representation of the tree topology. This elegant solution not only simplifies the compression process but also maintains the structural relationships essential for tree operations.
 

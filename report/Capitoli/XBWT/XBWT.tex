@@ -7,7 +7,7 @@ The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to 
     \begin{itemize}
         \item $last(u)$: a binary value that is 1 if $u$ is the last (rightmost) child of its parent in the total order, and 0 otherwise.
         \item $\alpha(u)$: denotes the label of node $u$ concatenated with one bit that is 1 if $u$ is a leaf and 0 otherwise.
-        \item $\pi(u)$: the string obtained by concatenating the labels of the nodes on the \textsc{upward path} from $u$'s parent to the root of $T$. Formally, we define $\pi(u)$ recursively as:
+        \item $\pi(u)$: the string obtained by concatenating the labels of the nodes on the upward path from $u$'s parent to the root of $T$. Formally, we define $\pi(u)$ recursively as:
         \begin{align*}
             \pi(u) = \begin{cases}
                 \varepsilon & \text{if u is the root} \\

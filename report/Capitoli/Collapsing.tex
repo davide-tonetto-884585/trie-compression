@@ -1,38 +1,44 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
-The next crucial step of our compression scheme is to reduce the space required by each chain by collapsing equivalent nodes. Specifically, any sequence of consecutive nodes within the same chain that belong to the same equivalence class is merged into a single representative node. This new node preserves the connectivity of the original structure by inheriting all distinct outgoing and ingoing edges from the nodes it replaces. In the following subsections we will introduce the concept of non-deterministic finite automaton and define how nodes are collapsed in a chain. Then, we prove that this transformation is language-preserving (see \cref{lemma:collapsing_equivalence}).
+This chapter introduces a crucial optimization technique called \textbf{node collapsing}, designed to reduce the size of the trie. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original tree. Within these subsequences, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill-Nerode equivalence class.
+
+The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation simplifies the graph structure while preserving its essential connectivity. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
+
+In the following sections, we will formally define the collapsing procedure and then rigorously prove that this transformation is language-preserving (\cref{lemma:collapsing_equivalence}), guaranteeing the correctness of our compression scheme.
 
 \subsection{How to Collapse Nodes}
-Now, we define the concept of collapsing consecutive equivalent nodes in a chain.
-\begin{definition}[Collapsing consecutive equivalent nodes]
-    \label{def:collapsing}
-    Let $V$ be the set of nodes of the tree, let $\Sigma$ be the alphabet, and let $E \subseteq V \times \Sigma \times V$ be the set of labeled edges.
-    Let $\mathcal{P} = \{C_1, C_2, \ldots, C_m\}$ be the set of all chains partitioning $V$.
-    
-    For each chain $C_i = (u_1^{(i)}, u_2^{(i)}, \ldots, u_{n_i}^{(i)}) \in \mathcal{P}$, partition it into maximal consecutive blocks $B_1^{(i)}, \ldots, B_{k_i}^{(i)}$, where each block $B_t^{(i)} = (u_j^{(i)}, \ldots, u_\ell^{(i)})$ satisfies $\equivsetfunc{u_r^{(i)}} = \equivsetfunc{u_s^{(i)}}$ for all $r,s \in \{j,\ldots,\ell\}$, and the block is maximal (cannot be extended).
+Now, we define the concept of collapsing two consecutive MN-equivalent nodes in a subsequence.
+\begin{definition}[Collapsing Two MN-equivalent States]
+    \label{def:collapsing_pair}
+    Let $A = (Q, \Sigma, \delta, q_0, F)$ be the ADFA corresponding to the trie structure we are compressing. The operation \textbf{collapse(u, v)} is defined for two states $u, v \in Q$ if and only if they are consecutive in a subsequence and are MN-equivalent.
 
-    The collapsed chain is $C_i' = (v_1^{(i)}, \ldots, v_{k_i}^{(i)})$, where each block $B_t^{(i)}$ is replaced by a single node $v_t^{(i)}$.
-    
-    Define the global collapse map $\Phi: V \to V'$ where $V' = \bigcup_{i=1}^m C_i'$, such that $\Phi(u) = v_t^{(i)}$ if $u \in B_t^{(i)}$ for some chain $C_i$ and block $B_t^{(i)}$.
-    
-    Then:
-    \begin{itemize}[leftmargin=25pt]
-        \item Two consecutive nodes $u_j^{(i)}, u_{j+1}^{(i)} \in C_i$ are collapsed into the same node if and only if $\equivsetfunc{u_j^{(i)}} = \equivsetfunc{u_{j+1}^{(i)}}$.
-        \item The edge set after collapsing all chains is
+    This operation transforms $A$ into a new automaton $A'=(Q', \Sigma, \delta', q_0', F')$ as follows:
+    \begin{enumerate}[leftmargin=25pt]
+        \item \textbf{State Merging:} A new state $w$ is created to replace $u$ and $v$. The new set of states is $Q' = (Q \setminus \{u, v\}) \cup \{w\}$.
+        \item \textbf{Transition Redirection:} Let $\phi: Q \to Q'$ be a state mapping function defined as follows:
         \[
-            E' \;=\; \{\, (\Phi(x), a, \Phi(y)) \;:\; (x,a,y) \in E \,\},
+            \phi(z) = 
+            \begin{cases} 
+                w & \text{if } z \in \{u, v\} \\
+                z & \text{otherwise}
+            \end{cases}
         \]
-        where parallel duplicates are removed (i.e., $E'$ is treated as a set).
-    \end{itemize}
+        
+        We treat $\delta$ as a set of triples of the form $(q, a, r)$, where $q$ is the source state, $a$ is the transition label, and $r$ is the destination state. The new transition function $\delta': Q' \times \Sigma \to Q'$ is then formed by applying this mapping to the source and destination states of every transition in $\delta$:
+        \[
+            \delta' = \{ (\phi(q), a, \phi(r)) \mid (q, a, r) \in \delta \}
+        \]
+        \item \textbf{Initial and Final States:} The new initial state is $q_0' = \phi(q_0)$, and the new set of final states is $F' = \{ \phi(f) \mid f \in F \}$.
+    \end{enumerate}
 \end{definition}
 
 \begin{example}
-    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree ADFA in \cref{fig:example_ADFA} by applying the reduction from \textsc{Chain-Division} to \textsc{MWPBM}. The nodes inside each chain are the following:
+    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree ADFA in \cref{fig:example_ADFA} by applying the reduction from String Partitioning to MWPBM. The nodes inside each chain are the following:
     \begin{itemize}
         \item $C_1 = \{a,d,f,c\}$
         \item $C_2 = \{b,h,l,e,i,m,g\}$
     \end{itemize}
     
-    Applying the collapsing operation from \cref{def:collapsing}:
+    Applying the collapsing operation from \cref{def:collapsing_pair}:
     \begin{itemize}
         \item For $C_1 = (a,d,f,c)$ with classes $(A,C,C,B)$: 
         \begin{itemize}
@@ -59,7 +65,7 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
         Result: $C_2' = (w_1, w_2)$ with classes $(B,D)$, and $w_2$ is the unique accepting state for this example.
     \end{itemize}
     
-    The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting NFA is shown in \cref{fig:minimized_chains}.
+    The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting $2$-sortable automaton is shown in \cref{fig:minimized_chains}.
 
     \begin{figure}[H]
         \centering
@@ -83,95 +89,26 @@ Now, we define the concept of collapsing consecutive equivalent nodes in a chain
                 (w1) edge [bend left] node {0} (v2)
                     edge [bend right] node[below] {1} (w2);
         \end{tikzpicture}
-        \caption{NFA obtained after collapsing equivalent nodes in chains $C_1$ and $C_2$.}
+        \caption{$2$-sortable automaton obtained after collapsing equivalent nodes in chains $C_1$ and $C_2$.}
         \label{fig:minimized_chains}
     \end{figure} 
 \end{example}
 
 \subsection{Language Equivalence}
-Now, we need to prove that the language recognized by the NFA obtained after collapsing equivalent nodes in chains following \cref{def:collapsing} is equivalent to the language of the original tree ADFA. We define the language of an NFA or ADFA $F$ as $L(F)$.
-
-\begin{lemma}[Root forms a singleton class under Revuz]
-    \label{lemma:root_singleton}
-    In a tree ADFA minimized by Revuz’s algorithm (\cref{sec:revuz}), the root forms a singleton equivalence class.
-\end{lemma}
-\begin{proof}
-    Let $T$ be a tree ADFA, let $r$ be its root, and let $D = h(r)$ be its height as in \cref{def:height}. For every other node $u \neq r$ at depth $k \ge 1$, we have $h(u) \le D - k < D$. Hence $r$ is the unique state in the level $\Pi_D$. Since Revuz’s algorithm partitions by height and refines within each level, $r$ cannot be merged with any other state and thus forms its own equivalence class.
-\end{proof}
-
-\begin{lemma}[All leaves fall into the same class under Revuz]
-    \label{lemma:all_leaves_same_class}
-    In a tree ADFA minimized by Revuz’s algorithm, all leaves belong to the same equivalence class.
-\end{lemma}
-\begin{proof}
-    Every leaf $\ell$ is final and has no outgoing transitions, so $h(\ell) = 0$. In the base step on level $\Pi_0$, the label of a state depends only on its finality and on transitions to already distinguished classes. All leaves share the same label (final, no outgoing transitions), hence they are merged into a single equivalence class in $\Pi_0$.
-\end{proof}
+Now, we need to prove that the language recognized by the $p$-sortable automaton obtained after collapsing two MN-equivalent nodes following \cref{def:collapsing_pair} is equivalent to the language of the original ADFA.
 
 \begin{lemma}
-    \label{lemma:collapsing_equivalence}
-    Let $T$ be a tree ADFA with alphabet $\Sigma$. Let $C_1, C_2, \ldots, C_m$ be the chains partitioning $T$ as defined in \cref{def:problem_def}. Let $N$ be the NFA obtained after collapsing equivalent nodes in chains $C_1, C_2, \ldots, C_m$ as defined in \cref{def:collapsing}. Then, $L(N) = L(T)$.
+Let $M=(Q,\Sigma,\delta,q_0,F)$ be an automaton recognizing $L \subseteq \Sigma^*$.
+If two states $p,q \in Q$ correspond to the same Myhill--Nerode class for $L$ (i.e., for all $w\in\Sigma^*$ we have $\delta(p,w)\in F \iff \delta(q,w)\in F$), then merging $p$ and $q$ into a single state yields an automaton (possibly nondeterministic) that still recognizes exactly $L$.
 \end{lemma}
 
 \begin{proof}
-    We prove the equality $L(N) = L(T)$ by showing both inclusions $L(T) \subseteq L(N)$ and $L(N) \subseteq L(T)$.
-
-    \textbf{($L(T) \subseteq L(N)$):} Let $w \in L(T)$. Then there exists an accepting path in $T$ from the root to some accepting state:
-    \[
-        q_0 \xrightarrow{a_1} q_1 \xrightarrow{a_2} q_2 \xrightarrow{a_3} \cdots \xrightarrow{a_n} q_n
-    \]
-    where $q_0$ is the root, $q_n$ is accepting, and $w = a_1a_2\ldots a_n$.
-
-    By \cref{def:collapsing}, each node $q_i$ in the original tree is mapped to a collapsed node $\Phi(q_i)$ in $N$. Since the collapse map preserves all edges (by the definition of $E'$), there exists a corresponding path in $N$:
-    \[
-        \Phi(q_0) \xrightarrow{a_1} \Phi(q_1) \xrightarrow{a_2} \Phi(q_2) \xrightarrow{a_3} \cdots \xrightarrow{a_n} \Phi(q_n)
-    \]
-    Since $q_0$ is the root of $T$, by \cref{lemma:root_singleton} its image $\Phi(q_0)$ is the unique initial state of $N$. Since $q_n$ is accepting in $T$, by \cref{lemma:all_leaves_same_class} its image $\Phi(q_n)$ lies in the unique leaf class, which is marked accepting in $N$. Hence, $w \in L(N)$.
-
-    \textbf{($L(N) \subseteq L(T)$):} Let $w \in L(N)$. Then there exists an accepting path in $N$:
-    \[
-        v_0 \xrightarrow{a_1} v_1 \xrightarrow{a_2} v_2 \xrightarrow{a_3} \cdots \xrightarrow{a_n} v_n
-    \]
-    where $v_0$ is the initial state, $v_n$ is accepting, and $w = a_1a_2\ldots a_n$.
-
-    Each collapsed node $v_i$ corresponds to some block $B_t^{(j)}$ in the original tree. By \cref{def:collapsing}, every edge $(v_{i-1}, a_i, v_i)$ in $N$ corresponds to at least one edge $(u, a_i, u')$ in the original tree $T$, where $\Phi(u) = v_{i-1}$ and $\Phi(u') = v_i$.
-
-    Since the chains preserve the ordering from the original tree structure, we can construct a valid path in $T$ by selecting appropriate representatives from each collapsed block. Specifically, we can choose nodes $u_0, u_1, \ldots, u_n$ in $T$ such that $\Phi(u_i) = v_i$ and $(u_{i-1}, a_i, u_i) \in E$ for all $i = 1, \ldots, n$.
-
-    Since $v_0$ corresponds to the root block and $v_n$ is accepting, for \cref{lemma:root_singleton,lemma:all_leaves_same_class} we have $u_0$ as the root and $u_n$ as an accepting state in $T$ respectively. Therefore, $w \in L(T)$.
-
-    Thus, $L(N) = L(T)$.
-\end{proof}
-
-Collapsing the nodes as in \cref{def:collapsing} preserves the language of the original tree ADFA and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}, which we present in the next chapter.
-
-\begin{theorem}[Myhill--Nerode]
-Let $L \subseteq \Sigma^*$ and define the indistinguishability relation
-\[
-x \sim_L y \;\Longleftrightarrow\; \forall z \in \Sigma^*,\; xz \in L \iff yz \in L .
-\]
-Then:
-\begin{enumerate}
-    \item $\sim_L$ is an equivalence relation on $\Sigma^*$.
-    \item $L$ is regular iff $\sim_L$ has finitely many equivalence classes.
-    \item The states of the minimal DFA for $L$ are in one-to-one correspondence with the equivalence classes of $\sim_L$.
-    \item $L$ is exactly the union of those equivalence classes that intersect $L$:
-    \[
-        L \;=\; \bigcup \{ [x]_{\sim_L} \mid x \in L \}.
-    \]
-\end{enumerate}
-\end{theorem}
-
-\begin{lemma}
-Let $M=(Q,\Sigma,\delta,q_0,F)$ be a DFA recognizing $L \subseteq \Sigma^*$.
-If two states $p,q \in Q$ correspond to the same Myhill--Nerode class for $L$ (i.e., for all $w\in\Sigma^*$ we have $\delta(p,w)\in F \iff \delta(q,w)\in F$),
-then merging $p$ and $q$ into a single state yields an automaton (possibly nondeterministic) that still recognizes exactly $L$.
-\end{lemma}
-
-\begin{proof}
-By the Myhill--Nerode theorem, every state of $M$ corresponds to a unique equivalence class of $\sim_L$, and $L$ is exactly the union of those classes that intersect $L$.
+By the Myhill-Nerode theorem, every state of $M$ corresponds to a unique equivalence class of $\sim_L$, and $L$ is exactly the union of those classes that intersect $L$.
 If $p$ and $q$ belong to the same equivalence class, then for every continuation $z \in \Sigma^*$ we have
 \[
 \delta(p,z) \in F \iff \delta(q,z) \in F.
 \]
 Thus replacing $p$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore merging $p$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
 \end{proof} 
+
+Collapsing two MN-equivalent nodes as in \cref{def:collapsing_pair} preserves the language of the original ADFA and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}.

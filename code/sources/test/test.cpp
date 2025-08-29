@@ -11,9 +11,9 @@
 
 int main()
 {
-    bool verbose = true, from_file = false;
+    bool verbose = false, from_file = true;
 
-    std::string filename = "tree_generator/generated_trees/tree_bf3_rp40_sd3-8_letters8_mn100000_s42.txt";
+    std::string filename = "tree_generator/generated_trees/low/tree_bf26_rp10_sd3-20_letters26_mn100000_s42_try001.txt";
     std::string str = "(1(0(0(0)(1))(1))(1(0(0)(1))(1)))";
 
     if (from_file)
@@ -76,11 +76,11 @@ int main()
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "Node order computed in " << duration.count() << " ms" << std::endl;
 
-    uint16_t p = 2;
+    uint16_t p = 20;
 
     std::cout << "Building bipartite graph..." << std::endl;
     auto start_construction = std::chrono::high_resolution_clock::now();
-    ChainsDivisionSolver solver(tree_dawg, node_order, p, verbose);
+    ChainsDivisionSolver solver(tree_dawg, node_order, p, true, verbose);
     auto end_construction = std::chrono::high_resolution_clock::now();
     auto construction_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_construction - start_construction);
     std::cout << "Construction time: " << construction_time.count() << " ms" << std::endl;
@@ -92,27 +92,31 @@ int main()
     auto solving_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_solving - start_solving);
     std::cout << "Solving time: " << solving_time.count() << " ms" << std::endl;
 
-    if (verbose)
+    uint64_t tot_cost = 0;
+    uint64_t max_class = 0;
+    for (uint64_t i = 0; i < p; i++)
     {
-        uint64_t tot_cost = 0;
-        for (uint64_t i = 0; i < p; i++)
-        {
+        if (verbose)
             std::cout << "Chain " << i << " classes: ";
-            uint64_t prev_class = UINT64_MAX;
-            for (uint64_t j : chains[i])
-            {
+        uint64_t prev_class = UINT64_MAX;
+        for (uint64_t j : chains[i])
+        {
+            if (verbose)
                 std::cout << tree_dawg[j].get_equivalence_class() << " ";
-                if (prev_class != tree_dawg[j].get_equivalence_class())
-                    ++tot_cost;
+            if (prev_class != tree_dawg[j].get_equivalence_class())
+                ++tot_cost;
+            if (max_class < tree_dawg[j].get_equivalence_class())
+                max_class = tree_dawg[j].get_equivalence_class();
 
-                prev_class = tree_dawg[j].get_equivalence_class();
-            }
-
-            std::cout << std::endl;
+            prev_class = tree_dawg[j].get_equivalence_class();
         }
 
-        std::cout << "Total cost: " << tot_cost << std::endl;
+        if (verbose)
+            std::cout << std::endl;
     }
+
+    std::cout << "Total cost: " << tot_cost << std::endl;
+    std::cout << "Max class: " << max_class << std::endl;
 
     std::cout << "Compressing tree..." << std::endl;
     TreeCompressor<char> compressor(tree_dawg, chains, verbose);

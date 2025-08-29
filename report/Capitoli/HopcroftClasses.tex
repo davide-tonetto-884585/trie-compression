@@ -248,7 +248,8 @@ Sorting states by their signature again is done by a lexicographic sort \cite{be
         \item \textbf{Processing $\Pi_3$:} Finally, we process $\Pi_3$, which contains only state $a$. There is nothing to compare it with, so it forms its class, $A = \{a\}$.
     \end{enumerate}
 
-    After applying the algorithm, we obtain the minimized ADFA represented in figure \cref{fig:example_minimized_ADFA}. Each node of the original ADFA is represented by a node in the minimized ADFA (equivalence classes). The edges represent transitions between these nodes. The root node $A$ is the initial state of the minimized ADFA, while the node $D$ is the final state.
+    After applying the algorithm, we obtain the minimized ADFA represented in \cref{fig:example_minimized_ADFA}. Each node of the original ADFA is represented by a node in the minimized ADFA (equivalence classes). The edges represent transitions between these nodes. The root node $A$ is the initial state of the minimized ADFA, while the node $D$ is the final state.
+    
     \begin{figure}[H]
         \centering
         \begin{tikzpicture}[->, >=stealth, node distance=3cm, on grid, auto]
@@ -268,19 +269,22 @@ Sorting states by their signature again is done by a lexicographic sort \cite{be
         \label{fig:example_minimized_ADFA}
     \end{figure}      
 
-    The equivalence classes of the nodes are listed in table \cref{tab:equivalence_classes}.
-    \begin{center}
+    The equivalence classes of the nodes are listed in \cref{tab:equivalence_classes}.
+    
+    \begin{table}[H]
+        \centering
         \begin{tabular}{|c|l|}
-        \hline
-        \textbf{Class} & \textbf{States} \\
-        \hline
-        A & $a$ \\
-        B & $b, c$ \\
-        C & $d, f$ \\
-        D & $e, g, h, i, l, m$ \\
-        \hline
+            \hline
+            \textbf{Class} & \textbf{States} \\
+            \hline
+            A & $a$ \\
+            B & $b, c$ \\
+            C & $d, f$ \\
+            D & $e, g, h, i, l, m$ \\
+            \hline
         \end{tabular}
-        \captionof{table}{Equivalence classes of the nodes}
+        \caption{Equivalence classes of the nodes}
         \label{tab:equivalence_classes}
-    \end{center}
+    \end{table}
 \end{example}
+ 
