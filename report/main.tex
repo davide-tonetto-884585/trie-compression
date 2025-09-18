@@ -2,7 +2,7 @@
 % ---- DECLARE PACKAGES ----
 % --------------------------
 \documentclass[a4paper, oneside, openright]{book}
-\usepackage[T1]{fontenc} % Font encoding, T1 = it
+\usepackage{fontenc} % Font encoding, T1 = it
 \usepackage{lmodern}
 \usepackage{multicol} % Per il frontespizio
 \usepackage[utf8]{inputenc} % Input encoding - per caratteri particolari
@@ -22,6 +22,7 @@
 \usepackage{sectsty}
 \DeactivateWarningFilters[temp] % So nothing unrelated gets silenced
 \usepackage{hyperref} % Rende l'indice cliccabile
+\usepackage{xurl}
 \usepackage[bottom]{footmisc} % Posiziona le footnotes alla fine della pagina
 \usepackage{tikz}
 \usepackage{forest}
@@ -41,6 +42,7 @@
 \usepackage{fancyhdr}
 \usepackage{amsthm}
 \usepackage{amsmath,amssymb}
+\usepackage{mathtools}
 \usepackage{minted}
 \usepackage{verbatim}
 \usepackage{cleveref}
@@ -49,6 +51,7 @@
 \setlist[itemize]{leftmargin=25pt}
 \setlist[enumerate]{leftmargin=25pt}
 \usepackage{subcaption}
+\usepackage{thm-restate}
 
 % Algorithms
 \usepackage{algorithm}
@@ -79,6 +82,7 @@
 \newcommand{\rem}[1]{{\draft{\sout{#1}}}}
 \newcommand{\alessio}[1]{{\color[HTML]{34aa15}{\bf{Alessio:}} #1}}
 \newcommand{\davide}[1]{{\color{blue}{\bf{Davide T.:}} #1}}
+\newcommand{\nicola}[1]{{\color{red}{\bf{Nicola.:}} #1}}
 
 \newcommand{\equivset}{\mathcal{C}}
 \newcommand{\equivsetfunc}[1]{\equivset(#1)}
@@ -204,9 +208,9 @@
 \input{Capitoli/thbgLabeledTrees.tex}
 \input{Capitoli/XBWT/Introduzione}
 \input{Capitoli/XBWT/XBWT.tex}
-\input{Capitoli/XBWT/Implementation.tex}
-\input{Capitoli/XBWT/ExperimentsAndConclusions.tex}
-\input{Capitoli/HopcroftClasses.tex}
+% \input{Capitoli/XBWT/Implementation.tex} % moved to chp Eperiments
+% \input{Capitoli/XBWT/ExperimentsAndConclusions.tex} % moved to chp Eperiments
+% \input{Capitoli/HopcroftClasses.tex}
 \input{Capitoli/wheelerAndPsortable.tex}
 \input{Capitoli/minWeigthPerfectBipartiteMatching.tex}
 \newpage

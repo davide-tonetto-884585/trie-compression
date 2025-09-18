@@ -1,17 +1,34 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
-This chapter introduces a crucial optimization technique called \textbf{node collapsing}, designed to reduce the size of the trie. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original tree. Within these subsequences, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill-Nerode equivalence class.
+This chapter introduces our \textbf{node collapsing} technique, designed to reduce the size of the trie by collapsing runs of Myhill--Nerode-Equivalent states adjacent in the same chain. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original tree, we call them chains. Within these chains, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill--Nerode equivalence class.
 
-The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation simplifies the graph structure while preserving its essential connectivity. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
+The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation reduce the graph structure while preserving its language. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
 
-In the following sections, we will formally define the collapsing procedure and then rigorously prove that this transformation is language-preserving (\cref{lemma:collapsing_equivalence}), guaranteeing the correctness of our compression scheme.
+In this section, we will formally define the collapsing procedure and then rigorously prove that this transformation is language-preserving (\cref{lemma:language-eq}), guaranteeing the correctness of our compression scheme.
 
-\subsection{How to Collapse Nodes}
-Now, we define the concept of collapsing two consecutive MN-equivalent nodes in a subsequence.
-\begin{definition}[Collapsing Two MN-equivalent States]
+\begin{algorithm}[H]
+\caption{$\textsc{Collapse}(N,u,v)$}
+\label{alg:collapse}
+\begin{algorithmic}[1]
+\Require $N = (Q, \Sigma, \delta, q_0, F)$ is an NFA; $u,v \in Q$ and are MN--equivalent.
+\Ensure A collapsed automaton $N'=(Q', \Sigma, \delta', q_0', F')$
+    \State Create a new state $w$
+    \State $Q' = (Q \setminus \{u,v\})\cup\{w\}$
+    \State $\phi(z) = w \textbf{ if } z\in\{u, v\} \textbf{ else } z$
+    \State $\delta' = \{ (\phi(q), a, \phi(r)) \mid (q, a, r) \in \delta \}$
+    \State $q_0' = \phi(q_0)$
+    \State $F' = \{ \phi(f) \mid f \in F \}$
+\end{algorithmic}
+\end{algorithm}
+
+%\alessio{Ho riscritto la sezione sotto nell'\cref{alg:collapse}, valuta te se mantenerlo così o come prima, diciamo che una procedura spiegata come definizione era un po' strano per me.}
+
+%\subsection{Procedure}
+% Now, we define the concept of collapsing two MN-equivalent nodes in a subsequence.
+%\begin{definition}[Collapsing Two MN-equivalent States]
+\begin{comment}
     \label{def:collapsing_pair}
-    Let $A = (Q, \Sigma, \delta, q_0, F)$ be the ADFA corresponding to the trie structure we are compressing. The operation \textbf{collapse(u, v)} is defined for two states $u, v \in Q$ if and only if they are consecutive in a subsequence and are MN-equivalent.
-
-    This operation transforms $A$ into a new automaton $A'=(Q', \Sigma, \delta', q_0', F')$ as follows:
+    
+    Let $N = (Q, \Sigma, \delta, q_0, F)$ be an NFA. The operation \textbf{$collapse(u,v)$} is defined for two states $u, v \in Q$ if and only if they are MN-equivalent, and transforms $N$ into a new automaton $N'=(Q', \Sigma, \delta', q_0', F')$ as follows:
     \begin{enumerate}[leftmargin=25pt]
         \item \textbf{State Merging:} A new state $w$ is created to replace $u$ and $v$. The new set of states is $Q' = (Q \setminus \{u, v\}) \cup \{w\}$.
         \item \textbf{Transition Redirection:} Let $\phi: Q \to Q'$ be a state mapping function defined as follows:
@@ -23,22 +40,25 @@ Now, we define the concept of collapsing two consecutive MN-equivalent nodes in 
             \end{cases}
         \]
         
-        We treat $\delta$ as a set of triples of the form $(q, a, r)$, where $q$ is the source state, $a$ is the transition label, and $r$ is the destination state. The new transition function $\delta': Q' \times \Sigma \to Q'$ is then formed by applying this mapping to the source and destination states of every transition in $\delta$:
+        The new transition function $\delta': Q' \times \Sigma \to Q'$ is then formed by applying this mapping to the source and destination states of every transition in $\delta$:
         \[
             \delta' = \{ (\phi(q), a, \phi(r)) \mid (q, a, r) \in \delta \}
         \]
         \item \textbf{Initial and Final States:} The new initial state is $q_0' = \phi(q_0)$, and the new set of final states is $F' = \{ \phi(f) \mid f \in F \}$.
     \end{enumerate}
-\end{definition}
+%\end{definition}
+\end{comment}
+
+The \textsc{Collapse} procedure forms the core of our compression strategy. By recursively applying this operation to all consecutive MN--equivalent nodes in each chain, we merge redundant states. The restriction to merge only consecutive states is critical: merging non-consecutive states, even if they share the same MN--class, would violate the total order of the chains, a property that must be preserved for the construction of the $p$--sortable automaton (\cref{def:p-sorable-automaton}) to be valid. This process transforms the initial trie into a compact $p$--sortable automaton. Such an automaton can result in an NFA, as the \textsc{Collapse} operation may introduce non-determinism. For example, if two states $u$ and $v$ are merged into a new state $w$, and there exist transitions $(u, a, s)$ and $(v, a, t)$ and $s \neq t$ after the collapsing procedure, the resulting state $w$ will have two distinct transitions for the same label $a$, which is a feature of NFAs.
 
 \begin{example}
-    Consider \cref{ex:reduction_ex} where we obtained the chains $C_1 = \{A,C,C,B\}$ and $C_2 = \{B,D,D,D,D,D,D\}$ for the tree ADFA in \cref{fig:example_ADFA} by applying the reduction from String Partitioning to MWPBM. The nodes inside each chain are the following:
+    Assume that we extract the chains $C_1 = \text{ACCB}$ and $C_2 = \text{BDDDDDD}$ from the tree in \cref{fig:example_ADFA} by applying the reduction from String Partitioning to MWPBM. The nodes inside each chain are the following:
     \begin{itemize}
         \item $C_1 = \{a,d,f,c\}$
         \item $C_2 = \{b,h,l,e,i,m,g\}$
     \end{itemize}
     
-    Applying the collapsing operation from \cref{def:collapsing_pair}:
+    Applying \cref{alg:collapse} we obtain:
     \begin{itemize}
         \item For $C_1 = (a,d,f,c)$ with classes $(A,C,C,B)$: 
         \begin{itemize}
@@ -65,7 +85,7 @@ Now, we define the concept of collapsing two consecutive MN-equivalent nodes in 
         Result: $C_2' = (w_1, w_2)$ with classes $(B,D)$, and $w_2$ is the unique accepting state for this example.
     \end{itemize}
     
-    The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting $2$-sortable automaton is shown in \cref{fig:minimized_chains}.
+    The collapsed chains preserve all distinct outgoing and incoming edges through the collapse map $\Phi$, significantly reducing the space complexity from 11 nodes to 5 nodes total. The resulting $2$--sortable automaton is shown in \cref{fig:minimized_chains}.
 
     \begin{figure}[H]
         \centering
@@ -89,26 +109,29 @@ Now, we define the concept of collapsing two consecutive MN-equivalent nodes in 
                 (w1) edge [bend left] node {0} (v2)
                     edge [bend right] node[below] {1} (w2);
         \end{tikzpicture}
-        \caption{$2$-sortable automaton obtained after collapsing equivalent nodes in chains $C_1$ and $C_2$.}
+        \caption{$2$--sortable automaton obtained after collapsing consecutive MN--equivalent nodes in chains $C_1$ and $C_2$ from \cref{ex:reduction_ex}.}
         \label{fig:minimized_chains}
     \end{figure} 
 \end{example}
 
-\subsection{Language Equivalence}
-Now, we need to prove that the language recognized by the $p$-sortable automaton obtained after collapsing two MN-equivalent nodes following \cref{def:collapsing_pair} is equivalent to the language of the original ADFA.
+%\subsection{Language Equivalence}
 
-\begin{lemma}
-Let $M=(Q,\Sigma,\delta,q_0,F)$ be an automaton recognizing $L \subseteq \Sigma^*$.
-If two states $p,q \in Q$ correspond to the same Myhill--Nerode class for $L$ (i.e., for all $w\in\Sigma^*$ we have $\delta(p,w)\in F \iff \delta(q,w)\in F$), then merging $p$ and $q$ into a single state yields an automaton (possibly nondeterministic) that still recognizes exactly $L$.
+We now need to prove that the language recognized by an automaton obtained after collapsing two MN--equivalent nodes following \cref{alg:collapse} is equivalent to the language of the original automaton.
+
+\begin{lemma} \label{lemma:language-eq}
+Let $N=(Q,\Sigma,\delta,q_0,F)$ be an automaton recognizing $L \subseteq \Sigma^*$.
+If two states $l,q \in Q$ correspond to the same Myhill--Nerode class for $L$ (\cref{def:myhill-nerode}), then merging $l$ and $q$ into a single state yields an automaton (possibly nondeterministic) that still recognizes exactly $L$.
 \end{lemma}
 
 \begin{proof}
-By the Myhill-Nerode theorem, every state of $M$ corresponds to a unique equivalence class of $\sim_L$, and $L$ is exactly the union of those classes that intersect $L$.
-If $p$ and $q$ belong to the same equivalence class, then for every continuation $z \in \Sigma^*$ we have
+By the Myhill--Nerode theorem (\cref{def:myhill-nerode}), every state of $M$ corresponds to a unique Myhill--Nerode equivalence class, and $L$ is exactly the union of those classes that intersect $L$.
+If $l$ and $q$ belong to the same equivalence class, then for every continuation $z \in \Sigma^*$ we have
 \[
-\delta(p,z) \in F \iff \delta(q,z) \in F.
+\delta(l,z) \in F \iff \delta(q,z) \in F.
 \]
-Thus replacing $p$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore merging $p$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
+Thus replacing $l$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore merging $l$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
 \end{proof} 
 
-Collapsing two MN-equivalent nodes as in \cref{def:collapsing_pair} preserves the language of the original ADFA and the resulting chains inherit a total order. This enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}.
+Collapsing two MN--equivalent nodes as in \cref{alg:collapse} preserves the language of the original automaton and the resulting chains inherit a total order. This 
+directly implies that the obtained NFA is $p$--sortable and 
+enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}.

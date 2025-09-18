@@ -111,7 +111,7 @@ CompressionResult process_with_p_value(const PreprocessedTree& preprocessed, uin
 int main()
 {
     bool verbose = false;
-    std::string trees_directory = "./tree_generator/generated_trees/high";
+    std::string trees_directory = "./tree_generator/generated_trees/low";
     std::vector<uint16_t> p_values = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     
     // Get all .txt files in the directory

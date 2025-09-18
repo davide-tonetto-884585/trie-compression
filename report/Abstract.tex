@@ -1,2 +1,12 @@
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
+
+\nicola{reminder: cerca le occorrenze di \textbackslash nicola e \textbackslash sout}
+
+This thesis introduces a novel compression technique for repetitive tries, which are fundamental data structures for representing large sets of strings in applications like bioinformatics and natural language processing. While tries are efficient for prefix-based queries, their inherent repetitiveness often leads to a large memory footprint. Traditional compression algorithms often fail to exploit this redundancy, and even specialized techniques like the Extended Burrows-Wheeler Transform (XBWT) may not be optimal in such cases.
+
+The proposed method aims to find an effective trade-off between high compression and efficient indexing. The core idea is to identify and merge identical subtrees by reducing the trie to a minimal deterministic finite automaton (DFA). However, a fully minimized DFA is difficult to index efficiently. Therefore, this work proposes a partial minimization of the trie that ensures the resulting automaton is \textit{$p$--sortable}, a property that allows for efficient indexing.
+
+The problem is framed as a \textbf{String Partitioning Problem}, where the sequence of nodes in the trie, ordered co--lexicographically, is partitioned into \textit{p} subsequences to maximize the merging of equivalent states. This optimization problem is then reduced to finding a \textbf{Minimum Weight Perfect Bipartite Matching (MWPBM)}, which can be solved efficiently.
+
+The result is a compressed, $p$--sortable automaton that supports efficient queries. Experimental results demonstrate the effectiveness of this method, particularly for highly repetitive datasets, achieving a balance of compression and indexability that prior methods could not attain. Our approach opens new possibilities for managing and querying large-scale string datasets in a memory-efficient manner.

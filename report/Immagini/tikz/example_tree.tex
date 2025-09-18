@@ -1,0 +1,46 @@
+\begin{tikzpicture}[
+        % Stili globali per l'albero
+        level distance=1.5cm,      % Distanza verticale tra i livelli
+        every node/.style={font=\sffamily}, % Usa un font sans-serif come nell'immagine
+        % Stili specifici per ogni livello
+        level 1/.style={sibling distance=4cm}, % Distanza tra i figli di A
+        level 2/.style={sibling distance=1.5cm}, % Distanza tra i figli di B e C
+        level 3/.style={level distance=1cm},     % Distanza verticale per i nodi foglia
+        level 4/.style={level distance=1cm}      % Distanza verticale per i nodi foglia più bassi
+    ]
+
+    \node {A}
+        child {
+            node (B1) {B}
+            child { node {D}
+                child { node {a} }
+            }
+            child { node {a} }
+            child { node {E}
+                child { node {b} }
+            }
+        }
+        child {
+            node {C}
+            child { node {D}
+                child { node {c} }
+            }
+            child { node {b} }
+            child { node {D}
+                child { node {c} }
+            }
+        }
+        child {
+            node (B2) {B}
+            child { node {D}
+                child { node {b} }
+            }
+        };
+
+    \node (label_u) [above left=0.2cm and 0.4cm of B1, font=\rmfamily] {Node $u$};
+    \draw[->] (label_u) -- (B1);
+
+    \node (label_v) [above right=0.2cm and 0.4cm of B2, font=\rmfamily] {Node $v$};
+    \draw[->] (label_v) -- (B2);
+\end{tikzpicture}
+    

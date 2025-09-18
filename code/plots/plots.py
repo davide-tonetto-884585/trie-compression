@@ -3,18 +3,23 @@ import matplotlib.pyplot as plt
 import os
 
 # Load the compression results dataset
-file_path = "../compression_results_low.csv"  # Change path if necessary
+file_path = "../compression_results_high.csv"  # Change path if necessary
 df = pd.read_csv(file_path)
 
 # Create figure with two subplots for comprehensive analysis
-fig, axes = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+fig, axes = plt.subplots(2, 1, figsize=(12, 10))
 
 # --- First Graph: Distribution of New Nodes by Probability Value ---
 bp1 = df.boxplot(column="num_new_nodes", by="p_value", ax=axes[0], grid=False)
 means_nodes = df.groupby("p_value")["num_new_nodes"].mean()
-axes[0].plot(means_nodes.index, means_nodes.values, 'ro-', label="Mean Values", linewidth=2, markersize=6)
+axes[0].plot(means_nodes.index, means_nodes.values, 'ro-', label="Mean Number of Nodes", linewidth=2, markersize=6)
+
+# Add mean of max_eq_classes
+mean_max_eq = df["max_eq_classes"].mean()
+axes[0].axhline(mean_max_eq, color='g', linestyle='--', linewidth=2, label="Mean Num. Distinct MN-Classes")
+
 axes[0].set_title("Distribution of Number of Nodes Obtained from Trie Compression by Parameter p", fontsize=12, pad=15)
-axes[0].set_ylabel("Number of Compressed Nodes", fontsize=11)
+axes[0].set_ylabel("Count", fontsize=11)
 axes[0].set_xlabel("p", fontsize=11)
 axes[0].legend(loc='upper right')
 axes[0].grid(True, alpha=0.3)
@@ -22,8 +27,8 @@ axes[0].grid(True, alpha=0.3)
 # --- Second Graph: Distribution of New Transitions by Probability Value ---
 bp2 = df.boxplot(column="num_new_transitions", by="p_value", ax=axes[1], grid=False)
 means_trans = df.groupby("p_value")["num_new_transitions"].mean()
-axes[1].plot(means_trans.index, means_trans.values, 'ro-', label="Mean Values", linewidth=2, markersize=6)
-axes[1].set_title("Distribution of New Transitions Created During Trie Compression by Parameter p", fontsize=12, pad=15)
+axes[1].plot(means_trans.index, means_trans.values, 'ro-', label="Mean Number of Transitions", linewidth=2, markersize=6)
+axes[1].set_title("Distribution of Number of Transitions Obtained from Trie Compression by Parameter p", fontsize=12, pad=15)
 axes[1].set_xlabel("p", fontsize=11)
 axes[1].set_ylabel("Number of Compressed Transitions", fontsize=11)
 axes[1].legend(loc='upper right')
@@ -54,4 +59,4 @@ print("- tree_compression_analysis.png (300 DPI)")
 print("- tree_compression_analysis.pdf (vector format)")
 print("- tree_compression_analysis.svg (scalable vector)")
 
-plt.show()
+# plt.show()

@@ -1,15 +1,15 @@
 \section{Min-Weight Perfect Bipartite Matching} \label{chp:min_weight_perfect_bipartite_matching}
 
 \subsection{Introduction and Motivation}
-The fundamental goal of our compression scheme is to transform an input trie into a compressed, $p$-sortable automaton by partitioning its nodes into $p$ chains in an optimal way.
+The fundamental goal of our compression scheme is to transform an input trie into a compressed, $p$--sortable automaton by partitioning its nodes into $p$ chains in an optimal way.
 
-To make this optimization problem more concrete, we can frame it as a string partitioning problem. Imagine the sequence of nodes in the trie, when read in co-lexicographic order, as a single long string. The ``character'' corresponding to each node is its Myhill-Nerode equivalence class, which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ substrings such that the number of runs is minimized (consecutive nodes of the same MN-equivalence class are merged into a single run). For instance, a subsequence $AAABBA$ contains three runs. Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$-sortable automaton.
+To make this optimization problem more concrete, we can frame it as a string partitioning problem. Imagine the sequence of nodes in the trie, when read in co--lexicographic order, as a single long string. The ``character'' corresponding to each node is its Myhill--Nerode equivalence class, which determines if it can be merged with other nodes. The task is to partition this string of nodes into $p$ substrings such that the number of runs is minimized (consecutive nodes of the same MN--equivalence class are merged into a single run). For instance, a subsequence $AAABBA$ contains three runs (see \cref{ex:string-partitioning}). Minimizing the number of runs directly corresponds to maximizing the number of merged states, yielding a compact $p$--sortable automaton.
 
-In this sections, we will provide the necessary background on the Minimum Weight Perfect Bipartite Matching (MWPBM) problem, a fundamental challenge in combinatorial optimization. We will then demonstrate in \cref{chp:tree_compression} a formal reduction from our partitioning problem to MWPBM. This reduction is the key to our method, as it allows us to model our problem as a bipartite graph and leverage well-known, efficient algorithms to find the optimal solution for our compression task.
+In this section, we will provide the necessary background on the Minimum Weight Perfect Bipartite Matching (MWPBM) problem, a fundamental challenge in combinatorial optimization. We will then demonstrate in \cref{sec:reduction_to_mwpbm} a formal reduction from our partitioning problem to the MWPBM problem. This reduction is the key to our method, as it allows us to model our problem as a bipartite graph and leverage well-known efficient algorithms to find the optimal solution for our compression task.
 
 \subsection{Bipartite Graphs} 
-\begin{definition} \label{def:bipartite}
-    A graph $G=(V,E)$ is called \textit{bipartite} if its vertex set $V$ can be partitioned into two disjoint subsets $V=V_1 \cup V_2$ such that every edge in $E$ has the form $(v_1,v_2)$ where $v_1\in V_1$ and $v_2 \in V_2$.
+\begin{definition}[Bipartite graph] \label{def:bipartite}
+    A graph $G=(V,E)$ is called \textbf{bipartite} if its vertex set $V$ can be partitioned into two disjoint subsets $V=V_1 \cup V_2$ such that every edge in $E$ has the form $(u_1,u_2)$ where $u_1\in V_1$ and $u_2 \in V_2$.
 \end{definition} 
 
 In other words, the vertices of the graph can be divided into two separate groups such that all edges connect a vertex from the first group to a vertex from the second group. An example of a bipartite graph is shown in \cref{fig:bipartite_graph_example}.
@@ -17,13 +17,13 @@ In other words, the vertices of the graph can be divided into two separate group
 \begin{figure}[H]
     \centering
     \begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}] 
-        \node[main] (2s) {$x_1$}; 
-        \node[main] (1s) [below of=2s] {$x_2$};
-        \node[main] (4s) [below of=1s] {$x_3$};
-        \node[main] (3d) [right=2cm of 2s] {$x_4$};
-        \node[main] (2d) [below of=3d] {$x_5$}; 
-        \node[main] (1d) [below of=2d] {$x_6$};
-        \node[main] (4d) [below of=1d] {$x_7$};
+        \node[main] (2s) {$u_1$}; 
+        \node[main] (1s) [below of=2s] {$u_2$};
+        \node[main] (4s) [below of=1s] {$u_3$};
+        \node[main] (3d) [right=2cm of 2s] {$u_4$};
+        \node[main] (2d) [below of=3d] {$u_5$}; 
+        \node[main] (1d) [below of=2d] {$u_6$};
+        \node[main] (4d) [below of=1d] {$u_7$};
         \draw[->] (1s) -- (3d);
         \draw[->] (1s) -- (2d);
         \draw[->] (4s) -- (3d);
@@ -31,24 +31,24 @@ In other words, the vertices of the graph can be divided into two separate group
         \draw[->] (4s) -- (4d);
         \draw[->] (2s) -- (1d);
     \end{tikzpicture}     
-    \caption[Example of a bipartite graph]{Example of a bipartite graph $G=(V, E)$ where $V_1=\{x_1,x_2,x_3\}$, $V_2=\{x_4,x_5,x_6,x_7\}$ and $E=\{(x_1,x_6),(x_1,x_7),(x_2,x_4),(x_2,x_5),(x_3,x_4),(x_3,x_7)\}$.}
+    \caption[Example of a bipartite graph]{Example of a bipartite graph $G=(V, E)$ where $V_1=\{u_1,u_2,u_3\}$, $V_2=\{u_4,u_5,u_6,u_7\}$ and $E=\{(u_1,u_6),(u_1,u_7),(u_2,u_4),(u_2,u_5),(u_3,u_4),(u_3,u_7)\}$.}
     \label{fig:bipartite_graph_example}
 \end{figure}
 
-\begin{definition}[Weighted Bipartite Graph] \label{def:weighted_bipartite}
-    A \textit{weighted bipartite graph} is a bipartite graph $G=(V, E, w)$, where $w$ is a weight function $w: E \to \mathbb{R}$ that assigns a real-valued weight to each edge.
+\begin{definition}[Weighted bipartite graph] \label{def:weighted_bipartite}
+    A \textbf{weighted bipartite graph} is a bipartite graph $G=(V, E, w)$, where $w$ is a weight function $w: E \to \mathbb{R}$ that assigns a real-valued weight to each edge.
 \end{definition}
 
-In a weighted bipartite graph, each edge has a numerical value, or "weight", associated with it.
+In other words, in a weighted bipartite graph, each edge has a numerical value, called \emph{weight}, associated with it.
 
 \subsection{Problem Definition}
-Given a bipartite graph $G = (V, E)$ (\cref{def:bipartite}), let's define the concept of a matching. 
+Given a bipartite graph $G = (V, E)$, we define the concept of a matching as follows.
 
 \begin{definition}[Matching] \label{def:matching}
-    Given a bipartite graph $G = (V, E)$, a matching $M \subseteq E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$.
+    Given a bipartite graph $G = (V, E)$, a \textbf{matching} $M \subseteq E$ is a collection of edges such that every vertex of $V$ is incident to at most one edge of $M$.
 \end{definition}
 
-In other words, a matching is a set of edges such that no two edges share a common vertex. If a vertex $v$ has no edge of $M$ incident to it, then $v$ is said to be exposed (or unmatched). A matching is \textbf{perfect} if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$ \cite{goemans2009matching}.
+In other words, a matching is a set of edges such that no two edges share a common vertex. If a vertex $v$ has no edge of $M$ incident to it, then $v$ is said to be \textbf{exposed} (or unmatched). A matching is \textbf{perfect} if no vertex is exposed; in other words, a matching is perfect if its cardinality is equal to $|V_1| = |V_2|$. We cite~\cite{goemans2009matching} as the source for the definitions and terminology used in this section.
 
 \begin{example}
     In \cref{fig:matching_examples_style2}, we illustrate three distinct scenarios. Subfigure (a) depicts a set of edges that does not constitute a valid matching, as vertex $u_1$ is incident to more than one edge, namely $(u_1, v_1)$ and $(u_1, v_2)$, violating the definition of a matching. Subfigure (b) presents a valid, yet non-perfect matching; here, vertices $u_3$ and $v_3$ are exposed, meaning they are not incident to any edge in the matching. Finally, subfigure (c) shows a perfect matching, where every vertex in the graph is incident to exactly one edge in the matching, satisfying the condition $|M| = |V_1| = |V_2| = 3$.
@@ -70,7 +70,7 @@ In other words, a matching is a set of edges such that no two edges share a comm
                 \draw[->, red] (u1) -- (v1);
                 \draw[->, red] (u1) -- (v2);
             \end{tikzpicture}
-            \caption{Not a matching}
+            \caption{Non-matching}
             \label{fig:not_a_matching_style2}
         \end{subfigure}
         \hfill
@@ -90,7 +90,7 @@ In other words, a matching is a set of edges such that no two edges share a comm
                 \draw[->, red] (u1) -- (v1);
                 \draw[->, red] (u2) -- (v2);
             \end{tikzpicture}
-            \caption{A non-perfect matching}
+            \caption{Matching}
             \label{fig:non_perfect_matching_style2}
         \end{subfigure}
         \hfill
@@ -111,10 +111,10 @@ In other words, a matching is a set of edges such that no two edges share a comm
                 \draw[->, red] (u2) -- (v2);
                 \draw[->, red] (u3) -- (v3);
             \end{tikzpicture}
-            \caption{A perfect matching}
+            \caption{Perfect matching}
             \label{fig:perfect_matching_style2}
         \end{subfigure}
-        \caption{Examples of a non-matching (a), a non-perfect matching (b), and a perfect matching (c) in a bipartite graph. The edges in the set $M$ are highlighted in red.}
+        \caption{Examples of (a) a non-matching, (b) a non-perfect matching, and (c) a perfect matching in a bipartite graph. The edges in the set $M$ are highlighted in red.}
         \label{fig:matching_examples_style2}
     \end{figure}
 \end{example}
@@ -131,7 +131,7 @@ The weight of a matching is the sum of the weights of the edges in the matching.
 \end{equation}
 
 \begin{example}
-    Consider the weighted bipartite graph in \cref{fig:mwpbm_example}. The goal is to find a perfect matching with the minimum possible total weight. Both subfigures show a valid perfect matching; however, only one of them has the minimum weight.
+    Consider the weighted bipartite graph in \cref{fig:mwpbm_example}, where single edges have weight 1 and double edges have weight 2. The goal is to find a perfect matching with the minimum possible total weight. Both subfigures show a valid perfect matching; however, only one of them has the minimum weight.
     \begin{itemize}
         \item Subfigure (a) shows the perfect matching $M_a = \{(u_1, v_2), (u_2, v_1), (u_3, v_3)\}$. Its total weight is $w(M_a) = w(u_1, v_2) + w(u_2, v_1) + w(u_3, v_3) = 2 + 1 + 1 = 4$. This is a valid perfect matching, but it is not optimal.
         \item Subfigure (b) shows the perfect matching $M_b = \{(u_1, v_1), (u_2, v_2), (u_3, v_3)\}$. Its total weight is $w(M_b) = w(u_1, v_1) + w(u_2, v_2) + w(u_3, v_3) = 1 + 1 + 1 = 3$.
@@ -149,15 +149,15 @@ The weight of a matching is the sum of the weights of the edges in the matching.
                 \node[main] (v2) [below of=v1] {$v_2$};
                 \node[main] (v3) [below of=v2] {$v_3$};
                 \draw[->] (u1) -- (v1);
-                \draw[->, dashed] (u1) -- (v2);
+                \draw[->, double] (u1) -- (v2);
                 \draw[->] (u2) -- (v1);
                 \draw[->] (u2) -- (v2); 
                 \draw[->] (u3) -- (v3); 
-                \draw[->, dashed, red] (u1) -- (v2);
+                \draw[->, double, red] (u1) -- (v2);
                 \draw[->, red] (u2) -- (v1);
                 \draw[->, red] (u3) -- (v3);
             \end{tikzpicture}
-            \caption{A non-minimum perfect matching.}
+            \caption{Non-min. weight perfect matching.}
             \label{fig:mwpbm_non_perfect}
         \end{subfigure}
         \hfill
@@ -171,7 +171,7 @@ The weight of a matching is the sum of the weights of the edges in the matching.
                 \node[main] (v2) [below of=v1] {$v_2$};
                 \node[main] (v3) [below of=v2] {$v_3$};
                 \draw[->] (u1) -- (v1);
-                \draw[->, dashed] (u1) -- (v2);
+                \draw[->, double] (u1) -- (v2);
                 \draw[->] (u2) -- (v1);
                 \draw[->] (u2) -- (v2); 
                 \draw[->] (u3) -- (v3); 
@@ -179,10 +179,10 @@ The weight of a matching is the sum of the weights of the edges in the matching.
                 \draw[->, red] (u2) -- (v2);
                 \draw[->, red] (u3) -- (v3);
             \end{tikzpicture}
-            \caption{A minimum perfect matching.}
+            \caption{Min. weight perfect matching.}
             \label{fig:mwpbm_perfect}
         \end{subfigure}
-        \caption{Example of a non-minimum perfect matching (a) and minimum perfect matching (b) in a weighted bipartite graph. Dashed edges have weight 2 while solid edges 1. The edges in a matching are highlighted in red.}
+        \caption{Example of (a) a non-minimum weight perfect matching and (b) a minimum weight perfect matching in a bipartite graph. Double edges have weight 2 while single edges 1. The edges in a matching are highlighted in red.}
         \label{fig:mwpbm_example}
     \end{figure}
 \end{example}
@@ -322,9 +322,9 @@ is called the bipartite perfect matching polytope (see Lecture notes by \cite{go
 \end{comment}
 
 \subsection{State of the Art} \label{sec:mwpbm_solutions}
-There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955 \cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the MWPBM problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$ where $n$ is the number of nodes in the bipartite graph. Later Dinic and Kronrod \cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
+There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955~\cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the MWPBM problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$ where $n$ is the number of nodes in the bipartite graph. Later Dinic and Kronrod~\cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
 
-The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp \cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989 Gabow and Tarjan \cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denote the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr \cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
+The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp~\cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989 Gabow and Tarjan~\cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denote the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr~\cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
-In 2022, Chen, Li, et al. \cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = 2n + m$ edges.
+In 2022, Chen, Li, et al.~\cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = 2n + m$ edges.
 

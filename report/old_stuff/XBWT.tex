@@ -1,5 +1,5 @@
 \subsection{Definition}
-The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to efficiently compress and index \emph{ordered node-labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT)~\cite{burrows1994block} for strings, the XBWT extends its principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. %It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
+The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to efficiently compress and index \emph{ordered node-labeled trees}. Inspired by the classical Burrows-Wheeler Transform (BWT) \cite{burrows1994block} for strings, the XBWT extends its principles to hierarchical structures, enabling efficient storage, navigation, and querying of trees. %It is particularly effective for trees where each node has a label drawn from an alphabet $\Sigma$ and the tree structure has an arbitrary shape and degree.
 
 \begin{definition}[XBWT basic notation]
     \label{def:node_informations}
@@ -84,7 +84,7 @@ This grouping provides several important consequent properties:
 
 \textbf{Unary Degree Encoding:} The subarray $S_{\text{last}}$ for the block of children $[u_1, \dots, u_z]$ encodes the degree of $u$ in unary coding. Specifically, $S_{\text{last}}[u'_z] = 1$ and $S_{\text{last}}[u'_i] = 0$ for $1 \leq i < z$. 
 \begin{example}
-    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can observe that $S_{\text{last}}[5 \dots 7] = [0, 0, 1]$, which is equal 3 in unary encoding, matching the number of children of node $u$.
+    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can observe that $S_{\text{last}}[5..7] = [0, 0, 1]$, which is equal 3 in unary encoding, matching the number of children of node $u$.
 \end{example}
 
 \textbf{Preservation of Sibling Order:} If two nodes $u$ and $v$ have the same label, and the triplet for $u$ precedes the triplet for $v$ in $S$, then the entire block of children of $u$ will also precede the block of children of $v$.
@@ -96,10 +96,10 @@ This grouping provides several important consequent properties:
 \begin{example}
     Let's examine nodes $u$ and $v$ in \cref{fig:example_tree}, both labeled `B'. In the sequence $S$ shown in \cref{tab:xbwt_example}, $u$ is the first node with label 'B' (at index 2), and $v$ is the second (at index 4).
 
-    The children of all nodes labeled `B' form a contiguous block in $S$. In this case, the children of both $u$ and $v$ are located in the range $[5 \dots 8]$. We can distinguish between the children of $u$ and the children of $v$ using the $S_{\text{last}}$ array:
+    The children of all nodes labeled `B' form a contiguous block in $S$. In this case, the children of both $u$ and $v$ are located in the range $[5..8]$. We can distinguish between the children of $u$ and the children of $v$ using the $S_{\text{last}}$ array:
     \begin{itemize}
-        \item The block of children for $u$ (the first `B' node) starts at the beginning of the range (index 5) and ends at the position of the first 1 (index 7) in $S_{\text{last}}[5 \dots 8]$.
-        \item The block of children for $v$ (the second `B' node) starts after the first 1 (index 8) and ends at the position of the second 1 (index 8) in $S_{\text{last}}[5 \dots 8]$.
+        \item The block of children for $u$ (the first `B' node) starts at the beginning of the range (index 5) and ends at the position of the first 1 (index 7) in $S_{\text{last}}[5..8]$.
+        \item The block of children for $v$ (the second `B' node) starts after the first 1 (index 8) and ends at the position of the second 1 (index 8) in $S_{\text{last}}[5..8]$.
     \end{itemize}
 \end{example}
 
@@ -112,8 +112,8 @@ Additional properties of the XBWT components include:
     \item $S_{\alpha}$ is a permutation of the node labels in $T$.
 \end{itemize}
 
-\subsection{Construction}\label{sec:pathSort}
-A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for deep trees. To overcome this issue, Ferragina et al.~\cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time $O(t)$ and uses $O(t \log t)$ bits of working space.
+\subsection{Construction}
+A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for deep trees. To overcome this issue, Ferragina et al. \cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time $O(t)$ and uses $O(t \log t)$ bits of working space.
 This algorithm is called {\pathsort}, and is based on a generalization of the Skew algorithm, designed for the construction of suffix arrays on strings~\cite{karkkainen2006linear}.
 
 The Skew algorithm works by first building the suffix array recursively on a string long two thirds of the original one.
@@ -134,7 +134,6 @@ T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
 \end{comment}
 
 
-\begin{comment}
 \alessio{Maybe all of this detail is not required for this algorithm... This is just a precursor of the {\pathsort}, which you explain in detail just after this subsubsection. Here I think it's enough to give an intuition of the mod 3 stuff, and explain directly the {\pathsort}. Otherwise it can be confusing as you were talking about compressing trees and you jump to strings. I won't delete what you wrote because there are some comments that are still interesting (old part between the horizontal lines).}
 
 \par\noindent\rule{\textwidth}{0.4pt}
@@ -184,25 +183,19 @@ T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
 \]
 
 \par\noindent\rule{\textwidth}{0.4pt}
-\end{comment}
 
 % \subsubsection{PathSort Algorithm} \label{sec:pathSort}
 
 % The pseudocode of the pathSort algorithm is shown in \cref{alg:pathSort}. 
 The {\pathsort} algorithms works similarly, adapted to work on labeled trees.
 % This algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees.
-\alessio{What is an upward subpath? Is it the $\pi$ component of the node or is it something with the triplets? If it is the first case, use $\pi(u)$, otherwise define upward subpath. Reading the Ferragina et al paper it seems $\pi$ (or at least, some prefix), so i will edit it. The original version is in the old stuff folder.}
-Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the $\pi$ component of the nodes in levels $\not\equiv j \pmod{3}$, then sort the $\pi$ component of the nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the resulting two sets. %by exploiting their lexicographic names.
-At each step $i$ of the recursion, the algorithm works on a labeled tree $T_i$, that is a \emph{contracted} (or shrunk) version of the original tree $T$. 
-We set $T_0 = T$, and note that the structure of $T_{i+1}$ is derived from the one of $T_i$.
-The inner workings of the recursive step will be explained in detail later.
-
-The parameter $j$ is chosen in such a way that the number of nodes of the shrunk tree whose level is $\equiv j \pmod{3}$ is at least $t/3$, so that a constant fraction of upward paths $\pi$ is ensured to be dropped at each recursive step.
-It is important to note that:
+\alessio{What is an upward subpath? Is it the $\pi$ component of the node or is it something with the triplets? If it is the first case, use $\pi(u)$, otherwise define upward subpath.}
+Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the upward subpaths of the tree starting at nodes in levels $\not\equiv j \pmod{3}$, then sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the two sets of sorted subpaths by exploiting their lexicographic names. $j$ is chosen in such a way that the number of nodes of the shrunk tree whose level is $\equiv j \pmod{3}$ is at least $t/3$ so that a constant fraction of upward paths are ensured to be dropped at each recursive step.
+Is important to note that:
 \begin{enumerate}
     \item the height of the new (contracted) tree shrinks by a factor of three, hence the node naming requires the radix sort over triples of names; 
     \item given the choice of $j$, the number of nodes of the new (contracted) tree will be at most $2t/3$, thus ensuring that the running time of the algorithm satisfies the recurrence $R(t) = R(2t/3) + \Theta(t) = \Theta(t)$; 
-    \item following an argument similar to~\cite{karkkainen2006linear}, the names of the dropped subpaths can be computed in $O(t)$ time from the names of the non-dropped subpaths, by radix sorting.
+    \item following an argument similar to \cite{karkkainen2006linear}, the names of the dropped subpaths can be computed in $O(t)$ time from the names of the non-dropped subpaths, by radix sorting.
 \end{enumerate}
 The pseudocode of the {\pathsort} algorithm is shown in \cref{alg:pathSort}.
 
@@ -210,8 +203,8 @@ The pseudocode of the {\pathsort} algorithm is shown in \cref{alg:pathSort}.
     \caption{{\pathsort}($T$)}
     \label{alg:pathSort}
     \begin{algorithmic}[1]
-    \State Initialize the array of triplets \texttt{IntNodes}[1 \dots $t$].
-    \State Visit the internal nodes of $T$ in pre-order. For the $i$-th visited internal node $u$, set $\texttt{IntNodes}[i] = \bigl(\alpha(u),\, \text{level}(u),\, \text{parent}(u)\bigr)$.
+    \State Initialize the array of triplets \texttt{IntNodes}[1..$t$].
+    \State Visit the internal nodes of $T$ in pre-order. For the $i$-th visited internal node $u$, set $\texttt{IntNodes}[i] \gets \bigl(\alpha(u),\, \text{level}(u),\, \text{parent}(u)\bigr)$.
     \State Let $j \in \{0, 1, 2\}$ be such that the number of nodes in \texttt{IntNodes} whose level is $\equiv j \pmod{3}$ is at least $t/3$. Sort recursively the upward subpaths starting at nodes in levels $\not\equiv j \pmod{3}$.
     \State Sort the upward subpaths starting at nodes in levels $\equiv j \pmod{3}$ using the result of Step 3.
     \State Merge the two sets of sorted subpaths by exploiting their lexicographic names.
@@ -227,14 +220,12 @@ Next, the algorithm selects a value $j$ such that the number of nodes in \texttt
     \item \texttt{IntNodesNotAtPosJ}, containing nodes at levels $\not\equiv j \pmod{3}$
 \end{itemize}
 
-For each node $u$ in \texttt{IntNodesNotAtPosJ}, the algorithm extracts the upward path consisting of the first three ancestors of $u$, $\pi(u)[1 \dots 3]$. These paths are then sorted using radix sort. If all upward paths are unique, the nodes in \texttt{IntNodesAtPosJ} are sorted and subsequently merged with \texttt{IntNodesNotAtPosJ} using lexicographic ordering.
-%, following the same merging strategy as in the Skew algorithm. 
-Otherwise, the algorithm recursively calls the {\pathsort} function on a new contracted tree, where nodes are renamed according to their sorted paths.
+For each node $u$ in \texttt{IntNodesNotAtPosJ}, the algorithm extracts the upward path consisting of the first three ancestors of $u$. These paths are then sorted using radix sort. If the sorted upward paths contain duplicates, the algorithm recursively calls the {\pathsort} function on a new contracted tree, where nodes are renamed according to their sorted paths. Otherwise, if all upward paths are unique, the nodes in \texttt{IntNodesAtPosJ} are sorted and subsequently merged with \texttt{IntNodesNotAtPosJ} using lexicographic ordering, following the same merging strategy as in the Skew algorithm.
 
 \subsection{Inversion}
-The ability to invert the XBWT is fundamental to its utility as a compression technique. Invertibility guarantees that the original tree can be perfectly reconstructed from its transformed representation ($S_{\text{last}}$ and $S_{\alpha}$). This ensures that the compression is lossless, meaning that no information is lost during the process, which is a critical requirement for most applications.
+The ability to invert the XBWT is fundamental to its utility as a compression technique. Invertibility guarantees that the original tree can be perfectly reconstructed from its transformed representation ($S_{\text{last}}$ and $S_{\alpha}$). This ensures that the compression is lossless, meaning no information is lost during the process, which is a critical requirement for most applications.
 
-The property `Path-based Indexing' (\cref{prop3}) ensures that the two arrays $S_{\text{last}}$ and $S_{\alpha}$ of the XBWT can be used to reconstruct the original tree $T$. The algorithm for inverting the XBWT is linear in time and requires $O(t \log t)$ bits of space.
+Property 'Path-based Indexing' (\cref{prop3}) ensures that the two arrays $S_{\text{last}}$ and $S_{\alpha}$ of the XBWT can be used to reconstruct the original tree $T$. The algorithm to invert the XBWT is linear in time and requires $O(t \log t)$ bits of space.
 
 \cref{alg:rebuildTree} operates in three main steps. First, it constructs two auxiliary arrays, $F$ and $J$, which are crucial for navigating the tree structure within the compressed format.
 
@@ -250,13 +241,12 @@ The property `Path-based Indexing' (\cref{prop3}) ensures that the two arrays $S
 Finally, the algorithm employs the array $J$ to
 simulate a depth-first visit of $T$, creates its labeled nodes, and properly connects them to their parents. 
 
-% \alessio{Why BuildF and BuildJ take in input XBWT[T] but do not use it? The function should use the parameters that you pass it, pass more specific variables (as below). Also, I removed XBWT[T] notation since I really don't like it :).}
 \begin{algorithm}[H]
-    \caption{\textsc{RebuildTree}($S_\alpha$, $S_\textup{last}$)}
+    \caption{RebuildTree(\texttt{XBWT[$T$]})}
     \label{alg:rebuildTree}
     \begin{algorithmic}[1]
-    \State $F = $ \textsc{BuildF}($S_\alpha$, $\Slast$)
-    \State $J = $ \textsc{BuildJ}($S_\alpha$, $\Slast$, $F$)
+    \State $F = $ BuildF(\texttt{XBWT[$T$]});
+    \State $J = $ BuildJ(\texttt{XBWT[$T$]}, $F$); 
     \State Create node $r$ and set $Q = \{\langle1, r\rangle\}$; \Comment{$Q$ is a stack}
     \While{$Q \neq \emptyset$} \Comment{We still have nodes to create in $T$}
         \State $\langle i, u \rangle = $ pop($Q$);
@@ -264,7 +254,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
         \If{$j = -1$} \Comment{$u$ is a leaf of $T$}
             \State \textbf{continue};
         \EndIf
-        \State Find first $j' \geq j$ such that $S_{\text{last}}[j'] = 1$; \Comment{Range $[j, j']$ are the children of $u$ in $T$}
+        \State Find first $j' \geq j$ such that $S_{\text{last}}[j'] = 1$; \Comment{$S[j, j']$ are the children of $u$ in $T$}
         \For{$h = j'$ downto $j$} 
             \State Create the node $v$ labeled $S_\alpha[h]$;
             \State Attach $v$ as first child of $u$;
@@ -276,13 +266,11 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
 \end{algorithm}
 
 \begin{algorithm}[H]
-    \caption{\textsc{BuildF}($S_\alpha$, $\Slast$)}
+    \caption{BuildF(\texttt{XBWT[$T$]})}
     \label{alg:buildF}
     \begin{algorithmic}[1]
-    \State $C[1,|\Sigma_n|] = \{0, 0, \dots, 0\}$;
-    \State $F[1,t] = \{0, 0, \dots, 0\}$;
-    \For{$i = 1, \ldots, t$}
-        \State $C[S_\alpha[i]] = C[S_\alpha[i]] + 1$; \Comment{Count the occurrences of node labels}
+    \For{$i = 1, \ldots, |\Sigma_N|$}
+        \State $C[S_\alpha[i]] \gets C[S_\alpha[i]] + 1$; \Comment{Count the occurrences of node labels}
     \EndFor
     \State $F[1] = 2$; \Comment{$S_\pi[1]$ is the empty string}
     \For{$i \in \{1, \ldots, |\Sigma_N|-1\}$} \Comment{Consider just the internal-node labels}
@@ -300,15 +288,13 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
 \end{algorithm}
     
 \begin{algorithm}[H]
-    \caption{\textsc{BuildJ}($S_\alpha$, $\Slast$, $F$)}
+    \caption{BuildJ(\texttt{XBWT[$T$]}, $F$)}
     \begin{algorithmic}[1]
-    \State $J[1,t]=\{0, 0, \dots, 0\}$;
     \For{$i = 1, \ldots, t$}
         \If{$S_\alpha[i] \in \Sigma_L$}
             \State $J[i] = -1$; \Comment{$S_\alpha[i]$ is a leaf label}
         \Else
-            \State $J[i] = F[S_\alpha[i]]$;
-            \State $z = J[i]$;
+            \State $z = J[S_\alpha[i]]$;
             \While{$S_{\text{last}}[z] \neq 1$} \Comment{Reach the last child of $S_\alpha[i]$}
                 \State $z = z + 1$;
             \EndWhile
@@ -324,14 +310,13 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
 Let the $k$-context of a node $u \in T$ be the first $k$ symbols of $\pi(u)$. We denote this $k$-long prefix as $\pi_k[u]$. Thus, $\pi_k[u]$ represents the subpath of length $k$ leading to $u$ in $T$, or equivalently, the node $u$ descends from a subpath labeled as $\pi_k[u]$, where the nodes in $\pi_k[u]$ are encountered in an upward direction.
 \end{comment}
 
-The XBWT of a tree $T$ exhibits a local homogeneity property on $S_{\alpha}$: the labels ($\alpha$ components) of nodes whose upward paths ($\pi$ components) share long common prefixes, appear in $S_{\alpha}$ in contiguous (or tightly bounded) clusters. 
-This phenomenon can be formalized via the notion of $k$-contexts on trees.
-This property mirrors the strong local homogeneity exhibited by strings under the Burrows-Wheeler Transform~\cite{burrows1994block} when applied to labeled trees.
+The XBWT[$T$] exhibits a local homogeneity property on $S_{\alpha}$: specifically, the labels $\alpha(u)$ of nodes $u$ whose upward paths $\pi(u)$ share long common prefixes appear in $S_{\alpha}$ in contiguous (or tightly bounded) clusters. This phenomenon can be formalized via the notion of $k$-contexts on trees.
+This property mirrors the strong local homogeneity exhibited by strings under the Burrows-Wheeler Transform \cite{burrows1994block} when applied to labeled trees.
 
 To illustrate this, let us consider two arbitrary nodes $u$ and $v$ in $T$, and examine their contexts $\pi(u)$ and $\pi(v)$. Given the sorting of $S$, the greater the length of the shared prefix between $\pi(u)$ and $\pi(v)$, the closer the corresponding labels $\alpha(u)$ and $\alpha(v)$ will be in the string $S_{\alpha}$. These closely spaced labels are expected to be few in number, resulting in $S_{\alpha}$ exhibiting local homogeneity. As a consequence, we can leverage the advanced algorithmic techniques developed for BWT-based compression methods to achieve efficient compression.
 
 At the end, the XBWT is used for turning the labeled tree compression problem into a string compression problem. To this aim, two string compressors
-$C_{\alpha}$ and $C_{\text{last}}$ are used to compress the two strings $S_{\alpha}$ and $S_{\text{last}}$. respectively, by exploiting their fine specialties. Of course, many choices are possible for $C_{\alpha}$ and $C_{\text{last}}$, each having implications on the algorithmic time and compression bounds.
+$C_{\alpha}$ and $C_{\text{last}}$ are used to compress the two strings that compose XBWT[$T$], by exploiting their fine specialties. Of course, many choices are possible for $C_{\alpha}$ and $C_{\text{last}}$, each having implications on the algorithmic time and compression bounds.
 
 In general, the following theorem holds:
 
@@ -339,8 +324,7 @@ In general, the following theorem holds:
     let $C_{\alpha}$ be a $k$-th order string compressor that compresses any string $w$ into $|w|H_k(w) + |w| + o(|w|)$ bits, taking $O(|w|)$ time; and let $C_{\text{last}}$ be an algorithm that stores $S_{\text{last}}$ without compression. With this simple instantiation, the labeled tree $T$ can be compressed within $t H_k(S_{\alpha}) + 2t + o(t)$ bits and takes $O(t)$ optimal time.
 \end{theorem}
 
-Since $H_k(S_\alpha) \leq (\log |\Sigma|) + 1$
-(where the additional $+1$ cost comes from the definition of $\alpha$ in \cref{def:node_informations}, since we consider the same alphabet $\Sigma$ for nodes and leaves), the above bound is at most $t(\log |\Sigma| + 3) + o(t)$ bits, and can be significantly better than the information-theoretic lower bound and the plain storage of the XBWT (both taking $2t + t \log|\Sigma|$ bits), depending on the distribution of the labels among its nodes.
+Since $H_k(S_\alpha) \leq (\log |\Sigma|) + 1$ (Recall that when a unique alphabet is used to label both internal nodes and leaves, one needs a further bit to distinguish between them. The additional term +1 in the bound takes this into account), the above bound is at most $t(\log |\Sigma| + 3) + o(t)$ bits, and can be significantly better than the information-theoretic lower bound and the plain storage of XBWT[$T$] (both taking $2t + t \log|\Sigma|$ bits), depending on the distribution of the labels among its nodes.
 
 \subsection{Indexing a Compressed Labeled Tree} \label{sec:xbwt_operations}
 In order to implement the efficient operations listed in \cref{compandindexinglabtree} using the compressed arrays $S_{\text{last}}$ and $S_{\alpha}$ of XBWT, we need the chosen compressors $C_{\alpha}$ and $C_{\text{last}}$ to support the following operations:
@@ -351,35 +335,33 @@ Given a string $S[1, t]$ over alphabet $\Sigma$
     \item \textbf{$select_c(S, i)$}: gives the position of the $i$-th occurrence of the symbol $c \in \Sigma$ in $S$.
 \end{itemize}
 
-The compressed indexing of the XBWT will be based on three compressed data structures that support rank and select queries over the two strings $S_{\alpha}$ and $S_{\text{last}}$, and over an auxiliary binary array $A[1, t]$ defined as: $A[1] = 0$, $A[j] = 1$ if and only if the first symbol of $S_{\pi}[j]$ differs from the first symbol of $S_{\pi}[j - 1]$. 
+The compressed indexing of XBWT[$T$] will be based on three compressed data structures that support rank and select queries over the two strings $S_{\alpha}$ and $S_{\text{last}}$, and over an auxiliary binary array $A[1, t]$ defined as: $A[1] = 0$, $A[j] = 1$ if and only if the first symbol of $S_{\pi}[j]$ differs from the first symbol of $S_{\pi}[j - 1]$. 
 Hence, $A$ contains at most $|\Sigma| + 1$ bits set to 1 out of $t$ positions. It is also easy to see that, through rank and select operations over $A$, we can succinctly implement the array $F$ employed in \cref{alg:rebuildTree,alg:buildF}.
 
-%\alessio{Is $S$ a pair of strings or a string of pairs? $S$ such that $S[i] = (\Slast[i], S_\alpha[i])$, for $i = 1,...,t$?}
-In this section, let $S \coloneq (S_{\text{last}}, S_{\alpha})$ such that $S[i] = (\Slast[i], S_\alpha[i])$ for $i = 1,\dots,t$, denote the XBWT obtained after the construction phase.
-The compressed index supports the following methods:
+In this section, let $S := (S_{\text{last}}, S_{\alpha})$ denote the XBWT$[T]$ obtained after the construction phase. The following methods are supported by the compressed index:
 
-\textbf{GetRankedChild($i$, $k$)}: Returns the position in $S$ of the $k$-th child of the node at index $i$. If the child does not exist, it returns -1. 
+\textbf{GetRankedChild(i, k)}: Returns the position in $S$ of the $k$-th child of the node at index $i$. If the child does not exist, it returns -1. 
 \begin{example}
     In \cref{tab:xbwt_example_2}, \texttt{GetRankedChild(2, 2)} returns 6.
 \end{example}
 
-\textbf{GetCharRankedChild($i$, $c$, $k$)}: Returns the position in $S$ of the $k$-th child labeled $c$ of the node at index $i$. If the child does not exist, it returns -1.
+\textbf{GetCharRankedChild(i, c, k)}: Returns the position in $S$ of the $k$-th child labeled $c$ of the node at index $i$. If the child does not exist, it returns -1.
 \begin{example}
     In \cref{tab:xbwt_example_2}, \texttt{GetCharRankedChild(1, B, 2)} returns 4.
 \end{example}
 
-\textbf{GetDegree($i$)}: Returns the total number of children of the node at index $i$ in $S$.
+\textbf{GetDegree(i)}: Returns the total number of children of the node at index $i$ in $S$.
 
-\textbf{GetCharDegree($i$, $c$)}: Returns the number of children of the node at index $i$ in $S$ that have the label $c$.
+\textbf{GetCharDegree(i, c)}: Returns the number of children of the node at index $i$ in $S$ that have the label $c$.
 
-\textbf{GetParent($i$)}: Returns the position in $S$ of the parent of the node at index $i$. If the node is the root (at index 1), it returns -1.
+\textbf{GetParent(i)}: Returns the position in $S$ of the parent of the node at index $i$. If the node is the root (at index 1), it returns -1.
 \begin{example}
     In \cref{tab:xbwt_example_2}, \texttt{GetParent(8)} returns 4.
 \end{example}
 
-\textbf{GetSubtree($i$)}: Retrieves the labels of all nodes in the subtree rooted at the node at index $i$ in $S$. The labels can be returned in any standard traversal order (e.g., pre-order, in-order, or post-order).
+\textbf{GetSubtree(i)}: Retrieves the labels of all nodes in the subtree rooted at the node at index $i$ in $S$. The labels can be returned in any standard traversal order (e.g., pre-order, in-order, or post-order).
 
-\textbf{SubPathSearch($P$)}: For a given labeled path $P = c_1c_2 \cdots c_k$, this function finds the range $[\text{First}\dots\text{Last}]$ such that all strings in $S_{\pi}[\text{First}\dots\text{Last}]$ are prefixed by the reversed path $P^R = c_k \cdots c_2c_1$.
+\textbf{SubPathSearch($P$)}: For a given labeled path $P = c_1c_2 \cdots c_k$, this function finds the range $S[\text{First} \dots \text{Last}]$ such that all strings in $S_{\pi}[\text{First} \dots \text{Last}]$ are prefixed by the reversed path $P^R = c_k \cdots c_2c_1$.
 \begin{example}
     In \cref{tab:xbwt_example_2}, \texttt{SubPathSearch(BD)} results in the range [12, 13], and \\ \texttt{SubPathSearch(AB)} gives the range [5, 8].
 \end{example}
@@ -388,11 +370,11 @@ It is important to note that their time complexity is dependent on the specific 
 
 Let's now see how to implement some of the above methods (from which the others can be derived) using the rank and select operations over the compressed strings $S_{\alpha}$ and $S_{\text{last}}$.
 
-\begin{figure}
+\begin{table}
     \centering
     \begin{tabular}{r c c c l}
     \hline\hline
-    \textbf{} & $A$ & $S_{\text{last}}$ & \textbf{$S_{\alpha}$} & \textbf{$S_{\pi}$} \\
+    \textbf{} & $A$ & \textbf{$S_{\text{last}}$} & \textbf{$S_{\alpha}$} & \textbf{$S_{\pi}$} \\
     \hline
     \textbf{1} & 0 & 0 & A & $\epsilon$ \\
     \textbf{2} & 1 & 0 & B & A \\
@@ -412,11 +394,11 @@ Let's now see how to implement some of the above methods (from which the others 
     \textbf{16} & 1 & 1 & b & EBA \\
     \hline\hline
     \end{tabular}
-    \caption{The sequence $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their `$\pi$' components. In contrast to \cref{tab:xbwt_example}, the auxiliary binary array $A$ is shown in the second column.}
+    \caption{The sequence $S$ for the tree shown in \cref{fig:example_tree}, obtained by stably sorting triplets according to their '$\pi$' components. In this representation, nodes $u$ and $v$ from the original tree $T$ appear at indices $2$ and $4$, respectively. The children's block of node $u$ occupies positions $5$ through $7$, while node $v$'s single child is located at index $8$. Also, the auxiliary binary array $A$ is shown.}
     \label{tab:xbwt_example_2}
-\end{figure}
+\end{table}
 
-\subsubsection*{GetChildren($i$)}
+\subsubsection*{GetChildren(i)}
 \cref{alg:getchildren} exploits directly the properties described before, in particular Property `Path-based Indexing' (\cref{prop3}). The rank operation at line 5 is used to get the number $r$ of nodes labeled $c$ up to position $i$ in $S_{\alpha}$. Then, the position $F[c]$ is obtained through a select operation on $A$ (line 6). By Property `Path-based Indexing', the children of $S[i]$ are located at the $r$-th block of children following position $F[c]$. Lines $8 - 9$ identify this block. 
 
 \begin{example}
@@ -433,23 +415,23 @@ Let's now see how to implement some of the above methods (from which the others 
 \end{example}
 
 \begin{algorithm}[H] 
-    \caption{GetChildren($S_\alpha$, $\Slast$, $i$)}
+    \caption{GetChildren($i$)}
     \label{alg:getchildren}
     \begin{algorithmic}[1]
     \If{$S_\alpha[i] \in \Sigma_L$}
         \State \Return $-1$ \Comment{$S[i]$ is a leaf}
     \EndIf
-    \State $c = S_\alpha[i]$ \Comment{$S[i]$ is labeled $c$}
-    \State $r = \text{rank}_c(S_\alpha, i)$
-    \State $y = \text{select}_1(A, c)$ \Comment{$y = F[c]$}
-    \State $z = \text{rank}_1(S_{\text{last}}, y - 1)$
-    \State $\text{First} = \text{select}_1(S_{\text{last}}, z + r - 1) + 1$
-    \State $\text{Last} = \text{select}_1(S_{\text{last}}, z + r)$
+    \State $c \gets S_\alpha[i]$ \Comment{$S[i]$ is labeled $c$}
+    \State $r \gets \text{rank}_c(S_\alpha, i)$
+    \State $y \gets \text{select}_1(A, c)$ \Comment{$y = F[c]$}
+    \State $z \gets \text{rank}_1(S_{\text{last}}, y - 1)$
+    \State $\text{First} \gets \text{select}_1(S_{\text{last}}, z + r - 1) + 1$
+    \State $\text{Last} \gets \text{select}_1(S_{\text{last}}, z + r)$
     \State \Return $(\text{First}, \text{Last})$
     \end{algorithmic}
 \end{algorithm}
 
-\subsubsection*{GetParent($i$)}
+\subsubsection*{GetParent(i)}
 \cref{alg:getparent} is based on Property `Path-based Indexing' (\cref{prop3}) and it is the inverse of the GetChildren method. In line 4, the algorithm computes the label $c$ of the parent of $S[i]$ that prefixes the upward path leading to $S[i]$. Then, the parent of $S[i]$ is searched among the nodes labeled $c$ in $S_{\alpha}$ by exploiting Property `Path-based Indexing' in a reverse manner. Namely, the number $k$ of children-blocks in the range $S[y, i]$ is computed; these are children of nodes labeled $c$ and preceding $i$ in the stable sort of $S$. Then, the $k$-th occurrence of $c$ in $S_{\alpha}$ is selected, which is indeed the parent of $S[i]$.
 
 \begin{example}
@@ -464,16 +446,16 @@ Let's now see how to implement some of the above methods (from which the others 
 \end{example}
 
 \begin{algorithm}[H]
-    \caption{GetParent($S_\alpha$, $\Slast$, $i$)}
+    \caption{GetParent($i$)}
     \label{alg:getparent}
     \begin{algorithmic}[1]
     \If{$i = 1$}
         \State \Return $-1$ \Comment{$S[i]$ is the root of $\mathcal{T}$}
     \EndIf
-    \State $c = \text{rank}_1(A, i)$
-    \State $y = \text{select}_1(A, c)$
-    \State $k = \text{rank}_1(S_{\text{last}}, i - 1) - \text{rank}_1(S_{\text{last}}, y - 1)$
-    \State $p = \text{select}_c(S_\alpha, k + 1)$
+    \State $c \gets \text{rank}_1(A, i)$
+    \State $y \gets \text{select}_1(A, c)$
+    \State $k \gets \text{rank}_1(S_{\text{last}}, i - 1) - \text{rank}_1(S_{\text{last}}, y - 1)$
+    \State $p \gets \text{select}_c(S_\alpha, k + 1)$
     \State \Return $p$
     \end{algorithmic}
 \end{algorithm}
@@ -510,35 +492,24 @@ The time complexity of the SubPathSearch algorithm is $O(l)$, where $l$ is the l
 \end{example}
 
 \begin{algorithm}[H]
-    \caption{\textsc{SubPathSearch}($S_\alpha$, $\Slast$, $P$)}
+    \caption{SubPathSearch($P$)}
     \label{alg:subpathsearch}
     \begin{algorithmic}[1]
-    \State $First = F(c_1)$; $Last = F(c_1 + 1) - 1$
+    \State $First \gets F(c_1)$; $Last \gets F(c_1 + 1) - 1$
     \If{$First > Last$}
         \State \textbf{return} ``$P$ is not a subpath of $T$''
     \EndIf
-    \For{$i = 2, \dots, k$}
-        \State $k_1 = \text{rank}_{c_i}(S_\alpha, First - 1)$; 
-        \State $z_1 = \text{select}_{c_i}(S_\alpha, k_1 + 1)$
+    \For{$i \gets 2, \dots, k$}
+        \State $k_1 \gets \text{rank}_{c_i}(S_\alpha, First - 1)$; $z_1 \gets \text{select}_{c_i}(S_\alpha, k_1 + 1)$
         \Comment{first entry in $S_\alpha[First, t]$ labeled $c_i$}
-        \State $k_2 = \text{rank}_{c_i}(S_\alpha, Last)$; 
-        \State $z_2 = \text{select}_{c_i}(S_\alpha, k_2)$
+        \State $k_2 \gets \text{rank}_{c_i}(S_\alpha, Last)$; $z_2 \gets \text{select}_{c_i}(S_\alpha, k_2)$
         \Comment{last entry in $S_\alpha[1, Last]$ labeled $c_i$}
         \If{$z_1 > z_2$}
             \State \textbf{return} ``$P$ is not a subpath of $T$''
         \EndIf
-        \State $First = \text{GetRankedChild}(z_1, 1)$ \Comment{get the first child of $S[z_1]$}
-        \State $Last = \text{GetRankedChild}(z_2, \text{GetDegree}(z_2))$ \Comment{get the last child of $S[z_2]$}
+        \State $First \gets \text{GetRankedChild}(z_1, 1)$ \Comment{get the first child of $S[z_1]$}
+        \State $Last \gets \text{GetRankedChild}(z_2, \text{GetDegree}(z_2))$ \Comment{get the last child of $S[z_2]$}
     \EndFor
     \State \textbf{return} $(First, Last)$
     \end{algorithmic}
 \end{algorithm}
-
-\subsection{Summary}
-To sum up, the XBWT has several key properties that make it an effective tool for labeled tree compression and indexing:
-\begin{itemize}
-    \item \textbf{Succinctness:} The XBWT representation of a labeled tree uses space close to the worst-case entropy (\cref{lem:info_theoretic_lower_bound}), which is \(H_{wc} = 2t + t \log |\Sigma| - \Theta(\log t) \) bits for a tree with $t$ nodes and an alphabet of size $|\Sigma|$.
-    Notice that the second component of $H_{wc}$ is $t\log |\Sigma|$ and not $m\log |\Sigma|$ since the XBWT works on \emph{node} labeled trees.
-    \item \textbf{Efficient Querying:} The XBWT supports navigational queries (\cref{def:tree_operations}) in optimal time $O(1)$ if $|\Sigma| = O(polylog(t))$, otherwise in $O(\log\log^{1+\epsilon} |\Sigma|)$ time. Whereas, given $s \in \Sigma^*$, subpath queries (\cref{def:tree_operations}) are supported in $O(|s|)$ if $|\Sigma| = O(polylog(t))$, otherwise in $O(|s| \log\log^{1+\epsilon} |\Sigma|)$ time.
-    \item \textbf{Scalability:} The XBWT is particularly useful for large-scale hierarchical data, such as XML documents or phylogenetic trees, where both compression and fast querying are critical.
-\end{itemize}

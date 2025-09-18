@@ -1,7 +1,11 @@
 \subsection{Implementation} \label{sec:xbwt_impl}
+
+% \nicola{Il lettore qui rimane spiazzato: stai descrivendo lo stato dell'arte e tutto ad un tratto spunta un'implementazione e degli esperimenti.  Sposta questa sezione in sezione 4 (in una sottosezione a parte) e motiva perché hai re-implementato la XBWT (cioè per compararla con il tuo compressore). }
+
+
 The XBWT data structure has been implemented in C++ using the Succinct Data Structure Library 2.0 (SDSL) for efficient representation and manipulation of compressed data structures. We will develop two algorithms for constructing the XBWT: one efficient linear-time recursive algorithm and one more straightforward iterative algorithm. Also, we will implement the necessary data structures and algorithms for navigating and querying the XBWT, such as parent-child navigation and path-based searches. 
 
-The implementation of the XBWT is based on the descriptions provided in the previous sections. Also, it is available on GitHub at the following link: \url{https://github.com/davide-tonetto-884585/XBWT}.
+The implementation of the XBWT is based on the descriptions provided in \cref{sec:XBWT}. Also, it is available on GitHub at the following link: \url{https://github.com/davide-tonetto-884585/XBWT}.
 
 \subsubsection{Implementation Choices}
 Follows a list of the main choices made during the implementation of the XBWT:
@@ -17,10 +21,10 @@ The implementation of the XBWT relies heavily on succinct data structures to ach
 
 The compression is achieved through the Succinct Data Structure Library (SDSL), which provides efficient implementations of various compressed data structures. For $S_{\text{last}}$, which is a binary sequence, we utilize a compressed bit vector that supports fast rank and select operations. For $S_\alpha$, which contains labels from a potentially large alphabet, we employ a wavelet tree structure that provides both compression and efficient query capabilities.
 
-The SDSL is a C++ library that provides efficient implementations of various compressed data structures and algorithms. It is used in this project to handle the compressed data structures composing the XBWT. The SDSL library provides a wide range of succinct data structures, such as bit vectors, wavelet trees, and compressed suffix arrays, which are essential for representing and querying the XBWT efficiently. The library is available at \url{https://github.com/simongog/sdsl-lite} \cite{gbmp2014sea}. Let's see the implementation details of the SDSL data structures used in the XBWT implementation.
+The SDSL is a C++ library that provides efficient implementations of various compressed data structures and algorithms. It is used in this project to handle the compressed data structures composing the XBWT. The SDSL library provides a wide range of succinct data structures, such as bit vectors, wavelet trees, and compressed suffix arrays, which are essential for representing and querying the XBWT efficiently. The library is available at \url{https://github.com/simongog/sdsl-lite}~\cite{gbmp2014sea}. Let's see the implementation details of the SDSL data structures used in the XBWT implementation.
 
 \subsubsection{RRR Bit Vector}
-The RRR bit vector is designed to provide space-efficient representations of bit vectors while supporting efficient rank and select operations. This data structure implements the RRR (Raman, Raman, and Rao) encoding method, which compresses bit vectors by partitioning them into fixed-size blocks and encoding each block based on its population count (the number of 1s) and specific configuration \cite{raman2002succinct}. 
+The RRR bit vector is designed to provide space-efficient representations of bit vectors while supporting efficient rank and select operations. This data structure implements the RRR (Raman, Raman, and Rao) encoding method, which compresses bit vectors by partitioning them into fixed-size blocks and encoding each block based on its population count (the number of 1s) and specific configuration~\cite{raman2002succinct}. 
 
 The space needed for an RRR bit vector of length $n$ with $m$ set bits is $nH_0 + o(n)$ ($\approx \lceil \log \binom{n}{m} \rceil$). 
 The rank support is provided by \texttt{sdsl::rank\_support\_rrr}, adding $80$ bits and requiring $O(\log k)$ time for rank queries, where $k$ is the number of set bits. The select support is provided by \texttt{sdsl::select\_support\_rrr}, adding $64$ bits and requiring $O(\log n)$ time for select queries.
@@ -28,7 +32,7 @@ The rank support is provided by \texttt{sdsl::rank\_support\_rrr}, adding $80$ b
 This data structure is used to represent $S_{\text{last}}$, a dedicated binary array $B_{\alpha}$ that stores the additional information associated with each entry of $S_{\alpha}$ (i.e., $B_{\alpha}[i]=1$ if the $i$-th symbol in $S_{\alpha}$ corresponds to a leaf and $0$ otherwise), and the $A$ array of the XBWT.
 
 \subsubsection{Wavelet Tree}
-The Wavelet tree is designed to efficiently handle sequences over large alphabets, such as integer sequences. It provides a space-efficient representation while supporting fast access, rank, and select operations. The wavelet tree is a balanced binary tree that recursively partitions the alphabet into two equal-sized subsets and encodes the sequence based on the partitioning \cite{grossi2003high}. The \texttt{sdsl::wt\_int} uses the RRR bit vectors or other succinct representations for storing the bit vectors in each node of the wavelet tree. This makes the structure space-efficient.
+The Wavelet tree is designed to efficiently handle sequences over large alphabets, such as integer sequences. It provides a space-efficient representation while supporting fast access, rank, and select operations. The wavelet tree is a balanced binary tree that recursively partitions the alphabet into two equal-sized subsets and encodes the sequence based on the partitioning~\cite{grossi2003high}. The \texttt{sdsl::wt\_int} uses the RRR bit vectors or other succinct representations for storing the bit vectors in each node of the wavelet tree. This makes the structure space-efficient.
 
 If RRR-compressed bitvectors are used for the internal bitmaps, a wavelet tree over a sequence $S \in \Sigma^n$ (with $|\Sigma|=\sigma$) occupies $n H_0(S) + o(n \log \sigma) + \Theta(\sigma \log n)$ bits of space, where $H_0(S)$ is the zero-order empirical entropy of $S$, and it supports access, rank, and select queries in $O(\log \sigma)$ time.
 
