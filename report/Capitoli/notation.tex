@@ -41,7 +41,7 @@ A basic understanding of formal grammars is crucial for comprehending some of th
     This grammar generates the language $\{a^n b^n \mid n \geq 0\}$, which includes strings like $\epsilon$ (the empty string), $ab$, $aabb$, $aaabbb$, and so on.
 \end{example}
 
-Let us now move to the definition of rooted tree.
+Let us now move to the definition of a rooted tree.
 \begin{definition}[Tree] \label{def:rooted_tree}
     A \textbf{rooted tree} is a triple $T = (V, E, r)$ where:
     \begin{itemize}
@@ -56,7 +56,7 @@ We denote by $t = |V|$ the number of vertices in the tree.
 \begin{definition}[Tree Terminology] \label{def:tree_terminology}
 Given a rooted tree $T = (V, E, r)$, we define the following concepts:
 \begin{itemize}
-    \item \textbf{Parent:} For any two distinct nodes $u,v\in V$, with $v\neq r$, we say that $u$ is the parent of $v$ iff $(u, v) \in E$ and $u$ lies on the unique path from $r$ to $v$. It follows that each node $v$ (except from the root) has exactly one parent, which we denote as $\textup{parent}(v)$. 
+    \item \textbf{Parent:} For any two distinct nodes $u,v\in V$, with $v\neq r$, we say that $u$ is the parent of $v$ iff $(u, v) \in E$ and $u$ lies on the unique path from $r$ to $v$. It follows that each node $v$ (except for the root) has exactly one parent, which we denote as $\textup{parent}(v)$. 
     \item \textbf{Children:} For a vertex $u\in V$, we define the set $\textup{children}(u) = \{v \in V | (u,v)\in E \land u = \textup{parent}(v)\}$
     \item \textbf{Leaves:} A vertex $v \in V$ is a \textit{leaf} if it has no children, i.e., there is no edge $(v, w) \in E$ for any $w \in V$.
     \item \textbf{Degree:} The \textit{degree} of a node $u$, denoted $\text{deg}(u)$, is its number of children.
@@ -121,12 +121,12 @@ Similarly to NFAs, the language of a DFA is the set of strings that end at a sta
     \lang{\dfa} = \{S \in \Sigma^* \mid \hat\delta(q_0, a) \in F\}
 \]
 
-Also, we introduce the following notation for automata: For \( q \in Q \) we write \( I_q \) to denote the set of strings reaching \( q \) from the initial state:
+Also, we introduce the following notation for automata: For \( q \in Q \), we write \( I_q \) to denote the set of strings reaching \( q \) from the initial state:
 \[
 I_q = \{ \alpha \in \Sigma^* \mid q = \delta(q_0, \alpha) \}
 \]
 
-NFAs can be more compact in terms of the number of states required to represent a language: a well-known fact is that the smallest DFA for a language could be exponentially larger than the smallest equivalent NFA. In this thesis this will not be a concern, since we will assume that the input language is presented via a DFA (more specifically, a trie). 
+NFAs can be more compact in terms of the number of states required to represent a language: a well-known fact is that the smallest DFA for a language could be exponentially larger than the smallest equivalent NFA. In this thesis, this will not be a concern, since we will assume that the input language is presented via a DFA (more specifically, a trie). 
 
 %DFAs also present advantages in terms of compressibility \nicola{questa frase è in contrasto con il precedente paragrafo: spiega meglio}. For instance, as shown in \cref{thm:indexing}, when using compression schemes based on $p$-sortable automata (\cref{def:p-sorable-automaton}), DFAs offer a space advantage. A $p$-sortable DFA requires $\log p$ fewer bits per edge than its NFA counterpart, making it more space-efficient in this context. \nicola{riformula: DFA log p, mentre NFA 2log p (così non è chiaro quanto spazio occupano gli NFA)}
 
@@ -219,7 +219,7 @@ This height function induces a partition $\Pi_i$ of $Q$, where $\Pi_i$ denotes t
 
 \begin{comment}
 \begin{definition}[Distinguished set]
-    We say that a set $\Pi_i$ is distinguished if no pair of states in $\Pi_i$ are MN--equivalent.
+    We say that a set $\Pi_i$ is distinguished if no pairs of states in $\Pi_i$ are MN--equivalent.
 \end{definition}
 \end{comment}
 
@@ -270,8 +270,8 @@ It is important to notice that, since the automaton is acyclic, every transition
 The algorithm proceeds level by level, from $i=0$ up to the maximum height, ensuring that states at each level are correctly partitioned into Myhill--Nerode equivalence classes. For each level $i$, it groups the states in $\Pi_i$ based on their signatures computed by the function $R$ (see \cref{def:R}). As explained before, when processing level $i$, the equivalence classes for all states in lower levels ($j < i$) have already been finalized. The signature $R(l(s))$ for a state $s$ depends on its finality and the equivalence classes of its immediate successors. Therefore, two states $s, t \in \Pi_i$ have the same signature if and only if they are MN--equivalent. The algorithm assigns a unique class identifier to each group of states with the same signature.
 
 The whole algorithm can be implemented to run in time $O(m)$ for an acyclic automaton with $m$ edges. Heights may be computed in linear time by
-a bottom-up traversal. The lists of states of a given height are collected during this traversal. The signature of a state is easy to compute provided the edges starting in a state have
-been sorted (by a bucket sort for instance to remain within the linear time constraint).
+a bottom-up traversal. The lists of states of a given height are collected during this traversal. The signature of a state is easy to compute, provided the edges starting in a state have
+been sorted (by a bucket sort, for instance, to remain within the linear time constraint).
 Sorting states by their signature again is done by a lexicographic sort~\cite{berstel2010minimization}. 
 
 \begin{example} 

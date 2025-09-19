@@ -267,9 +267,9 @@ We now state the following theorem regarding the number of edges in the bipartit
 \begin{proof}
     The total number of edges in the graph $G$ is the sum of the edges from the three categories defined in the construction:
     \begin{itemize}[leftmargin=25pt]
-        \item \textbf{Source Edges:} There are $p$ source nodes in $\sourceset$ and $n$ tree nodes in $\treeset{2}$. Each source node connects to every node in $\treeset{2}$, resulting in $p \times n = np$ edges.
+        \item \textbf{Source Edges:} There are $p$ source nodes in $\sourceset$ and $n$ nodes in $\treeset{2}$. Each source node connects to every node in $\treeset{2}$, resulting in $p \times n = np$ edges.
 
-        \item \textbf{Destination Edges:} There are $n$ tree nodes in $\treeset{1}$ and $p$ destination nodes in $\destset$. Each node in $\treeset{1}$ connects to every node in $\destset$, resulting in $n \times p = np$ edges.
+        \item \textbf{Destination Edges:} There are $n$ nodes in $\treeset{1}$ and $p$ destination nodes in $\destset$. Each node in $\treeset{1}$ connects to every node in $\destset$, resulting in $n \times p = np$ edges.
 
         \item \textbf{Internal Edges:} For each node $u_i \in \treeset{1}$, edges are created to all nodes $v_j \in \treeset{2}$ where $j > i$. The number of such edges is $\sum_{i=1}^{n-1} i = \frac{n(n-1)}{2}$.
     \end{itemize}
@@ -342,7 +342,7 @@ We introduce the following notation:
         &= p + \sum_{i=1}^p |\{j \in [|I_i| - 1]:(S[I_i])[j] \neq (S[I_i])[j+1]\}|
     \end{align*}
 
-    Where the first equality holds because the total weight $W(M)$ is the sum of weights from the $p$ source edges (each with weight 1) and the internal edges with weight 1. The second equality rewrites this count by summing the run boundaries for each partition set $I_i$. By distributing the constant $p$ into the summation we get:
+    Where the first equality holds because the total weight $W(M)$ is the sum of weights from the $p$ source edges (each with weight 1) and the internal edges with weight 1. The second equality rewrites this count by summing the run boundaries for each partition set $I_i$. By distributing the constant $p$ into the summation, we get:
 
     \begin{align*}
         W(M) &= \sum_{i=1}^p \big( 1 + |\{j \in [|I_i| - 1]:(S[I_i])[j] \neq (S[I_i])[j+1]\}| \big) \\
@@ -350,7 +350,7 @@ We introduce the following notation:
         &= \gamma(\mathcal{P}(M))
     \end{align*}
     
-    Where we used the definition of $\tau(S[I_i])$ as the number of runs (1 plus the number of character changes). The final equality is by the definition of $\gamma(\mathcal{P}(M))$.
+    We used the definition of $\tau(S[I_i])$ as the number of runs (1 plus the number of character changes). The final equality is by the definition of $\gamma(\mathcal{P}(M))$.
     
     Conversely, let $\mathcal{P} = \{I_1, \ldots, I_p\}$ be a partition of $S$. By \cref{lemma:partition_induces_matching}, $\mathcal{P}$ induces a perfect matching $M(\mathcal{P}) = \bigcup_{q=1}^p M(I_q)$. Since the edge sets $M(I_q)$ are disjoint, the total weight of the matching is the sum of the weights of each part, i.e., $W(M(\mathcal{P})) = \sum_{q=1}^p W(M(I_q))$.
 
@@ -712,7 +712,7 @@ To improve the efficiency of the reduction, we are studying a more sparse constr
     $$j_c = \min\{j \in \{i+1, i+2, \ldots, n\} : S[j] = c\}$$
     if such $j$ exists. Then we add edges $(u_i, v_{j_c})$ with weight $1$ for the first $p$ distinct characters in $\mathcal{C}_i$.
 \end{enumerate}
-This leads to a graph with $O(np)$ edges, where $n$ is the size of $S$. It can be shown that such graph preserves the optimal solutions of the original reduction. 
+This leads to a graph with $O(np)$ edges, where $n$ is the size of $S$. It can be shown that such a graph preserves the optimal solutions of the original reduction. 
 
 \begin{example}
     Consider the example in \cref{fig:improv_ex}, where $p = 2$. The first node labeled $A$ in $V_1$ is connected to the first node labeled $A$ in $V_2$ with weight $0$. Also, it is connected only to the first $p$ distinct nodes in $V_2$ with weight $1$.
@@ -759,7 +759,3 @@ This leads to a graph with $O(np)$ edges, where $n$ is the size of $S$. It can b
         \label{fig:improv_ex}
     \end{figure}
 \end{example}
-
-
-
-

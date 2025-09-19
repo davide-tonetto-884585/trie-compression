@@ -17,7 +17,7 @@ However, existing techniques may not be optimal when dealing with tries that exh
 The primary goal of this thesis is to develop a data structure that both compresses a given finite language and efficiently supports indexing queries, such as navigational and subpath queries (see \cref{def:tree_operations}). This challenge involves navigating a fundamental trade-off between compression and indexability, which we explore in detail in \cref{sec:wheeler_and_psortable_graphs}. Two straightforward approaches highlight the extremes of this spectrum:
 
 \begin{enumerate}
-    \item[A] \textbf{Full Compression, Difficult Indexing:} One could minimize the input trie into the smallest possible equivalent DFA using an algorithm like Revuz's~\cite{revuz1992minimisation}. While this yields optimal compression through DAG compression (see \cref{sec:notation}), indexing the resulting general DFA is a notoriously difficult problem. As shown by Equi et al.~\cite{equiGraphsCannotBe2023}, polynomial-time indexing schemes for general DFAs cannot support sub-quadratic query times unless the Strong Exponential Time Hypothesis (SETH) fails, making this approach unsuitable for most indexing purposes.unsuitable for most indexing purposes.
+    \item[A] \textbf{Full Compression, Difficult Indexing:} One could minimize the input trie into the smallest possible equivalent DFA using an algorithm like Revuz's~\cite{revuz1992minimisation}. While this yields optimal compression through DAG compression (see \cref{sec:notation}), indexing the resulting general DFA is a notoriously difficult problem. As shown by Equi et al.~\cite{equiGraphsCannotBe2023}, polynomial-time indexing schemes for general DFAs cannot support sub-quadratic query times unless the Strong Exponential Time Hypothesis (SETH) fails, making this approach unsuitable for most indexing purposes.
     
     \item[B] \textbf{Full Indexability, No Compression:} At the other extreme, the input trie itself can be used as an index. Tries are Wheeler graphs~\cite{gagie2017wheeler}, specifically $1$--sortable automata (\cref{def:wheeler_automaton}), a property that makes them highly amenable to efficient indexing~\cite{cotumaccio2023co}. While this provides excellent query performance through the co--lexicographic ordering of states (see \cref{def:colex_order_on_automaton}), it offers no compression, as even highly repetitive subtrees are stored explicitly.
 \end{enumerate}
@@ -72,12 +72,19 @@ We frame this problem as a string partitioning problem. Consider the sequence of
     The total number of runs for this partition is $2 + 3 = 5$. This is a reduction from the original 8 runs in $S$. This example illustrates how partitioning a string's indices can reduce the total number of runs in the resulting subsequences.
 \end{example}
 
-In Section \ref{sec:reduction_to_mwpbm} we show that the String Partitioning Problem can be reduced to the problem of finding a minimum weight perfect matching on a bipartite graph (MWPBM), allowing us to use efficient, well-studied algorithms to find the optimal solution. 
+In Section \ref{sec:reduction_to_mwpbm}, we show that the String Partitioning Problem can be reduced to the problem of finding a minimum weight perfect matching on a bipartite graph (MWPBM), allowing us to use efficient, well-studied algorithms to find the optimal solution. 
 
 To sum up, the main contribution of the thesis is to show how to convert a trie (recognizing a finite regular language) to an equivalent small compressed automaton that is $p$--sortable by construction (for any parameter $p$ specified by the user) and thus supports efficient queries using the data structure developed by Cotumaccio et al.~\cite{cotumaccio2023co}. 
 The larger $p$ is, the better compression we can achieve (but the slower queries will be).
-As our experimental results in \cref{chp:experiments} will show, in both the repetitive and non-repetitive scenarios our method allows for a twofold reduction of the number of states by just increasing $p$ from 1 (the original trie) to $2$. By further increasing $p$, the number of states quickly approaches that of the smallest DFA for the language. 
-
-
+As our experimental results in \cref{chp:experiments} will show, in both the repetitive and non-repetitive scenarios, our method allows for a twofold reduction of the number of states by just increasing $p$ from 1 (the original trie) to $2$. By further increasing $p$, the number of states quickly approaches that of the smallest DFA for the language. 
 
 \section{Structure of the Thesis}
+This thesis is organized into several chapters, each building upon the last to provide a comprehensive exploration of our proposed trie compression scheme.
+
+In \cref{chp:preliminary}, we begin by introducing the fundamental concepts and notation that are essential for understanding the subsequent chapters. This includes theoretical background on automata theory, labeled trees and tries, the Extended Burrows-Wheeler Transform (XBWT), Wheeler and $p$--sortable graphs, and the min-weight perfect bipartite matching (MWPBM) problem, which form the theoretical foundations of our work.
+
+\Cref{chp:project_overview} then transitions from theory to practice, presenting the core ideas behind our novel trie compression algorithm. We introduce the concept of collapsing nodes and detail the reduction to a MWPBM problem, which is the central mechanism of our approach.
+
+Following this, \cref{chp:experiments} is dedicated to the empirical evaluation of our method. We describe the implementation of our algorithm and present a series of experiments designed to assess its performance. This includes a comparison with existing methods and an analysis of the execution time and compression ratios achieved.
+
+Finally, in \cref{chp:conclusions}, we summarize our findings and discuss the implications of our results. We also outline potential avenues for future research, including possible optimizations and extensions of the proposed scheme.

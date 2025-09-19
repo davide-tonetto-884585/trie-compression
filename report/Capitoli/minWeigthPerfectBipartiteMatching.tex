@@ -182,7 +182,7 @@ The weight of a matching is the sum of the weights of the edges in the matching.
             \caption{Min. weight perfect matching.}
             \label{fig:mwpbm_perfect}
         \end{subfigure}
-        \caption{Example of (a) a non-minimum weight perfect matching and (b) a minimum weight perfect matching in a bipartite graph. Double edges have weight 2 while single edges 1. The edges in a matching are highlighted in red.}
+        \caption{Example of (a) a non-minimum weight perfect matching and (b) a minimum weight perfect matching in a bipartite graph. Double edges have weight 2, while single edges have weight 1. The edges in a matching are highlighted in red.}
         \label{fig:mwpbm_example}
     \end{figure}
 \end{example}
@@ -285,7 +285,7 @@ The problem of finding a minimum weight perfect matching in a bipartite graph ca
     \end{aligned}
 \end{equation}
 
-Notice that any solution to this integer program corresponds to a matching and therefore this is a valid formulation of the minimum weight perfect matching problem in bipartite graphs.
+Notice that any solution to this integer program corresponds to a matching, and therefore this is a valid formulation of the minimum weight perfect matching problem in bipartite graphs.
 
 The linear program relaxation $P$ of the above integer program is as follows:
 
@@ -322,9 +322,9 @@ is called the bipartite perfect matching polytope (see Lecture notes by \cite{go
 \end{comment}
 
 \subsection{State of the Art} \label{sec:mwpbm_solutions}
-There are several algorithms to solve the problem of finding a minimum weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955~\cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the MWPBM problem in polynomial time. In the original paper the complexity of the algorithm was $O(n^4)$ where $n$ is the number of nodes in the bipartite graph. Later Dinic and Kronrod~\cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
+There are several algorithms to solve the problem of finding a minimum-weight perfect matching in a bipartite graph. The first algorithm to solve this problem was proposed by Kuhn in 1955~\cite{kuhn1955hungarian}. The algorithm is based on the Hungarian method, which is a combinatorial optimization algorithm that solves the MWPBM problem in polynomial time. In the original paper, the complexity of the algorithm was $O(n^4)$ where $n$ is the number of nodes in the bipartite graph. Later Dinic and Kronrod~\cite{dinic1969algorithm} showed that the algorithm can be implemented in $O(n^3)$ time.
 
-The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp~\cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989 Gabow and Tarjan~\cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denote the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr~\cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
+The Hungarian method is a powerful algorithm; however, it is not very intuitive and can be difficult to implement. In recent years, several other algorithms have been proposed to solve this problem. In 1970, Edmonds and Karp~\cite{edmonds1972theoretical} proposed an algorithm that solves the problem in $O(nm + n^2 \log n)$ time, where $m$ is the number of edges. In 1989, Gabow and Tarjan~\cite{gabow1989faster} proposed an algorithm that solves the problem in $O(\sqrt{n}m \log(nW))$ time, where $W$ denotes the highest edge weight in the graph; costs are assumed to be integral. The algorithms work by scaling. Lastly, in 2009, Sankowski and Piotr~\cite{sankowski2009maximum} introduced a randomized algorithm that solves the problem in $O(Wn^\omega)$ time, where $\omega$ is the exponent of matrix multiplication, and $W$ is the highest edge weight in the graph.
 
 In 2022, Chen, Li, et al.~\cite{chen2022maximum} proposed a nearly linear time algorithm for the Minimum Cost Flow (MCF) problem, running in $O(m'^{1+o(1)})$ on a network with $m'$ edges. This is highly relevant as the MWPBM problem can be reduced to MCF. Specifically, an MWPBM instance on a bipartite graph with $n$ vertices and $m$ edges can be transformed into an MCF problem on a network with $m' = 2n + m$ edges.
 

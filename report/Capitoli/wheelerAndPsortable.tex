@@ -29,7 +29,7 @@ Now, let us define the formal concept of partial order and the width of a partia
     \end{itemize}
 \end{definition}
 
-A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In a Hasse diagram, each element of $S$ is represented by a node, and given $a,b \in S$ there is a line segment or curve going upward from $a$ to $b$ if $a \leq b$ and there is no element $c\in S$ such that $a \leq c \leq b$. The direction of the relation is implicitly upwards, so arrows are not needed. An example is given in \cref{ex:hasse}.
+A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In a Hasse diagram, each element of $S$ is represented by a node, and given $a,b \in S$, there is a line segment or curve going upward from $a$ to $b$ if $a \leq b$ and there is no element $c\in S$ such that $a \leq c \leq b$. The direction of the relation is implicitly upwards, so arrows are not needed. An example is given in \cref{ex:hasse}.
 
 \begin{example} \label{ex:hasse}
     In the example shown in \cref{fig:hasse_diagram_example}, the set is composed of the divisors of 12, and the relation is divisibility. An edge is drawn from $a$ to $b$ if $a$ divides $b$ and there is no other element $c$ in the set such that $a/c$ and $c/b$. For instance, there is an edge from 2 to 4 because 2 divides 4, and no other element in the set is a multiple of 2 and a divisor of 4. There is no direct edge from 2 to 12 because the relationship is captured transitively through other elements, such as $2/4/12$ or $2/6/12$.
@@ -56,7 +56,7 @@ A partial order $(S, \leq)$ can be visualized using a \textit{Hasse diagram}. In
     \end{figure}
 \end{example}
 
-Now we can define the concept of width of a partial order.
+Now we can define the concept of the width of a partial order.
 
 \begin{definition}[Antichain]
     An antichain of a partial order $(S, \leq)$ is a subset of $S$ where any two distinct elements are incomparable. That is, for any two distinct elements $a, b$ in the antichain, neither $a \leq b$ nor $b \leq a$ holds.
@@ -76,7 +76,7 @@ With the concept of co--lex order established, we can now define the class of gr
     \sloppy
     A finite state automaton $\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$ is a \textit{Wheeler automaton} if there exists a total order $\leq$ on its set of states $Q$ that satisfies the following axioms:
     \begin{enumerate}
-        \item The initial state precede all other states in the order.
+        \item The initial state precedes all other states in the order.
     \suspend{enumerate}
     For any two transitions $u \in \delta(u', a)$ and $v \in \delta(v', b)$:
     \resume{enumerate}[{}]
@@ -132,7 +132,7 @@ Under these definitions, a Wheeler automaton is a \textbf{$1$--sortable automato
     State incomparability can arise in several situations. For example, consider two states $u$ and $u'$.
     \begin{itemize}
         \item As illustrated in Figure~\ref{fig:incomparability-scenario1}, if there are two same-labeled transitions to the target states $u$ and $v$ from two incomparable states $u'$ and $v'$, then $u$ and $v$ are also incomparable.
-        \item Conflicting constraints from different labels can force incomparability, as shown in Figure~\ref{fig:incomparability-scenario2}. An existing order on the sources of $a$-transitions (e.g., $u' < v'$) may require $u < v$ to satisfy the Wheeler axioms, while an order on the sources of $b$-transitions (e.g., $v'' < u''$) may require the opposite, $v < u$. Since both cannot be true, the targets $u$ and $v$ must be incomparable.
+        \item Conflicting constraints from different labels can force incomparability, as shown in Figure~\ref{fig:incomparability-scenario2}. An existing order on the sources of $a$-transitions (e.g., $u' < v'$) may require $u < v$ to satisfy the Wheeler axioms, while an order on the sources of $b$-transitions (e.g., $v'' < u''$) may require the opposite, $v < u$. Since neither can be true, the targets $u$ and $v$ must be incomparable.
     \end{itemize}
 
     \begin{figure}[H]
@@ -196,7 +196,7 @@ Under these definitions, a Wheeler automaton is a \textbf{$1$--sortable automato
 \end{example}
 
 \begin{example} \label{ex:p-sortable}
-    Consider the following DFA $D$ of \cref{fig:non_wheeler_graph_example} and its partial co--lex order \cref{fig:non_wheeler_graph_poset}. The DFA is not Wheeler because states $u_3$ and $u_5$ and states $u_4$ and $u_7$ are incomparable (as shown in the Hasse diagram). $D$ admits a partition into two chains of totally ordered states, for example one possible chain partition is given by:
+    Consider the following DFA $D$ of \cref{fig:non_wheeler_graph_example} and its partial co--lex order \cref{fig:non_wheeler_graph_poset}. The DFA is not Wheeler because states $u_3$ and $u_5$ and states $u_4$ and $u_7$ are incomparable (as shown in the Hasse diagram). $D$ admits a partition into two chains of totally ordered states, for example, one possible chain partition is given by:
     \begin{itemize}
         \item Chain 1: $u_1 \leq u_2 \leq u_3 \leq u_4$
         \item Chain 2: $u_5 \leq u_6 \leq u_7$

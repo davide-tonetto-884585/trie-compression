@@ -55,18 +55,18 @@ The XBWT class utilizes several data structures from the SDSL library to efficie
     \item \texttt{std::unordered\_map<T, unsigned int> alphabetMap}: A hash map that maps each label in the alphabet to a unique integer.
     \item \texttt{unsigned int cardSigma}: The cardinality of the alphabet $\Sigma$.
     \item \texttt{unsigned int cardSigmaN}: The cardinality of the $\Sigma_N$ alphabet. Where $\Sigma_N$ is the set of labels that appear in the internal nodes of the labeled tree.
-    \item \texttt{unsigned int maxNumDigits}: The maximum number of digits that has the integer code associated to the greater label in the alphabet (needed to sort the labels in the alphabet).
+    \item \texttt{unsigned int maxNumDigits}: The maximum number of digits that has the integer code associated with the greater label in the alphabet (needed to sort the labels in the alphabet).
 \end{itemize}
 
 The overall space complexity of the XBWT class can be derived from the space complexity of the compressed data structures used in the class. 
 
 \subsection{Construction implementation}
 \alessio{Perché non fare pseudocodice come per Alg 1?}
-The construction of the XBWT is done by the constructor of the XBWT class. The constructor takes as input a generic labeled tree and constructs the compressed indexing scheme using the linear pathSort (also the naive construction method can be used by passing the boolean flag \texttt{usePathSort = false}). The construction process is divided into the following steps:
+The construction of the XBWT is done by the constructor of the XBWT class. The constructor takes as input a generic labeled tree and constructs the compressed indexing scheme using the linear pathSort (also, the naive construction method can be used by passing the boolean flag \texttt{usePathSort = false}). The construction process is divided into the following steps:
 
 \begin{enumerate}
     \item \textbf{Alphabet Encoding}: The first step is to encode the labels of the alphabet as integers. The labels are sorted in lexicographical order and assigned a unique integer code starting from 1 to $|\Sigma|$. Two hash maps are used to map each label to a unique integer and vice versa. 
-    \item \textbf{Construct \texttt{intNodes} array}: The next step is to construct the \texttt{intNodes} array as described in the previous chapters. \texttt{intNodes} is an array of triplets of length $t$ in which node is represented as a triplet containing the node's label, its level, and the index of its parent node in the array (from 1 to t, root has parent 0). The nodes are inserted in preorder traversal of the labeled tree.
+    \item \textbf{Construct \texttt{intNodes} array}: The next step is to construct the \texttt{intNodes} array as described in the previous chapters. \texttt{intNodes} is an array of triplets of length $t$ in which a node is represented as a triplet containing the node's label, its level, and the index of its parent node in the array (from $1 to t$, root has parent $0$). The nodes are inserted in a preorder traversal of the labeled tree.
     \item \textbf{Sort \texttt{intNodes} array:} Call the \texttt{pathSort} or \texttt{upwardStableSortConstruction} (naive method) method to get the sorted array of nodes \texttt{intNodes}.
     \item \textbf{Construct $S_{\text{last}}$ array}: Construct the $S_{\text{last}}$ array by iterating over the sorted \texttt{intNodes} array.
     \item \textbf{Construct $S_{\alpha}$ array}: Construct the $S_{\alpha}$ array by iterating over the sorted \texttt{intNodes} array, along with the additional bit array to distinguish between internal and leaf nodes.

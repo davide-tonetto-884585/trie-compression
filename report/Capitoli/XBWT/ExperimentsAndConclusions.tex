@@ -1,19 +1,18 @@
 \subsection{Construction Time Experiments} 
 
-To evaluate the performance of the implemented algorithms, we conducted a series of experiments on randomly generated trees. The trees were generated with sizes ranging from 100 to 900,000 nodes. For each tree, we executed the construction algorithms 10 times, measuring the average execution time for both the linear \emph{PathSort} (P.S.) algorithm and the Naive Sort (N.S.) algorithm used for constructing the XBWT.
-This approach allowed us to compare their performance across different tree sizes and assess their scalability.
+To evaluate the performance of the implemented algorithms, we conducted a series of experiments on randomly generated trees, with sizes ranging from 100 to 900,000 nodes. For each tree, we executed the construction algorithms 10 times, recording the average execution time for both the linear \textsc{PathSort} algorithm and the Naive Sort algorithm used for constructing the XBWT.
+By ``Naive Sort'', we refer to a straightforward approach that first precomputes all the upward paths in the tree and then sorts them using a standard sorting algorithm. This method contrasts with \textsc{PathSort}, which is specifically designed to achieve linear time complexity in path sorting.
+This approach enabled us to compare their performance across various tree sizes and evaluate their scalability.
 
-From the results shown in Table \cref{tab:experiments}, we can draw several conclusions about the performance of the PathSort (P.S.) algorithm compared to the Naive Sort (N.S.) algorithm and the space savings achieved by compressing the XBWT.
+From the results shown in Table \cref{tab:experiments}, we can draw several conclusions about the performance of the \textsc{PathSort} algorithm compared to the Naive Sort algorithm.
 
-Firstly, the PathSort algorithm consistently outperforms the Naive Sort algorithm in terms of execution time, especially as the number of nodes increases. For smaller trees, the difference in execution time between the two algorithms is minimal. However, as the number of nodes grows, the PathSort algorithm demonstrates significantly better scalability. For instance, with 900,000 nodes, the PathSort algorithm takes 8.51 seconds, whereas the Naive Sort algorithm takes 34.2 seconds, giving speedup of more than $4\times$.
-
-Secondly, the depth of the tree appears to increase with the number of nodes, which is expected in randomly generated trees. This increase in depth does not seem to adversely affect the performance of the PathSort algorithm as much as it does the Naive Sort algorithm.
+The \textsc{PathSort} algorithm consistently outperforms the Naive Sort algorithm in terms of execution time, especially as the number of nodes increases. For smaller trees, the difference in execution time between the two algorithms is minimal. However, as the number of nodes grows, the \textsc{PathSort} algorithm demonstrates significantly better scalability. For instance, with 900,000 nodes, the \textsc{PathSort} algorithm takes 8.51 seconds, whereas the Naive Sort algorithm takes 34.2 seconds, giving a speedup of more than $4\times$. A visual representation of the results can be seen in \cref{fig:xbwt_exp_plots} where both the time comparison and the speedup are shown.
 
 \begin{table}[h]
     \centering
     \begin{tabular}{|r|r||r|r|}
         \hline
-        \textbf{Nodes} & \textbf{Depth} & \textbf{Naive sort} (s) & \textbf{\textsc{PathSort} (s)} \\
+        \textbf{\# Nodes} & \textbf{Depth} & \textbf{Naive Sort (s)} & \textbf{\textsc{PathSort} (s)} \\
         \hline
             100 &    22 &  0.001 & 0.002 \\
             500 &    45 &  0.002 & 0.004 \\
@@ -26,7 +25,7 @@ Secondly, the depth of the tree appears to increase with the number of nodes, wh
         900,000 & 2,658 & 34.200 & 8.510 \\
         \hline
     \end{tabular}
-    \caption{Performance comparison between Naive Sort and {\pathsort} algorithms.}
+    \caption{Performance comparison of the execution times for the Naive Sort and \textsc{PathSort} algorithms on randomly generated trees of varying sizes.}
     \label{tab:experiments}
 \end{table}
 
@@ -34,19 +33,19 @@ Secondly, the depth of the tree appears to increase with the number of nodes, wh
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{"Immagini/plottime.png"}
+        \includegraphics[width=\textwidth]{"Immagini/execution_time_comparison.pdf"}
         \caption{Time Comparison}
         \label{fig:time_comparison}
     \end{subfigure}
     \hfill %
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{"Immagini/speedup_pathsort.png"}
+        \includegraphics[width=\textwidth]{"Immagini/speedup_comparison.pdf"}
         \caption{Speedup}
         \label{fig:speedup}
     \end{subfigure}
-    \caption{Time comparison and speedup plots for the experiments in \cref{tab:experiments}. Image (a) shows Pathsort time in seconds (blue line) vs. naive sort time (red dashed line). Image (b) shows Speedup of pathsort over naive sort. The dashed line represents linear speedup.}
-    \label{fig:side_by_side_plots}
+    \caption{Time comparison and speedup plots for the experiments in \cref{tab:experiments}. Image (a) shows \textsc{PathSort} time in seconds (yellow dashed line) vs. Naive Sort time (blue line). Image (b) shows the speedup of \textsc{PathSort} over Naive Sort. The area below the red dashed line indicates points where the speedup is less than or equal to 1, representing no improvement of \textsc{PathSort} over Naive Sort.}
+    \label{fig:xbwt_exp_plots}
 \end{figure}
 
 \begin{comment}
@@ -88,6 +87,4 @@ By \emph{uncompressed XBWT}, we refer to the XBWT arrays $S_{\text{last}}$ and $
 For small trees, the compressed XBWT does not always provide immediate savings due to the overhead of succinct data structures. For instance, for 100 nodes, the compressed representation is larger than the plain tree, showing a \(-27.18\%\) increase in space. However, as the number of nodes increases, the compression becomes more effective, achieving savings of over 60\% for large trees.
 
 The space reduction becomes particularly evident for trees with more than 500 nodes. These results confirm that the compressed XBWT provides a scalable and space-efficient alternative for storing and indexing labeled trees. The efficiency gains are particularly beneficial for applications requiring large-scale tree processing, such as bioinformatics and text indexing.
-
-In conclusion, the PathSort algorithm is a more efficient choice for constructing the XBWT, especially for larger trees, and the compression method provides significant space savings, making the overall process more efficient in terms of both time and space.
 \end{comment}

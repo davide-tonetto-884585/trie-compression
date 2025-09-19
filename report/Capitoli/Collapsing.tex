@@ -1,7 +1,7 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
-This chapter introduces our \textbf{node collapsing} technique, designed to reduce the size of the trie by collapsing runs of Myhill--Nerode-Equivalent states adjacent in the same chain. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original tree, we call them chains. Within these chains, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill--Nerode equivalence class.
+This chapter introduces our \textbf{node collapsing} technique, designed to reduce the size of the trie by collapsing runs of Myhill--Nerode-Equivalent states adjacent in the same chain. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original trie; we call them chains. Within these chains, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill--Nerode equivalence class.
 
-The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation reduce the graph structure while preserving its language. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
+The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation reduces the graph structure while preserving its language. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
 
 In this section, we will formally define the collapsing procedure and then rigorously prove that this transformation is language-preserving (\cref{lemma:language-eq}), guaranteeing the correctness of our compression scheme.
 
@@ -52,7 +52,7 @@ In this section, we will formally define the collapsing procedure and then rigor
 The \textsc{Collapse} procedure forms the core of our compression strategy. By recursively applying this operation to all consecutive MN--equivalent nodes in each chain, we merge redundant states. The restriction to merge only consecutive states is critical: merging non-consecutive states, even if they share the same MN--class, would violate the total order of the chains, a property that must be preserved for the construction of the $p$--sortable automaton (\cref{def:p-sorable-automaton}) to be valid. This process transforms the initial trie into a compact $p$--sortable automaton. Such an automaton can result in an NFA, as the \textsc{Collapse} operation may introduce non-determinism. For example, if two states $u$ and $v$ are merged into a new state $w$, and there exist transitions $(u, a, s)$ and $(v, a, t)$ and $s \neq t$ after the collapsing procedure, the resulting state $w$ will have two distinct transitions for the same label $a$, which is a feature of NFAs.
 
 \begin{example}
-    Assume that we extract the chains $C_1 = \text{ACCB}$ and $C_2 = \text{BDDDDDD}$ from the tree in \cref{fig:example_ADFA} by applying the reduction from String Partitioning to MWPBM. The nodes inside each chain are the following:
+    Assume that we extract the chains $C_1 = \text{ACCB}$ and $C_2 = \text{BDDDDDD}$ from the trie in \cref{fig:example_ADFA} by applying the reduction from String Partitioning to MWPBM. The nodes inside each chain are the following:
     \begin{itemize}
         \item $C_1 = \{a,d,f,c\}$
         \item $C_2 = \{b,h,l,e,i,m,g\}$
@@ -129,9 +129,9 @@ If $l$ and $q$ belong to the same equivalence class, then for every continuation
 \[
 \delta(l,z) \in F \iff \delta(q,z) \in F.
 \]
-Thus replacing $l$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore merging $l$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
+Thus, replacing $l$ with $q$ (or vice versa) in any path does not affect whether the run ends in an accepting state. Therefore, merging $l$ and $q$ does not alter the set of accepted strings, i.e.\ the recognized language remains $L$.
 \end{proof} 
 
-Collapsing two MN--equivalent nodes as in \cref{alg:collapse} preserves the language of the original automaton and the resulting chains inherit a total order. This 
+Collapsing two MN--equivalent nodes as in \cref{alg:collapse} preserves the language of the original automaton, and the resulting chains inherit a total order. This 
 directly implies that the obtained NFA is $p$--sortable and 
 enables the application of the NFA indexing scheme of Cotumaccio et al.~\cite{cotumaccio2023co}.

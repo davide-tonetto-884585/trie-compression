@@ -19,7 +19,7 @@ The \textbf{Extended Burrows-Wheeler Transform} is a data structure designed to 
 \end{definition}
 Let $\Sigma_N$ be the alphabet of the internal nodes, and $\Sigma_L$ be the alphabet of the leaves of $T$.
 If $\Sigma_L \cap \Sigma_N = \emptyset$, the additional indicator bit in $\alpha(u)$ becomes redundant and may be omitted.
-Without loss of generality, we will only consider this case, therefore, we identify $\alpha(u)$ with the node label, i.e., $\alpha(u) := label(u)$.
+Without loss of generality, we will only consider this case; therefore, we identify $\alpha(u)$ with the node label, i.e., $\alpha(u) := label(u)$.
 
 The definition of the XBWT relies on a sequence $S$, which contains a triplet \\ 
 $(last(u), \alpha(u), \pi(u))$ for each node $u$ in the tree $T$.
@@ -28,7 +28,7 @@ The construction of $S$ is a two-step process. First, an intermediate vector of 
 From now on, we will use $S_{last}$ (resp. $S_{\alpha}$, $S_{\pi}$) to refer to the sequences made up of the $last$ (resp. $\alpha$, $\pi$) component of all triplets in $S$.
 
 \begin{theorem}
-    The XBWT of a labeled tree $T$ consists of two arrays, $S_{\text{last}}$ and $S_{\alpha}$ after sorting.
+    The XBWT of a labeled tree $T$ consists of two arrays, $S_{\text{last}}$ and $S_{\alpha}$, after sorting.
     %These are constructed from the sequence $S$ of triplets. Specifically, for each $i$ from 1 to $t$, $S_{\text{last}}[i]$ is the `$last$` component of the $i$-th triplet in $S$, and $S_{\alpha}[i]$ is the '$\alpha$' component.
     The total space required is $2t + t \log |\Sigma|$ bits.
 \end{theorem}
@@ -84,7 +84,7 @@ This grouping provides several important consequent properties:
 
 \textbf{Unary Degree Encoding:} The subarray $S_{\text{last}}$ for the block of children $[u_1, \dots, u_z]$ encodes the degree of $u$ in unary coding. Specifically, $S_{\text{last}}[u'_z] = 1$ and $S_{\text{last}}[u'_i] = 0$ for $1 \leq i < z$. 
 \begin{example}
-    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can observe that $S_{\text{last}}[5 \dots 7] = [0, 0, 1]$, which is equal 3 in unary encoding, matching the number of children of node $u$.
+    Consider the node $u$ in \cref{fig:example_tree}. Looking at \cref{tab:xbwt_example}, we can observe that $S_{\text{last}}[5 \dots 7] = [0, 0, 1]$, which is equal to 3 in unary encoding, matching the number of children of node $u$.
 \end{example}
 
 \textbf{Preservation of Sibling Order:} If two nodes $u$ and $v$ have the same label, and the triplet for $u$ precedes the triplet for $v$ in $S$, then the entire block of children of $u$ will also precede the block of children of $v$.
@@ -116,7 +116,7 @@ Additional properties of the XBWT components include:
 A naive approach to build the XBWT would be to explicitly construct $S$ through the concretization of $\pi$-strings and then sort it using a stable sorting algorithm. However, this approach would require $\Theta(t^2)$ space in the worst case, which is not feasible for deep trees. To overcome this issue, Ferragina et al.~\cite{ferragina2009compressing} proposed a more efficient algorithm that builds $S$ in linear time $O(t)$ and uses $O(t \log t)$ bits of working space.
 This algorithm is called {\pathsort}, and is based on a generalization of the Skew algorithm, designed for the construction of suffix arrays on strings~\cite{karkkainen2006linear}.
 
-The Skew algorithm works by first building the suffix array recursively on a string long two thirds of the original one.
+The Skew algorithm works by first building the suffix array recursively on a string of length two-thirds of the original one.
 This is done by working on the suffixes starting at positions $i$ such that $i \bmod 3 \neq 0$. 
 Then, the suffix array of the remaining suffixes is built using the result of the previous step, and in the end, these two are merged into the final suffix array.
 Thanks to linear-time radix sorting of the suffix array, a single-pass merge algorithm, and given that the recursion operates on a string of length $2n/3$, the overall time satisfies
@@ -135,7 +135,7 @@ T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
 
 
 \begin{comment}
-\alessio{Maybe all of this detail is not required for this algorithm... This is just a precursor of the {\pathsort}, which you explain in detail just after this subsubsection. Here I think it's enough to give an intuition of the mod 3 stuff, and explain directly the {\pathsort}. Otherwise it can be confusing as you were talking about compressing trees and you jump to strings. I won't delete what you wrote because there are some comments that are still interesting (old part between the horizontal lines).}
+\alessio{Maybe all of this detail is not required for this algorithm... This is just a precursor of the {\pathsort}, which you explain in detail just after this subsubsection. Here, I think it's enough to give an intuition of the mod 3 stuff, and explain directly the {\pathsort}. Otherwise it can be confusing as you were talking about compressing trees and you jump to strings. I won't delete what you wrote because there are some comments that are still interesting (old part between the horizontal lines).}
 
 \par\noindent\rule{\textwidth}{0.4pt}
 Let us see briefly how the Skew algorithm works first.
@@ -189,12 +189,12 @@ T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
 % \subsubsection{PathSort Algorithm} \label{sec:pathSort}
 
 % The pseudocode of the pathSort algorithm is shown in \cref{alg:pathSort}. 
-The {\pathsort} algorithms works similarly, adapted to work on labeled trees.
+The {\pathsort} algorithm works similarly, adapted to work on labeled trees.
 % This algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees.
 \alessio{What is an upward subpath? Is it the $\pi$ component of the node or is it something with the triplets? If it is the first case, use $\pi(u)$, otherwise define upward subpath. Reading the Ferragina et al paper it seems $\pi$ (or at least, some prefix), so i will edit it. The original version is in the old stuff folder.}
 Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the $\pi$ component of the nodes in levels $\not\equiv j \pmod{3}$, then sort the $\pi$ component of the nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the resulting two sets. %by exploiting their lexicographic names.
-At each step $i$ of the recursion, the algorithm works on a labeled tree $T_i$, that is a \emph{contracted} (or shrunk) version of the original tree $T$. 
-We set $T_0 = T$, and note that the structure of $T_{i+1}$ is derived from the one of $T_i$.
+At each step $i$ of the recursion, the algorithm works on a labeled tree $T_i$, which is a \emph{contracted} (or shrunk) version of the original tree $T$. 
+We set $T_0 = T$, and note that the structure of $T_{i+1}$ is derived from that one of $T_i$.
 The inner workings of the recursive step will be explained in detail later.
 
 The parameter $j$ is chosen in such a way that the number of nodes of the shrunk tree whose level is $\equiv j \pmod{3}$ is at least $t/3$, so that a constant fraction of upward paths $\pi$ is ensured to be dropped at each recursive step.
@@ -324,7 +324,7 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
 Let the $k$-context of a node $u \in T$ be the first $k$ symbols of $\pi(u)$. We denote this $k$-long prefix as $\pi_k[u]$. Thus, $\pi_k[u]$ represents the subpath of length $k$ leading to $u$ in $T$, or equivalently, the node $u$ descends from a subpath labeled as $\pi_k[u]$, where the nodes in $\pi_k[u]$ are encountered in an upward direction.
 \end{comment}
 
-The XBWT of a tree $T$ exhibits a local homogeneity property on $S_{\alpha}$: the labels ($\alpha$ components) of nodes whose upward paths ($\pi$ components) share long common prefixes, appear in $S_{\alpha}$ in contiguous (or tightly bounded) clusters. 
+The XBWT of a tree $T$ exhibits a local homogeneity property on $S_{\alpha}$: the labels ($\alpha$ components) of nodes whose upward paths ($\pi$ components) share long common prefixes appear in $S_{\alpha}$ in contiguous (or tightly bounded) clusters. 
 This phenomenon can be formalized via the notion of $k$-contexts on trees.
 This property mirrors the strong local homogeneity exhibited by strings under the Burrows-Wheeler Transform~\cite{burrows1994block} when applied to labeled trees.
 
