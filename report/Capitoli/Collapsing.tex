@@ -1,7 +1,7 @@
 \section{Collapsing Nodes in Chains} \label{sec:collapsing}
 This chapter introduces our \textbf{node collapsing} technique, designed to reduce the size of the trie by collapsing runs of Myhill--Nerode-Equivalent states adjacent in the same chain. The String Partitioning Problem provides us with a set of subsequences whose characters correspond to the nodes of the original trie; we call them chains. Within these chains, we often find consecutive nodes that are redundant from a language-theoretic perspective, specifically because they belong to the same Myhill--Nerode equivalence class.
 
-The core idea is to merge any such sequence of consecutive, equivalent nodes into a single representative node. This operation reduces the graph structure while preserving its language. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
+The core idea is to merge any such sequence of consecutive, MN--equivalent nodes into a single representative node. This operation reduces the graph structure while preserving its language. The new representative node inherits all unique incoming and outgoing transitions from the nodes it replaces, ensuring that the overall language accepted by the graph remains unchanged.
 
 In this section, we will formally define the collapsing procedure and then rigorously prove that this transformation is language-preserving (\cref{lemma:language-eq}), guaranteeing the correctness of our compression scheme.
 

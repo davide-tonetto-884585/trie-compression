@@ -191,7 +191,7 @@ T(n) \;=\; T(2n/3) + O(n) \;=\; O(n).
 % The pseudocode of the pathSort algorithm is shown in \cref{alg:pathSort}. 
 The {\pathsort} algorithm works similarly, adapted to work on labeled trees.
 % This algorithm is based on the Skew algorithm, but it is adapted to work on labeled trees.
-\alessio{What is an upward subpath? Is it the $\pi$ component of the node or is it something with the triplets? If it is the first case, use $\pi(u)$, otherwise define upward subpath. Reading the Ferragina et al paper it seems $\pi$ (or at least, some prefix), so i will edit it. The original version is in the old stuff folder.}
+%\alessio{What is an upward subpath? Is it the $\pi$ component of the node or is it something with the triplets? If it is the first case, use $\pi(u)$, otherwise define upward subpath. Reading the Ferragina et al paper it seems $\pi$ (or at least, some prefix), so i will edit it. The original version is in the old stuff folder.}
 Given a value $j\in\{0,1,2\}$, the main idea is to recursively sort the $\pi$ component of the nodes in levels $\not\equiv j \pmod{3}$, then sort the $\pi$ component of the nodes in levels $\equiv j \pmod{3}$ using the result of the previous step, and finally merge the resulting two sets. %by exploiting their lexicographic names.
 At each step $i$ of the recursion, the algorithm works on a labeled tree $T_i$, which is a \emph{contracted} (or shrunk) version of the original tree $T$. 
 We set $T_0 = T$, and note that the structure of $T_{i+1}$ is derived from that one of $T_i$.
@@ -255,8 +255,8 @@ simulate a depth-first visit of $T$, creates its labeled nodes, and properly con
     \caption{\textsc{RebuildTree}($S_\alpha$, $S_\textup{last}$)}
     \label{alg:rebuildTree}
     \begin{algorithmic}[1]
-    \State $F = $ \textsc{BuildF}($S_\alpha$, $\Slast$)
-    \State $J = $ \textsc{BuildJ}($S_\alpha$, $\Slast$, $F$)
+    \State $F = $ \textsc{BuildF}($S_\alpha$, $\Slast$);
+    \State $J = $ \textsc{BuildJ}($S_\alpha$, $\Slast$, $F$);
     \State Create node $r$ and set $Q = \{\langle1, r\rangle\}$; \Comment{$Q$ is a stack}
     \While{$Q \neq \emptyset$} \Comment{We still have nodes to create in $T$}
         \State $\langle i, u \rangle = $ pop($Q$);
@@ -468,12 +468,12 @@ Let's now see how to implement some of the above methods (from which the others 
     \label{alg:getparent}
     \begin{algorithmic}[1]
     \If{$i = 1$}
-        \State \Return $-1$ \Comment{$S[i]$ is the root of $\mathcal{T}$}
+        \State \Return $-1$; \Comment{$S[i]$ is the root of $\mathcal{T}$}
     \EndIf
-    \State $c = \text{rank}_1(A, i)$
-    \State $y = \text{select}_1(A, c)$
-    \State $k = \text{rank}_1(S_{\text{last}}, i - 1) - \text{rank}_1(S_{\text{last}}, y - 1)$
-    \State $p = \text{select}_c(S_\alpha, k + 1)$
+    \State $c = \text{rank}_1(A, i)$;
+    \State $y = \text{select}_1(A, c)$;
+    \State $k = \text{rank}_1(S_{\text{last}}, i - 1) - \text{rank}_1(S_{\text{last}}, y - 1)$;
+    \State $p = \text{select}_c(S_\alpha, k + 1)$;
     \State \Return $p$
     \end{algorithmic}
 \end{algorithm}
@@ -513,22 +513,22 @@ The time complexity of the SubPathSearch algorithm is $O(l)$, where $l$ is the l
     \caption{\textsc{SubPathSearch}($S_\alpha$, $\Slast$, $P$)}
     \label{alg:subpathsearch}
     \begin{algorithmic}[1]
-    \State $First = F(c_1)$; $Last = F(c_1 + 1) - 1$
+    \State $First = F(c_1)$; $Last = F(c_1 + 1) - 1$;
     \If{$First > Last$}
-        \State \textbf{return} ``$P$ is not a subpath of $T$''
+        \State \textbf{return} ``$P$ is not a subpath of $T$'';
     \EndIf
     \For{$i = 2, \dots, k$}
         \State $k_1 = \text{rank}_{c_i}(S_\alpha, First - 1)$; 
-        \State $z_1 = \text{select}_{c_i}(S_\alpha, k_1 + 1)$
+        \State $z_1 = \text{select}_{c_i}(S_\alpha, k_1 + 1)$;
         \Comment{first entry in $S_\alpha[First, t]$ labeled $c_i$}
         \State $k_2 = \text{rank}_{c_i}(S_\alpha, Last)$; 
-        \State $z_2 = \text{select}_{c_i}(S_\alpha, k_2)$
+        \State $z_2 = \text{select}_{c_i}(S_\alpha, k_2)$;
         \Comment{last entry in $S_\alpha[1, Last]$ labeled $c_i$}
         \If{$z_1 > z_2$}
-            \State \textbf{return} ``$P$ is not a subpath of $T$''
+            \State \textbf{return} ``$P$ is not a subpath of $T$'';
         \EndIf
-        \State $First = \text{GetRankedChild}(z_1, 1)$ \Comment{get the first child of $S[z_1]$}
-        \State $Last = \text{GetRankedChild}(z_2, \text{GetDegree}(z_2))$ \Comment{get the last child of $S[z_2]$}
+        \State $First = \text{GetRankedChild}(z_1, 1)$; \Comment{get the first child of $S[z_1]$}
+        \State $Last = \text{GetRankedChild}(z_2, \text{GetDegree}(z_2))$; \Comment{get the last child of $S[z_2]$}
     \EndFor
     \State \textbf{return} $(First, Last)$
     \end{algorithmic}

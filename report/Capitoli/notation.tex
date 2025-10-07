@@ -249,19 +249,19 @@ It is important to notice that, since the automaton is acyclic, every transition
     \begin{algorithmic}[1]
     \Require $M=(Q,\Sigma,\delta,q_0,F)$ is an ADFA.
     \Ensure Minimal DFA $M'=(\{1,\dots,n\},\Sigma,\delta',N[q_0],F')$ with $F'=\{N[q]\mid q\in F\}$ and $\delta'(N[q],a)=N[\delta(q,a)]$.
-    \State Calculate height $h(s)$ for every state $s$
-    \State Create partitions $\Pi_i = \{s \in Q \mid h(s) = i\}$
-    \State $N[1, |Q|] = \{1,2,\dots,|Q|\}$ \Comment{Renaming array}
-    \State $n = 0$
+    \State Calculate height $h(s)$ for every state $s$;
+    \State Create partitions $\Pi_i = \{s \in Q \mid h(s) = i\}$;
+    \State $N[1, |Q|] = \{1,2,\dots,|Q|\}$; \Comment{Renaming array}
+    \State $n = 0$;
     \For{$i := 0$ to $h(q_0)$} \Comment{$q_0$ is the initial state}
-        \State Sort states in $\Pi_i$ based on $R(l(q)), q\in \Pi_i$
-        \State $n = n + 1$
+        \State Sort states in $\Pi_i$ based on $R(l(q)), q\in \Pi_i$;
+        \State $n = n + 1$;
         \State $N[\Pi_i[1]] = n$;
         \For{$j := 2$ to $|\Pi_i|$}
             \If{$R(l(\Pi_i[j])) \ne R(l(\Pi_i[j-1]))$}
-                \State $n = n + 1$
+                \State $n = n + 1$;
             \EndIf
-            \State $N[\Pi_i[j]] = n$
+            \State $N[\Pi_i[j]] = n$;
         \EndFor
     \EndFor
     \end{algorithmic}

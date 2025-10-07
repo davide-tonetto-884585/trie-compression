@@ -1,0 +1,77 @@
+% Thesis Team Setup - Custom Setup for Candidate, Supervisor, Co-Supervisors in Beamer
+% Place this file in your project directory and \input{thesis_team_setup.tex} in your main .tex
+
+% Required packages
+\usepackage{tabularx}
+\usepackage[british]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx,hyperref,ru,url}
+\usepackage{lmodern,tabularx,background,tikz}
+\usepackage{scrextend}
+\usepackage[skip=2pt]{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{fontawesome5}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\tikzset{
+  accepting/.style={circle, draw, double, minimum size=7mm}
+}
+
+
+% Team member macros (LaTeX2e, needs \makeatletter...\makeatother)
+\makeatletter
+\newcommand{\candidate}[1]{\def\@candidate{#1}}
+\newcommand{\supervisor}[1]{\def\@supervisor{#1}}
+\newcommand{\cosupervisors}[1]{\def\@cosupervisors{#1}}
+\newcommand{\printthesisteam}{
+  \vspace{0.3cm}
+  \begin{center}
+    \begin{tabular}{@{}p{0.28\linewidth}@{\hspace{0.05\linewidth}}p{0.28\linewidth}@{\hspace{0.05\linewidth}}p{0.35\linewidth}@{}}
+      \raggedright\footnotesize \textbf{Candidate}: \@candidate &
+      \centering\footnotesize \textbf{Supervisor}: \@supervisor &
+      \raggedleft\footnotesize \textbf{Co-Supervisor}: \@cosupervisors \\
+    \end{tabular}
+  \end{center}
+}
+\makeatother
+
+% Title and metadata
+\title[RU style for Beamer]{A New Compression Technique for Repetitive Tries}
+\author[Davide Tonetto]{\changefontsizes{12pt} \textsc{Davide Tonetto}}
+\institute[Ca' Foscari]{
+\changefontsizes{10pt}
+  \textsc{Ca’ Foscari University of Venice \\
+Department of Environmental Sciences, Informatics and Statistics}
+}
+\date[master thesis]{
+{\changefontsizes{14pt}
+  \textsc{Master's Thesis Defence} \\[0.3cm] \changefontsizes{8pt}
+  Computer Science and Information Technology\\[-0.5em] \textit{Artificial Intelligence and Data Engineering} }\\[0.5cm]
+  \textsc{6th November 2025}
+  \printthesisteam
+}
+
+% Watermark background (logo on right, faint, scaled, shifted)
+\setbeamertemplate{background}{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=east, opacity=0.05, scale=0.9, yshift=-0.72cm] at ([xshift=3.3cm]current page.east) 
+      {\includegraphics[height=0.8\paperheight]{UNIVE_square_black.png}};
+  \end{tikzpicture}
+}
+
+\newcommand{\fancysectionframe}[2][]{%
+  \begin{frame}[plain]
+    \centering
+    \vfill
+    {\color{rured} \bfseries \LARGE #2}
+    \ifx&#1&\else
+      \\[0.5em]
+      {\color{black} \large #1}
+    \fi
+    \par\vspace{0.5ex}
+    {\color{rured}\rule{0.45\paperwidth}{1.7pt}}
+    \vfill
+  \end{frame}
+}

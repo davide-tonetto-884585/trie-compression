@@ -1,0 +1,129 @@
+% Copyright 2019 by Antonio Emanuele Cinà
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+%%%
+%%% Inherit definitions from existing themes (DO NOT MODIFY THESE)
+%%%
+
+\usetheme{Rochester}
+\RequirePackage{pgf}
+\pgfdeclareimage[width=1.0\paperwidth]{header-logo}{ca_header_cropped2}
+\setbeamercovered{transparent}
+
+\useoutertheme{split}
+\usecolortheme{whale}
+\useinnertheme{rounded}
+\usecolortheme{orchid}
+
+%%%
+%%% Tweak definitions of inner theme to match personal preferences (MODIFY THESE)
+%%%
+
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[circle]
+\setbeamertemplate{sections/subsections in toc}[default]
+\setbeamertemplate{blocks}[rounded]
+%\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true]
+\setbeamertemplate{part page}[default][colsep=-4bp,rounded=true]
+\setbeamertemplate{navigation symbols}{}
+
+%%%
+%%% Tweak definitions of outer theme to match Radboud (website) style
+%%%
+
+% \pgfdeclareimage[width=\paperwidth,height=\paperheight]{bg}{ca_background_light}
+% \setbeamertemplate{background}{\pgfuseimage{bg}}
+\usecolortheme[RGB={172,0,52}]{structure}
+\setbeamercolor{frametitle}{parent=subsection in head/foot}
+\setbeamercolor{frametitle right}{parent=section in head/foot}
+\definecolor{rured}{HTML}{CD1950}
+\setbeamercolor*{Title bar}{fg=white}
+\setbeamercolor*{frametitle}{parent=Title bar}
+\definecolor{authorbox}{HTML}{AC0034}
+
+\defbeamertemplate*{footline}{ru theme}{%
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.59\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}%\textit{\inserttitle}
+  \end{beamercolorbox}%
+   \begin{beamercolorbox}[wd=0.083333\paperwidth,ht=2.25ex,dp=1ex,right]{title in head/foot}%
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\beamer@headheight=0.13\paperwidth
+\setbeamercolor{author in head/foot}{fg=white,bg=authorbox}
+
+\defbeamertemplate*{frametitle}{ru theme}
+{
+  \vskip-0.25\beamer@headheight
+  \vskip-\baselineskip
+  \vskip-0.2cm
+  \hskip0.7cm\usebeamerfont*{frametitle}\insertframetitle
+  \vskip-0.10em
+  \hskip0.7cm\usebeamerfont*{framesubtitle}\insertframesubtitle
+}
+
+% --- HEADER BAR: CURRENT SECTION ONLY, CENTERED ---
+\defbeamertemplate*{headline}{ru theme}{%
+  \pgfuseimage{header-logo}
+  \vskip -1.9cm
+  \linethickness{0pt}
+  \framelatex{
+\begin{beamercolorbox}[wd=\paperwidth,ht=-1\beamer@headheight,center]{Title bar}
+      % \usebeamerfont{section in head/foot}%
+      % \insertsection % This prints only the current section name
+    \end{beamercolorbox}
+  }
+  \framelatex{
+    \begin{beamercolorbox}[wd=\paperwidth,ht=1.\beamer@headheight]{Title bar}
+    \end{beamercolorbox}
+  }
+}
+
+\makeatletter
+\setbeamertemplate{title page}{
+  \vbox{}
+    \vfill
+    \vskip1.4em
+    % Fancy rounded box for the title
+    \begin{beamercolorbox}[colsep=0.5ex,rounded=true,shadow=true,center,sep=0.5ex]{title}
+      \usebeamerfont{title}\inserttitle
+    \end{beamercolorbox}
+    \vskip1em
+    \ifx\insertsubtitle\@empty\else
+      {\centering
+        \begin{beamercolorbox}[colsep=1ex,rounded=true,center,sep=1ex]{subtitle}
+          \usebeamerfont{subtitle}\insertsubtitle
+        \end{beamercolorbox}
+      }
+      \vskip0.5em
+    \fi
+    \ifx\insertinstitute\@empty\else
+      {\centering
+        \begin{beamercolorbox}[colsep=1ex,rounded=true,center,sep=1ex]{institute}
+          \usebeamerfont{institute}\insertinstitute
+        \end{beamercolorbox}
+      }
+      \vskip0.5em
+    \fi
+    \ifx\insertdate\@empty\else
+      {\centering
+        \begin{beamercolorbox}[colsep=1ex,rounded=true,center,sep=1ex]{date}
+          \usebeamerfont{date}\insertdate
+        \end{beamercolorbox}
+      }
+      \vskip1.2em
+    \fi
+    \vfill
+}
+\makeatother
