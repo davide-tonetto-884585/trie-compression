@@ -205,6 +205,35 @@ public:
         return total_transitions;
     }
 
+    /**
+     * @brief Checks if the TreeDAWG is deterministic.
+     *
+     * A DAWG is deterministic if no node has two or more transitions with the same label.
+     * This method iterates through all nodes and their transitions to verify this property.
+     *
+     * @return true if the TreeDAWG is deterministic, false otherwise.
+     */
+    bool is_deterministic() const
+    {
+        for (const auto &node : this->m_nodes)
+        {
+            const auto &transitions = node.get_transitions();
+            
+            // Check for duplicate labels in transitions
+            // Since transitions are sorted by label (done in State::Builder::build_into),
+            // we only need to check adjacent transitions
+            for (size_t i = 1; i < transitions.size(); ++i)
+            {
+                if (transitions[i - 1].first == transitions[i].first)
+                {
+                    // Found duplicate label
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 private:
     /**
      * @brief Sets the initial state, ensuring it's a valid tree root (no incoming transitions).

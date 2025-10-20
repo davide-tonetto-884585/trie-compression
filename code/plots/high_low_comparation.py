@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import os
 
 # Load the compression results datasets
-low_path = "../compression_results_low.csv"
-high_path = "../compression_results_high.csv"
+low_path = "../compression_results_low_26.csv"
+high_path = "../compression_results_high_26.csv"
 
 df_low = pd.read_csv(low_path)
 df_high = pd.read_csv(high_path)

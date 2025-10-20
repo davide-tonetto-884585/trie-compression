@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Load the compression results dataset
-file_path = "../compression_results_high.csv"  # Change path if necessary
+file_path = "../compression_results_high_26.csv"  # Change path if necessary
 df = pd.read_csv(file_path)
 
 # Create figure with two subplots for comprehensive analysis

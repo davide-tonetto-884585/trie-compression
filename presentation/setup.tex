@@ -14,11 +14,15 @@
 \usepackage{fontawesome5}
 \usepackage{tcolorbox}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usepackage{mdwlist}
+
+% Bibliography setup for [Author, et al., Year] format
+\usepackage[style=authoryear,backend=biber,maxcitenames=1,mincitenames=1]{biblatex}
+\addbibresource{references.bib}
+\usetikzlibrary{positioning,arrows.meta,calc,automata,decorations.pathreplacing}
 \tikzset{
   accepting/.style={circle, draw, double, minimum size=7mm}
 }
-
 
 % Team member macros (LaTeX2e, needs \makeatletter...\makeatother)
 \makeatletter
@@ -47,7 +51,7 @@ Department of Environmental Sciences, Informatics and Statistics}
 }
 \date[master thesis]{
 {\changefontsizes{14pt}
-  \textsc{Master's Thesis Defence} \\[0.3cm] \changefontsizes{8pt}
+  \textsc{Master's Thesis Defense} \\[0.3cm] \changefontsizes{8pt}
   Computer Science and Information Technology\\[-0.5em] \textit{Artificial Intelligence and Data Engineering} }\\[0.5cm]
   \textsc{6th November 2025}
   \printthesisteam
@@ -75,3 +79,17 @@ Department of Environmental Sciences, Informatics and Statistics}
     \vfill
   \end{frame}
 }
+
+% Palette di colori ad alta visibilità e colorblind-safe (Okabe–Ito)
+\definecolor{oiBlue}{HTML}{0072B2}
+\definecolor{oiSkyBlue}{HTML}{56B4E9}
+\definecolor{oiOrange}{HTML}{E69F00}
+\definecolor{oiGreen}{HTML}{009E73}
+\definecolor{oiVermillion}{HTML}{D55E00}
+\definecolor{oiPurple}{HTML}{CC79A7}
+\definecolor{oiLightGrey}{HTML}{D3D3D3}
+\definecolor{oiRed}{HTML}{FF0000}
+
+
+
+\setbeamertemplate{caption}[numbered]

@@ -13,8 +13,9 @@ int main()
 {
     bool verbose = false, from_file = true;
 
-    std::string filename = "tree_generator/generated_trees/low/tree_bf26_rp10_sd3-20_letters26_mn100000_s42_try001.txt";
-    std::string str = "(1(0(0(0)(1))(1))(1(0(0)(1))(1)))";
+    std::string filename = "tree_generator/generated_trees/time_exp/tree_bf26_rp60_sd3-20_letters26_mn10000_s42.txt";
+    std::string str = "(1(a(b(a(b)(c)))(c)(x(a(b)(c))))(b(b(a(b)(c)))(c)(d))(x(a(b)(c))(c(b)(c))))";
+    uint16_t p = 5;
 
     if (from_file)
     { // Read input string from file
@@ -56,6 +57,12 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "Tree DAWG construction completed in " << duration.count() << " ms" << std::endl;
 
+    if (tree_dawg.is_deterministic()) {
+        std::cout << "The DAWG is deterministic" << std::endl;
+    } else {
+        std::cout << "The DAWG is non-deterministic" << std::endl;
+    }
+
     // Run minimization
     std::cout << "Minimizing Tree DAWG..." << std::endl;
     start = std::chrono::high_resolution_clock::now();
@@ -75,8 +82,6 @@ int main()
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "Node order computed in " << duration.count() << " ms" << std::endl;
-
-    uint16_t p = 20;
 
     std::cout << "Building bipartite graph..." << std::endl;
     auto start_construction = std::chrono::high_resolution_clock::now();
