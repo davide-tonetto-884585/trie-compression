@@ -11,11 +11,11 @@
 
 int main()
 {
-    bool verbose = false, from_file = true;
+    bool verbose = true, from_file = false;
 
     std::string filename = "tree_generator/generated_trees/time_exp/tree_bf26_rp60_sd3-20_letters26_mn10000_s42.txt";
-    std::string str = "(1(a(b(a(b)(c)))(c)(x(a(b)(c))))(b(b(a(b)(c)))(c)(d))(x(a(b)(c))(c(b)(c))))";
-    uint16_t p = 5;
+    std::string str = "(a(0(0(0)(1))(1))(1(0(0)(1))(1)))";
+    uint16_t p = 2;
 
     if (from_file)
     { // Read input string from file

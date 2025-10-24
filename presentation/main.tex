@@ -25,42 +25,16 @@
 
 \section{Introduction and Motivation}
 
-\begin{frame}{Motivation}
-	\begin{columns}[t]
-		\column{0.5\textwidth}
-		\textcolor{oiVermillion}{\textbf{Why Tries Matter}}
-		\begin{itemize}
-			\item \textbf{Purpose:} Fundamental data structures for large string sets
-			\item \textbf{Strength:} Efficient prefix-based queries ($O(m)$ time)
-			\item \textbf{Challenge:} Memory consumption can be massive
-			\item \textbf{Scale:} Real datasets with millions of strings
-		\end{itemize}
-
-		\column{0.5\textwidth}
-		\textcolor{oiBlue}{\textbf{Real-World Applications}}
-		\begin{itemize}
-			\item \textbf{Web Search:} Autocomplete suggestions
-			\item \textbf{Text Processing:} Spell checking systems
-			\item \textbf{Bioinformatics:} DNA/protein pattern matching
-			\item \textbf{Databases:} String indexing and retrieval
-		\end{itemize}
-	\end{columns}
-
-	\vspace{0.4cm}
-	\centering
-	\begin{block}{\textcolor{white}{\textbf{Research Objective}}}
-		\textbf{Reduce memory footprint while maintaining query efficiency}\\
-	\end{block}
-\end{frame}
-
-\begin{frame}{Example: Trie Representation and String Acceptance}
+\begin{frame}{Basic Definitions: Tries and Queries}
 	\begin{columns}[c]
-		\column{0.6\textwidth}
+		\column{0.55\textwidth}
+		% \textcolor{oiVermillion}{\textbf{Example Trie}}
 		\begin{figure}
 			\centering
 			\begin{tikzpicture}[
 					every node/.style={draw, circle, minimum size=8mm, inner sep=0pt},
 					edge from parent/.style={draw, -latex},
+					scale=1,
 					level distance=1.5cm,
 					sibling distance=2cm, % wider
 					accepting/.style={double, fill=green!20},
@@ -70,24 +44,23 @@
 				\node[fill=red!20] (root) {1}
 				child { node (a) {2}
 				child { node (ab) {3}
-				child { node[accepting] (abc) {4} [label=below:{\texttt{abc}}] }
-				child { node[accepting] (abd) {5} [label=below:{\texttt{abd}}] }
+				child { node[] (abc) {4} [label=below:{\texttt{abc}}] }
+				child { node[] (abd) {5} [label=below:{\texttt{abd}}] }
 				}
 				}
 				child {
-						node[accepting] (b) {6}
+						node[] (b) {6}
 					}
 				child { node[fill=red!20] (x) {7}
 				child { node[fill=red!20] (xb) {8}
-				child { node[accepting] (xbc) {9} [label=below:{\texttt{xbc}}] }
-				child { node[accepting, fill=red!20] (xbd) {10} [label=below:{\texttt{xbd}}] }
+				child { node[] (xbc) {9} [label=below:{\texttt{xbc}}] }
+				child { node[] (xbd) {10} [label=below:{\texttt{xbd}}] }
 				}
 				};
 
 				% Edge coloring for the red path
 				\draw[-latex, red, thick] (root) -- (x);
 				\draw[-latex, red, thick] (x) -- (xb);
-				\draw[-latex, red, thick] (xb) -- (xbd);
 
 				% Edge labels using \path
 				\path (root) -- (a) node[midway, left, edge label] {a};
@@ -99,78 +72,131 @@
 				\path (root) -- (x) node[midway, right, edge label, red] {x};
 				\path (x) -- (xb) node[midway, right, edge label, red] {b};
 				\path (xb) -- (xbc) node[midway, left, edge label] {c};
-				\path (xb) -- (xbd) node[midway, right, edge label, red] {d};
+				\path (xb) -- (xbd) node[midway, right, edge label] {d};
 			\end{tikzpicture}
 			\caption{The language is $\{abc, abd, b, xbc, xbd\}$. The path for \texttt{xbd} is highlighted in red.}
 			\label{fig:trie_example}
 		\end{figure}
-		\column{0.4\textwidth}
+		\column{0.45\textwidth}
+		\begin{block}{Trie}
+			A trie is a \textcolor{oiVermillion}{\textbf{tree data structure}} optimized for \textcolor{oiRed}{\textbf{storing strings}} and performing \textcolor{oiPurple}{\textbf{fast prefix-based queries}}.
+		\end{block}
+		\textcolor{oiBlue}{\textbf{Prefix-Query for `xb'}} \\
 		\small
-		To check if a string like \texttt{xbd} is in the language, we traverse the trie from the root:
 		\begin{enumerate}
-			\item Start at the root ($\epsilon$).
+			\item Start at the root.
 			\item Follow the edge labeled \texttt{x}.
 			\item From there, follow the edge labeled \texttt{b}.
-			\item Finally, follow the edge labeled \texttt{d}.
+			\item There are two strings with prefix \texttt{xb}: \texttt{xbc} and \texttt{xbd}.
 		\end{enumerate}
-		Since we end in an accepting state (double circle), the string is in the language.
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Indexing and Sub-Path Queries}
-	\begin{columns}[t]
-		\column{0.5\textwidth}
-		\textcolor{oiBlue}{\textbf{Indexing Data Structures}}
-		\begin{itemize}
-			\item \textbf{Purpose:} Accelerate data retrieval operations
-			\item \textbf{Examples:}
-			      \begin{itemize}
-				      \item B-Trees (databases)
-				      \item Hash Tables (key-value stores)
-				      \item Tries (string matching)
-			      \end{itemize}
-			\item \textbf{Applications:} Search engines, databases, file systems
-		\end{itemize}
+\begin{frame}{Basic Definitions: Sub-Path Queries}
+	\begin{columns}[c]
+		\column{0.55\textwidth}
+		\begin{figure}
+			\centering
+			\begin{tikzpicture}[
+					every node/.style={draw, circle, minimum size=8mm, inner sep=0pt},
+					edge from parent/.style={draw, -latex},
+					scale=1,
+					level distance=1.5cm,
+					sibling distance=2cm, % wider
+					accepting/.style={double, fill=green!20},
+					edge label/.style={font=\small, draw=none}
+				]
+				% Tree structure with named nodes
+				\node[] (root) {1}
+				child { node[fill=red!20] (a) {2}
+				child { node[fill=red!20] (ab) {3}
+				child { node[fill=green!20] (abc) {4} [label=below:{\texttt{abc}}] }
+				child { node[] (abd) {5} [label=below:{\texttt{abd}}] }
+				}
+				}
+				child {
+						node[] (b) {6}
+					}
+				child { node[fill=red!20] (x) {7}
+				child { node[fill=red!20] (xb) {8}
+				child { node[fill=green!20] (xbc) {9} [label=below:{\texttt{xbc}}] }
+				child { node[, ] (xbd) {10} [label=below:{\texttt{xbd}}] }
+				}
+				};
 
-		\column{0.5\textwidth}
-		\textcolor{oiRed}{\textbf{Sub-Path Queries}}
+				% Edge coloring for the red path
+				\draw[-latex, red, thick] (a) -- (ab);
+				\draw[-latex, red, thick] (ab) -- (abc);
+				\draw[-latex, red, thick] (x) -- (xb);
+				\draw[-latex, red, thick] (xb) -- (xbc);
+
+				% Edge labels using \path
+				\path (root) -- (a) node[midway, left, edge label] {a};
+				\path (root) -- (b) node[midway, right, edge label] {b};
+				\path (a) -- (ab) node[midway, left, edge label, red] {b};
+				\path (ab) -- (abc) node[midway, left, edge label, red] {c};
+				\path (ab) -- (abd) node[midway, right, edge label] {d};
+
+				\path (root) -- (x) node[midway, right, edge label] {x};
+				\path (x) -- (xb) node[midway, right, edge label, red] {b};
+				\path (xb) -- (xbc) node[midway, left, edge label, red] {c};
+				\path (xb) -- (xbd) node[midway, right, edge label] {d};
+			\end{tikzpicture}
+			\caption{The language is $\{abc, abd, b, xbc, xbd\}$. The path for \texttt{xbd} is highlighted in red.}
+			\label{fig:trie_example}
+		\end{figure}
+
+		\column{0.45\textwidth}
+		\textcolor{oiBlue}{\textbf{Sub-Path Query}}
 		\begin{itemize}
 			\item \textbf{Definition:} Find label sequences starting from \textit{any} node
-			\item \textbf{Advantage:} More flexible than prefix queries (root-only)
-			\item \textbf{Complexity:} Requires efficient internal node access
+			\item \textbf{Advantage:} More flexible than prefix queries
+		\end{itemize}
+		\vspace{0.5cm}
+		\textcolor{oiBlue}{\textbf{Example for `bc'}}
+		\begin{itemize}
+			\item Return the set of states reached by a path with label \texttt{bc}.
+			\item In Figure \autoref{fig:trie_example}, states \texttt{4} and \texttt{9} are returned.
 		\end{itemize}
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Challenges}
-	\textcolor{oiRed}{\textbf{Key Problems}}
-	\begin{itemize}
-		\item \textbf{Structural Redundancy:} Tries contain \textbf{large, identical subtrees}
-		\item \textbf{Indexing Challenge:} General DFA indexing is computationally hard~[\cite{equiGraphsCannotBe2023}]
-	\end{itemize}
+\begin{frame}{Motivations}
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\textcolor{oiVermillion}{\textbf{Why Tries Matter}}
+		\begin{itemize}
+			\item \textbf{Purpose:} Fundamental data structures for large string sets
+			\item \textbf{Strength:} Efficient prefix-based queries
+			\item \textbf{Challenge:} Memory consumption can be massive
+		\end{itemize}
 
-	\vspace{0.2cm}
-	\centering
-	\includegraphics[width=1\textwidth]{img/tradeoff.png}
+		\column{0.5\textwidth}
+		\onslide<2->
+		\textcolor{oiBlue}{\textbf{Real-World Applications}}
+		\begin{itemize}
+			\item \textbf{Text Processing:} Spell checking systems
+			\item \textbf{Bioinformatics:} DNA/protein pattern matching
+			\item \textbf{Databases:} String indexing and retrieval
+		\end{itemize}
+	\end{columns}
 \end{frame}
 
-% === THEORY BACKGROUND ===
-\fancysectionframe{Theoretical Background}
-
-\section{Theoretical Background}
 \begin{frame}{Tries, DFAs and Minimization}
 	\small
 	\begin{itemize}
-		\item \textcolor{oiBlue}{\textbf{Theoretical Foundation:}} A trie can be viewed as an \textbf{acyclic DFA}
-		\item \textcolor{oiGreen}{\textbf{Minimization Principle:}} DFA minimization merges \textbf{Myhill--Nerode equivalent states}
-		\item \textcolor{oiPurple}{\textbf{Algorithmic Solution:}} Revuz' algorithm allows \textbf{linear minimization} for acyclic DFAs~[\cite{revuz1992minimisation}]
+		\item<1-> \textcolor{oiBlue}{\textbf{Theoretical Foundation:}} A trie can be viewed as an \textbf{acyclic DFA}
+		\item<2-> \textcolor{oiGreen}{\textbf{Minimization Principle:}} DFA minimization merges \textbf{Myhill--Nerode equivalent states}
+		\item<3-> \textcolor{oiPurple}{\textbf{Algorithmic Solution:}} \textbf{Linear minimization} for acyclic DFAs~[\cite{revuz1992minimisation}]
 	\end{itemize}
 	\centering
+	
 	\begin{figure}
 		\centering
-		\scalebox{0.85}{%
+		\scalebox{0.9}{%
 			\begin{minipage}{\textwidth}
 				\centering
+				\onslide<4->
 				\begin{subfigure}[b]{0.42\textwidth}
 					\centering
 					\begin{tikzpicture}[
@@ -179,24 +205,22 @@
 							edge from parent/.style={draw, -latex},
 							level distance=1.35cm,
 							sibling distance=2cm, % wider
-							accepting/.style={double, fill=green!20},
+							accepting/.style={double},
 							edge label/.style={font=\small, draw=none}
 						]
 						% Tree structure with named nodes
-						\node[] (root) {A}
-						child { node (a) {B}
-						child { node (ab) {C}
-						child { node[accepting] (abc) {D} [label=below:{\texttt{abc}}] }
-						child { node[accepting] (abd) {D} [label=below:{\texttt{abd}}] }
+						\node[fill=oiBlue!20] (root) {A}
+						child { node[fill=oiGreen!20] (a) {B}
+						child { node[fill=oiOrange!20] (ab) {C}
+						child { node[fill=oiPurple!20, accepting] (abc) {D} [label=below:{\texttt{abc}}] }
+						child { node[fill=oiPurple!20, accepting] (abd) {D} [label=below:{\texttt{abd}}] }
 						}
 						}
-						child{
-								node[accepting] (b) {D}
-							}
-						child { node[] (x) {B}
-						child { node[] (xb) {C}
-						child { node[accepting] (xbc) {D} [label=below:{\texttt{xbc}}] }
-						child { node[accepting] (xbd) {D} [label=below:{\texttt{xbd}}] }
+						child{ node[fill=oiPurple!20, accepting] (b) {D} }
+						child { node[fill=oiGreen!20] (x) {B}
+						child { node[fill=oiOrange!20] (xb) {C}
+						child { node[fill=oiPurple!20, accepting] (xbc) {D} [label=below:{\texttt{xbc}}] }
+						child { node[fill=oiPurple!20, accepting] (xbd) {D} [label=below:{\texttt{xbd}}] }
 						}
 						};
 
@@ -216,6 +240,7 @@
 					\label{fig:trie_for_minimization}
 				\end{subfigure}
 				\hfill
+				\onslide<5->
 				\begin{subfigure}[b]{0.42\textwidth}
 					\centering
 					\begin{tikzpicture}[
@@ -225,10 +250,10 @@
 							accepting/.style={double, fill=green!20},
 							edge label/.style={font=\small, draw=none, midway}
 						]
-						\node (A) {A};
-						\node[right=of A] (B) {B};
-						\node[below=of B] (C) {C};
-						\node[accepting, left=of C] (D) {D};
+						\node[fill=oiBlue!20] (A) {A};
+						\node[right=of A, fill=oiGreen!20] (B) {B};
+						\node[below=of B, fill=oiOrange!20] (C) {C};
+						\node[accepting, left=of C, fill=oiPurple!20] (D) {D};
 
 						\path[-latex] (A) edge[bend left=20] node[above, edge label] {a} (B);
 						\path[-latex] (A) edge[bend right=20] node[below, edge label] {x} (B);
@@ -247,22 +272,113 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}{Wheeler Graphs}
+\begin{frame}{Challenges}
 	\begin{columns}[c]
-		\column{0.5\textwidth}
-		\small
-		\begin{block}{Wheeler DFA~[\cite{gagie2017wheeler}]}
-			A \textcolor{oiRed}{\textbf{Wheeler DFA (WDFA)}} G is a DFA for which there is a total order $\leq$ of the nodes respecting the following \textcolor{oiBlue}{\textbf{three axioms}}.
+		\column{0.6\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{img/objective.png}
 
-			\begin{enumerate}
-				\item The initial state precedes all other states in the order.
-				      \suspend{enumerate}
-				      For any two transitions $(u, u', a)$ and $(v, v', b)$:
-				      \resume{enumerate}[{}]
-				\item $a<b \implies u \leq v$,
-				\item $a=b \wedge u' < v' \implies u \leq v$.
-			\end{enumerate}
-		\end{block}
+		\column{0.4\textwidth}
+		\textcolor{oiRed}{\textbf{Key Problem}}
+		\begin{itemize}
+			\item Tries may contain \textbf{large, identical subtrees}
+			      %\item \textbf{Indexing Challenge:} General DFA indexing is computationally hard~[\cite{equiGraphsCannotBe2023}]
+		\end{itemize}
+		\vspace{1cm}
+		\tiny
+		[1] Equi et al. ``Graphs cannot be indexed in polynomial time for sub-quadratic time string matching, unless SETH fails''
+		\newline
+		[2] Ferragina et al. ``Compressing and Indexing Labeled Trees, with Applications''
+	\end{columns}
+\end{frame}
+
+% === THEORY BACKGROUND ===
+\fancysectionframe{Theoretical Background}
+
+\section{Theoretical Background}
+
+\begin{frame}{Wheeler Automata~[\cite{gagie2017wheeler}]}
+	\begin{columns}[t]
+		\column{0.5\textwidth}
+		\textcolor{oiRed}{\textbf{Wheeler Axioms}}
+		\begin{itemize}
+			\item The Wheeler axioms defines a total order of the states
+		\end{itemize}
+
+		\vspace{0.25cm}
+		% Example diagrams for sorting
+		\centering
+		\begin{tikzpicture}[scale=0.8, transform shape,
+				node distance=1.7cm,
+				accepting/.style={double, fill=green!20},
+				edge label/.style={font=\small, draw=none, midway}]
+			% First example (i)
+			\node at (-3, 0.5) {\textbf{(i)}};
+			\node[circle, draw, minimum size=8mm] (u) at (0, 1) {$u$};
+			\node[circle, draw, minimum size=8mm] (v) at (0, 0) {$v$};
+			\draw[-latex, thick] (-1.7, 1) -- (u) node[midway, above] {a};
+			\draw[-latex, thick] (-1.7, 0) -- (v) node[midway, above] {b};
+			\node at (1.4, 0.5) {$\Rightarrow u < v$};
+
+			% Second example (ii)
+			\node at (-3, -2.1) {\textbf{(ii)}};
+			\node[circle, draw, minimum size=8mm] (u2) at (-1.3, -1.4) {$u$};
+			\node[circle, draw, minimum size=8mm] (up2) at (0.5, -1.4) {$u'$};
+			\node[circle, draw, minimum size=8mm] (v2) at (-1.3, -2.8) {$v$};
+			\node[circle, draw, minimum size=8mm] (vp2) at (0.5, -2.8) {$v'$};
+			\draw[-latex, thick] (u2) -- (up2) node[midway, above] {a};
+			\draw[-latex, thick] (v2) -- (vp2) node[midway, above] {a};
+			\node at (-1.3, -2.1) {$<$};
+			\node at (2, -2.1) {$\Rightarrow u' \leq v'$};
+		\end{tikzpicture}
+
+		\column{0.5\textwidth}
+		\onslide<2->
+		\textcolor{oiBlue}{\textbf{Wheeler DFAs (WDFAs)}}
+		\begin{itemize}
+			\item If all the states of a DFA are comparable it is called Wheeler DFA
+		\end{itemize}
+		\centering
+		% Wheeler DFA example
+		\begin{tikzpicture}[->, >=stealth, node distance=1.5cm, auto]
+			\tikzset{
+				state/.style={circle, draw, minimum size=0.8cm},
+				accepting/.style={state, double}
+			}
+
+			\node[state, initial, initial text=] (s) at (0, 0) {s};
+			\node[state] (q1) at (1.5, 0) {$q_1$};
+			\node[state] (q3) at (3, 0) {$q_3$};
+			\node[state, accepting] (q2) at (4.5, 0) {$q_2$};
+
+			\path (s) edge node {a} (q1)
+			(q1) edge node {a} (q3)
+			(q3) edge node {b} (q2)
+			(q2) edge[bend left] node {a} (q3)
+			(q2) edge[loop above] node {b} (q2)
+			(s) edge[bend left] node {b} (q2);
+
+		\end{tikzpicture}
+
+		\textbf{(i)} $s < \{q_1, q_3\} < q_2$\\
+		{\small
+		\hspace{0.4cm} $\epsilon$ \hspace{0.9cm} $a$ \hspace{0.9cm} $b$}
+
+
+		\textbf{(ii)} $s < q_1 < q_3 < q_2$\\
+		{\small
+		\hspace{0.4cm} $\epsilon$ \hspace{0.4cm} $a$ \hspace{0.4cm} $a$ \hspace{0.4cm} $b$}
+	\end{columns}
+
+	\centering
+	\onslide<3->
+	\begin{block}{}
+		This special ordering allows for highly efficient queries
+	\end{block}
+\end{frame}
+
+\begin{frame}{Bipartite Representation}
+	\begin{columns}[c]
 		\column{0.5\textwidth}
 		\centering
 		\begin{figure}[t]
@@ -297,18 +413,18 @@
 				\node[vnode, below=0.2cm of v10] (v7) {$v_{7}$};
 
 				% Edges fra u_i e v_j (colori aggiornati, CVD-safe)
-				\draw[-latex, oiVermillion] (u1) -- (v2); \path (u1) -- (v2) node[edge_label, above] {};
-				\draw[-latex, oiBlue]       (u1) -- (v7); \path (u1) -- (v7) node[edge_label, above] {};
-				\draw[-latex, oiGreen]       (u1) -- (v6); \path (u1) -- (v6) node[edge_label, above] {};
+				\draw[-latex, oiVermillion, thick] (u1) -- (v2); \path (u1) -- (v2) node[edge_label, above] {};
+				\draw[-latex, oiBlue, thick]       (u1) -- (v7); \path (u1) -- (v7) node[edge_label, above, thick] {};
+				\draw[-latex, oiGreen, thick]       (u1) -- (v6); \path (u1) -- (v6) node[edge_label, above] {};
 
-				\draw[-latex, oiGreen]      (u2) -- (v3); \path (u2) -- (v3) node[edge_label, above] {};
+				\draw[-latex, oiGreen, thick]      (u2) -- (v3); \path (u2) -- (v3) node[edge_label, above] {};
 
-				\draw[-latex, oiPurple]     (u3) -- (v4); \path (u3) -- (v4) node[edge_label, above] {};
-				\draw[-latex, oiOrange]     (u3) -- (v5); \path (u3) -- (v5) node[edge_label, above] {};
+				\draw[-latex, oiPurple, thick]     (u3) -- (v4); \path (u3) -- (v4) node[edge_label, above] {};
+				\draw[-latex, oiOrange, thick]     (u3) -- (v5); \path (u3) -- (v5) node[edge_label, above] {};
 
-				\draw[-latex, oiGreen]      (u7) -- (v8); \path (u7) -- (v8) node[edge_label, above] {};
-				\draw[-latex, oiPurple]     (u8) -- (v9); \path (u8) -- (v9) node[edge_label, above] {};
-				\draw[-latex, oiOrange]     (u8) -- (v10); \path (u8) -- (v10) node[edge_label, above] {};
+				\draw[-latex, oiGreen, thick]      (u7) -- (v8); \path (u7) -- (v8) node[edge_label, above] {};
+				\draw[-latex, oiPurple, thick]     (u8) -- (v9); \path (u8) -- (v9) node[edge_label, above] {};
+				\draw[-latex, oiOrange, thick]     (u8) -- (v10); \path (u8) -- (v10) node[edge_label, above] {};
 
 				\node[vnode, fill=oiVermillion, below=0.5cm of u7, xshift=-0.85cm] (a) {a};
 				\node[right=0.2cm of a, font=\scriptsize] (lt1) {$<$};
@@ -322,33 +438,67 @@
 			\end{tikzpicture}
 			\caption{Bipartite representation for trie of \ref{fig:trie_example}.}
 		\end{figure}
+		\column{0.5\textwidth}
+		\textcolor{oiBlue}{\textbf{Bipartite Representation}}
+		\begin{itemize}
+			\item[\checkmark] Edge labels appear in alphabetical order from top to bottom.
+			\item[\checkmark] No two edges bearing the same label may cross.
+		\end{itemize}
+		\vspace{0.3cm}
+		\centering
+		\onslide<2->
+		\begin{tikzpicture}[scale=0.81]
+			% Wheeler DFAs circle (larger)
+			\draw[thick, blue, fill=oiBlue!20] (0,0) ellipse (3cm and 2cm);
+			\node[blue, font=\bfseries] at (0, -1.3) {Wheeler DFAs};
+
+			% Tries circle (smaller, inside Wheeler DFAs)
+			\draw[thick, red, fill=oiRed!20] (-0.5, 0.3) ellipse (1.5cm and 1cm);
+			\node[red, font=\bfseries] at (-0.5, 0.3) {Tries};
+
+			% Arrow showing subset relationship
+			\draw[->, thick, green!60!black] (-2.5, 1.5) -- (-1.8, 0.8);
+			\node[green!60!black, font=\small] at (-3.5, 1.8) {Tries $\subseteq$ WDFAs};
+		\end{tikzpicture}
+
 	\end{columns}
 \end{frame}
 
-\begin{frame}{$p$--sortable Automata: A Generalization of Wheeler Graphs}
+\begin{frame}{$p$--sortable Automata: A Generalization of Wheeler Automata}
+	\textcolor{oiBlue}{\textbf{Wheeler Automata}}
 	\begin{columns}[c]
 		\column{0.5\textwidth}
-		\textcolor{oiRed}{\textbf{The Wheeler Limitation}}
-		\begin{itemize}
-			\item \textbf{Problem:} Not all automata are Wheeler
-			\item \textbf{Issue:} Many useful automata cannot be totally ordered
-			\item \textbf{Solution:} Relax the ordering constraint
-			\item \textbf{Goal:} Extend Wheeler-based indexing applicability
-		\end{itemize}
+		\begin{greenblock}{Pros}
+			Linear time queries
+		\end{greenblock}
 
 		\column{0.5\textwidth}
-		\begin{block}{\textcolor{white}{\textbf{$p$--sortable Automaton~[\cite{cotumaccio2021indexing}]}}}
-			An automaton $\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$ is \textbf{$p$–sortable} if its states can be \textcolor{oiGreen}{\textbf{partitioned}} into $p$ subsets $\{Q_1, \dots, Q_p\}$, each admitting its own \textcolor{oiBlue}{\textbf{total order}} that satisfies the Wheeler axioms within the subset.
+		\begin{block}{Cons}
+			Very few automata are Wheeler
 		\end{block}
 
-		\color{oiVermillion}{\textbf{Important Result:}}
-		\begin{itemize}
-			\item Even a modest increase in $p$ can yield exponential compression~[\cite{manziniRationalConstructionWheeler2024}]
-		\end{itemize}
 	\end{columns}
+
+	\vspace{0.5cm}
+	\onslide<2->
+	\color{oiGreen}{\textbf{Solution:}}
+	\begin{itemize}
+		\item Move to \textbf{partial orders}
+		\item A partial order can be split in chains
+		\item The minimum number of chains is the width ($p$)
+	\end{itemize}
+	\onslide<3->
+	\color{oiVermillion}{\textbf{Important Result:}}
+	\begin{itemize}
+		\item Increasing $p$ can yield exponential compression~[\cite{manziniRationalConstructionWheeler2024}]
+	\end{itemize}
 \end{frame}
 
 \begin{comment}
+\begin{block}{\textcolor{white}{\textbf{$p$--sortable Automaton~[\cite{cotumaccio2021indexing}]}}}
+	An automaton $\mathcal{A} = (Q, \Sigma, \delta, q_0, F)$ is \textbf{$\mathbf{p}$--sortable} if its states can be \textcolor{oiGreen}{\textbf{partitioned}} into $p$ subsets $\{Q_1, \dots, Q_p\}$, each admitting its own \textcolor{oiBlue}{\textbf{total order}} that satisfies the Wheeler axioms within the subset.
+\end{block}
+
 \vspace{0.2cm}
 \small
 \textbf{Key Insight}
@@ -427,25 +577,13 @@
 \end{frame}
 
 \begin{frame}{$p$--sortable Automata Index~[\cite{cotumaccio2021indexing}]}
-	\begin{columns}[c]
-		\column{0.55\textwidth}
-		\begin{block}{\textcolor{white}{\textbf{Main Result}}}
-			Let $\mathcal{A}$ be a \textcolor{oiBlue}{\textbf{$p$--sortable automaton}}. There exists a \textcolor{oiGreen}{\textbf{compressed data structure}} for $\mathcal{A}$ that supports \textcolor{oiPurple}{\textbf{subpath queries}} on a query word $\alpha$ of length $m$ in
-			\[\mathbf{O(mp^2\log\log(p|\Sigma|))}\text{ time}\]
-		\end{block}
 
-		\column{0.45\textwidth}
-		\textcolor{oiGreen}{\textbf{Space Complexity}}
-		\begin{block}{\textcolor{white}{\textbf{DFA Case}}}
-			$\mathbf{\log(|\Sigma|) + \log p + 2}$ bits per edge
-		\end{block}
+	\begin{block}{\textcolor{white}{\textbf{Main Result}}}
+		There exists a \textcolor{oiGreen}{\textbf{compressed data structure}} for $p$-sortable automata that supports \textcolor{oiPurple}{\textbf{subpath queries}}.
+	\end{block}
 
-		\vspace{0.2cm}
-		\begin{block}{\textcolor{white}{\textbf{NFA Case}}}
-			$\mathbf{\log(|\Sigma|) + 2\log p + 2}$ bits per edge
-		\end{block}
-	\end{columns}
 	\vspace{0.3cm}
+	\onslide<2->
 	\textcolor{oiRed}{\textbf{Key Properties}}
 	\begin{itemize}
 		\item \textbf{Efficiency:} Efficient subpath query time
@@ -473,7 +611,7 @@
 \end{comment}
 
 % === PROPOSED METHOD ===
-\fancysectionframe{Proposed Compression Scheme}
+\fancysectionframe{Proposed Tries Compression Scheme}
 
 \section{Proposed Compression Scheme}
 \begin{frame}{Our Approach}
@@ -484,17 +622,19 @@
 		\end{block}
 
 		\column{0.5\textwidth}
-		\begin{block}{\textcolor{white}{\textbf{Mathematical Result}}}
+		\begin{block}{\textcolor{white}{\textbf{Result}}}
 			\centering
 			\textbf{Partial Minimization} \\
 			$\Downarrow$ \\
 			\textbf{$\mathbf{p}$--sortable automata}
 
-			\vspace{0.2cm}
+			\vspace{0.3cm}
+			\tiny
 			\textit{Optimal balance: compression + query efficiency}
 		\end{block}
 	\end{columns}
-	\vspace{0.2cm}
+	\vspace{0.5cm}
+	\onslide<2->
 	\textbf{\textcolor{oiBlue}{Key Benefits}}
 	\begin{itemize}
 		\item \textbf{Space:} Significant memory reduction
@@ -523,7 +663,7 @@
 
 \begin{frame}{Compression Pipeline}
 	\centering
-	\includegraphics[width=1.05\textwidth]{img/pipeline.png}
+	\includegraphics[width=1\textwidth]{img/pipeline.png}
 \end{frame}
 
 \begin{frame}{String Partitioning Problem}
@@ -589,66 +729,121 @@
 		Partition $s$ into $p$ subsequences \textcolor{oiBlue}{\textbf{minimizing}} number of \textcolor{oiRed}{\textbf{runs}}.
 	\end{block}
 
-	\vspace{0.3cm}
-	\centering
-	\begin{figure}[t]
+	\vspace{0.1cm}
+	\onslide<2->
+	\begin{itemize}
+		\item Reducible to: \textcolor{oiGreen}{\textbf{Minimum Weight Perfect Bipartite Matching (MWPBM)}}
+	\end{itemize}
+
+	\vspace{0.2cm}
+
+	\begin{figure}[H]
 		\centering
-		\begin{tikzpicture}[
-				every node/.style={font=\footnotesize, inner sep=1pt},
-				box/.style={draw, minimum width=0.55cm, minimum height=0.6cm, align=center}
-			]
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+				\node[main] (u1) {$u_1$};
+				\node[main] (u2) [below of=u1] {$u_2$};
+				\node[main] (u3) [below of=u2] {$u_3$};
+				\node[main] (v1) [right=2cm of u1] {$v_1$};
+				\node[main] (v2) [below of=v1] {$v_2$};
+				\node[main] (v3) [below of=v2] {$v_3$};
+				\draw[-latex] (u1) -- (v1);
+				\draw[-latex, double] (u1) -- (v2);
+				\draw[-latex] (u2) -- (v1);
+				\draw[-latex] (u2) -- (v2);
+				\draw[-latex] (u3) -- (v3);
+				\draw[-latex, double, red] (u1) -- (v2);
+				\draw[-latex, red] (u2) -- (v1);
+				\draw[-latex, red] (u3) -- (v3);
+			\end{tikzpicture}
+			\caption{Non-min. weight perfect matching (tot 4)}
+			\label{fig:mwpbm_non_perfect}
+		\end{subfigure}
+		\hfill
+		\begin{minipage}[b]{0.08\textwidth}
+			\centering
 
-			% Indices
-			\foreach \i in {1,...,10} {
-					\node[above=2mm] at (\i*0.9, 0) {\i};
-				}
-
-			% --- Partition s2 (red) ---
-			\node[anchor=west, font=\small] at (-0.8, -0.8) {$I_1$ (\textcolor{red!70!black}{red})};
-			\node[box, fill=red!20] (r1)  at (1*0.9, -0.8) {A};
-			\node[box, fill=red!20] (r2)  at (3*0.9, -0.8) {D};
-			\node[box, fill=red!20] (r3)  at (4*0.9, -0.8) {C};
-			\node[box, fill=red!20] (r4)  at (5*0.9, -0.8) {C};
-			\node[box, fill=red!20] (r5)  at (6*0.9, -0.8) {D};
-			\node[box, fill=red!20] (r6)  at (7*0.9, -0.8) {D};
-			\node[box, fill=red!20] (r7)  at (8*0.9, -0.8) {D};
-			\node[box, fill=red!20] (r8)  at (9*0.9, -0.8) {D};
-
-			\draw[decorate, decoration={brace, amplitude=4pt}, yshift=-0.2cm]
-			(0.9, -1.05) -- (0.9, -1.05) node[midway, below=4pt] {\tiny (A)};
-			\draw[decorate, decoration={brace, amplitude=4pt}, yshift=-0.2cm]
-			(2.7, -1.05) -- (2.7, -1.05) node[midway, below=4pt] {\tiny (D)};
-			\draw[decorate, decoration={brace, amplitude=4pt, mirror}, yshift=-0.2cm]
-			(3.2, -1) -- (4.85, -1) node[midway, below=0.2cm] {\tiny (CC)};
-			\draw[decorate, decoration={brace, amplitude=4pt, mirror}, yshift=-0.2cm]
-			(5, -1) -- (8.5, -1) node[midway, below=0.2cm] {\tiny (DDDD)};
-
-			\node[font=\small, right=1.4cm of r8, yshift=-0.7cm] {= 4 runs};
-
-			% --- Partition s1 (blue) ---
-			\node[anchor=west, font=\small] at (-0.9, -2.3) {$I_2$ (\textcolor{blue!70!black}{blue})};
-			\node[box, fill=blue!20] (b1) at (2*0.9, -2.3) {B};
-			\node[box, fill=blue!20] (b2) at (10*0.9, -2.3) {B};
-
-			\draw[decorate, decoration={brace, amplitude=4pt, mirror}]
-			(1.4, -2.7) -- (9.5, -2.7) node[midway, below=0.2cm] {\tiny (BB)};
-
-			\node[font=\small, right=0.5cm of b2, yshift=-0.7cm] {= 1 run};
-
-		\end{tikzpicture}
-		\vspace{0.3cm}
-		\caption{Partition of string in \ref{fig:string_example} into $p=2$ subsequences minimizing number of runs. Runs are reduced from 6 to 5.}
-		\label{fig:partition_example}
+			\begin{tikzpicture}
+				\draw[-latex] (0,0.5) -- (0.5,0.5);
+				\node[right] at (0.6,0.5) {\footnotesize 1};
+				\draw[-latex, double] (0,0) -- (0.5,0);
+				\node[right] at (0.6,0) {\footnotesize 2};
+			\end{tikzpicture}
+			\vspace{1.8cm}
+		\end{minipage}
+		\hfill
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[node distance={15mm}, thick, auto=center, main/.style = {draw, circle}]
+				\node[main] (u1) {$u_1$};
+				\node[main] (u2) [below of=u1] {$u_2$};
+				\node[main] (u3) [below of=u2] {$u_3$};
+				\node[main] (v1) [right=2cm of u1] {$v_1$};
+				\node[main] (v2) [below of=v1] {$v_2$};
+				\node[main] (v3) [below of=v2] {$v_3$};
+				\draw[-latex] (u1) -- (v1);
+				\draw[-latex, double] (u1) -- (v2);
+				\draw[-latex] (u2) -- (v1);
+				\draw[-latex] (u2) -- (v2);
+				\draw[-latex] (u3) -- (v3);
+				\draw[-latex, red] (u1) -- (v1);
+				\draw[-latex, red] (u2) -- (v2);
+				\draw[-latex, red] (u3) -- (v3);
+			\end{tikzpicture}
+			\caption{Min. weight perfect matching (tot 3)}
+			\label{fig:mwpbm_perfect}
+		\end{subfigure}
+		\label{fig:mwpbm_example}
 	\end{figure}
 \end{frame}
 
 \begin{frame}{Reduction to Bipartite Graph Matching}
-	\begin{itemize}
-		\item The String Partitioning Problem can be reduced to:
-		      \[
-			      \textbf{Minimum Weight Perfect Bipartite Matching (MWPBM)}
-		      \]
-	\end{itemize}
+	\centering
+	\vspace{0.2cm}
+	\begin{tikzpicture}[
+			every node/.style={font=\footnotesize, inner sep=1pt},
+			box/.style={draw, minimum width=0.55cm, minimum height=0.6cm, align=center}
+		]
+
+		% Indices
+		\foreach \i in {1,...,10} {
+				\node[above=2mm] at (\i*1.03, -3.8) {\i};
+			}
+
+		% --- Partition s2 (red) ---
+		\node[anchor=west, font=\small] at (-1, -0.8) {$I_1$ (\textcolor{red!70!black}{red})};
+		\node[box, fill=red!20] (r1)  at (1*1.03, -0.8) {A};
+		\node[box, fill=red!20] (r2)  at (3*1.03, -0.8) {D};
+		\node[box, fill=red!20] (r3)  at (4*1.03, -0.8) {C};
+		\node[box, fill=red!20] (r4)  at (5*1.03, -0.8) {C};
+		\node[box, fill=red!20] (r5)  at (6*1.03, -0.8) {D};
+		\node[box, fill=red!20] (r6)  at (7*1.03, -0.8) {D};
+		\node[box, fill=red!20] (r7)  at (8*1.03, -0.8) {D};
+		\node[box, fill=red!20] (r8)  at (9*1.03, -0.8) {D};
+
+		\draw[decorate, decoration={brace, amplitude=4pt}, yshift=-0.2cm]
+		(1.03, -1.05) -- (1.03, -1.05) node[midway, below=4pt] {\tiny (A)};
+		\draw[decorate, decoration={brace, amplitude=4pt}, yshift=-0.2cm]
+		(3.09, -1.05) -- (3.09, -1.05) node[midway, below=4pt] {\tiny (D)};
+		\draw[decorate, decoration={brace, amplitude=4pt, mirror}, yshift=-0.2cm]
+		(3.78, -1) -- (5.5, -1) node[midway, below=0.2cm] {\tiny (CC)};
+		\draw[decorate, decoration={brace, amplitude=4pt, mirror}, yshift=-0.2cm]
+		(5.85, -1) -- (9.6, -1) node[midway, below=0.2cm] {\tiny (DDDD)};
+
+		\node[font=\small, right=1.7cm of r8, yshift=-0.7cm] {= 4 runs};
+
+		% --- Partition s1 (blue) ---
+		\node[anchor=west, font=\small] at (-1, -2.3) {$I_2$ (\textcolor{blue!70!black}{blue})};
+		\node[box, fill=blue!20] (b1) at (2*1.03, -2.3) {B};
+		\node[box, fill=blue!20] (b2) at (10*1.03, -2.3) {B};
+
+		\draw[decorate, decoration={brace, amplitude=4pt, mirror}]
+		(1.7, -2.7) -- (10.7, -2.7) node[midway, below=0.2cm] {\tiny (BB)};
+
+		\node[font=\small, right=0.7cm of b2, yshift=-0.7cm] {= 1 run};
+	\end{tikzpicture}
+
 	\begin{figure}[t]
 		\centering
 		\begin{tikzpicture}[
@@ -688,9 +883,8 @@
 			\node[vnode, fill=oiVermillion, right=1.3cm of v10] (d1) at (v7) {$d_{1}$};
 			\node[vnode, fill=oiVermillion, right=0.8cm of d1] (d2) {$d_{2}$};
 
-			% Edges from source nodes to all v_x nodes
-			\draw[-latex, oiLightGrey] (s1) -- (v1);
-			\draw[-latex, oiBlue, thick] (s1) -- (v2);
+			% Light grey edges (drawn first, will appear behind colored edges)
+			\draw[-latex, oiLightGrey] (s1) -- (v2);
 			\draw[-latex, oiLightGrey] (s1) -- (v3);
 			\draw[-latex, oiLightGrey] (s1) -- (v4);
 			\draw[-latex, oiLightGrey] (s1) -- (v5);
@@ -699,11 +893,7 @@
 			\draw[-latex, oiLightGrey] (s1) -- (v8);
 			\draw[-latex, oiLightGrey] (s1) -- (v9);
 			\draw[-latex, oiLightGrey] (u9) -- (v10);
-
-			% Edges from u_x to v_y nodes positioned to the right
-			% u1 (leftmost) connects to all v nodes to its right
 			\draw[-latex, oiLightGrey] (u1) -- (v2);
-			\draw[-latex, oiBlue, thick] (u1) -- (v6);
 			\draw[-latex, oiLightGrey] (u1) -- (v3);
 			\draw[-latex, oiLightGrey] (u1) -- (v8);
 			\draw[-latex, oiLightGrey] (u1) -- (v4);
@@ -711,8 +901,6 @@
 			\draw[-latex, oiLightGrey] (u1) -- (v5);
 			\draw[-latex, oiLightGrey] (u1) -- (v10);
 			\draw[-latex, oiLightGrey] (u1) -- (v7);
-
-			% u2 connects to v nodes to its right
 			\draw[-latex, oiLightGrey] (u2) -- (v6);
 			\draw[-latex, oiLightGrey] (u2) -- (v3);
 			\draw[-latex, oiLightGrey] (u2) -- (v8);
@@ -720,54 +908,29 @@
 			\draw[-latex, oiLightGrey] (u2) -- (v9);
 			\draw[-latex, oiLightGrey] (u2) -- (v5);
 			\draw[-latex, oiLightGrey] (u2) -- (v10);
-			\draw[-latex, oiVermillion, thick] (u2) -- (v7);
-
-			% u6 connects to v nodes to its right
-			\draw[-latex, oiBlue, thick] (u6) -- (v3);
 			\draw[-latex, oiLightGrey] (u6) -- (v8);
 			\draw[-latex, oiLightGrey] (u6) -- (v4);
 			\draw[-latex, oiLightGrey] (u6) -- (v9);
 			\draw[-latex, oiLightGrey] (u6) -- (v5);
 			\draw[-latex, oiLightGrey] (u6) -- (v10);
 			\draw[-latex, oiLightGrey] (u6) -- (v7);
-
-			% u3 connects to v nodes to its right
-			\draw[-latex, oiVermillion, thick] (u3) -- (v8);
 			\draw[-latex, oiLightGrey] (u3) -- (v4);
 			\draw[-latex, oiLightGrey] (u3) -- (v9);
 			\draw[-latex, oiLightGrey] (u3) -- (v5);
 			\draw[-latex, oiLightGrey] (u3) -- (v10);
 			\draw[-latex, oiLightGrey] (u3) -- (v7);
-
-			% u8 connects to v nodes to its right
-			\draw[-latex, oiBlue, thick] (u8) -- (v4);
 			\draw[-latex, oiLightGrey] (u8) -- (v9);
 			\draw[-latex, oiLightGrey] (u8) -- (v5);
 			\draw[-latex, oiLightGrey] (u8) -- (v10);
 			\draw[-latex, oiLightGrey] (u8) -- (v7);
-
-			% u4 connects to v nodes to its right
-			\draw[-latex, oiVermillion, thick] (u4) -- (v9);
 			\draw[-latex, oiLightGrey] (u4) -- (v5);
 			\draw[-latex, oiLightGrey] (u4) -- (v10);
 			\draw[-latex, oiLightGrey] (u4) -- (v7);
-
-			% u9 connects to v nodes to its right
-			\draw[-latex, oiVermillion, thick] (u9) -- (v5);
 			\draw[-latex, oiLightGrey] (u9) -- (v10);
 			\draw[-latex, oiLightGrey] (u9) -- (v7);
-
-			% u5 connects to v nodes to its right
-			\draw[-latex, oiVermillion, thick] (u5) -- (v10);
 			\draw[-latex, oiLightGrey] (u5) -- (v7);
-
-			% u10 connects to v nodes to its right
 			\draw[-latex, oiLightGrey] (u10) -- (v7);
-
-			% u7 (rightmost) has no v nodes to its right
-
 			\draw[-latex, oiLightGrey] (s2) -- (v1);
-			\draw[-latex, oiLightGrey] (s2) -- (v2);
 			\draw[-latex, oiLightGrey] (s2) -- (v3);
 			\draw[-latex, oiLightGrey] (s2) -- (v4);
 			\draw[-latex, oiLightGrey] (s2) -- (v5);
@@ -776,6 +939,18 @@
 			\draw[-latex, oiLightGrey] (s2) -- (v8);
 			\draw[-latex, oiLightGrey] (s2) -- (v9);
 			\draw[-latex, oiLightGrey] (s2) -- (v10);
+
+			% Colored edges (drawn last, will appear on top)
+			\draw[-latex, oiRed, thick] (s1) -- (v1);
+			\draw[-latex, oiRed, thick] (u1) -- (v6);
+			\draw[-latex, oiBlue, thick] (u2) -- (v7);
+			\draw[-latex, oiRed, thick] (u6) -- (v3);
+			\draw[-latex, oiRed, thick] (u3) -- (v8);
+			\draw[-latex, oiRed, thick] (u8) -- (v4);
+			\draw[-latex, oiRed, thick] (u4) -- (v9);
+			\draw[-latex, oiRed, thick] (u9) -- (v5);
+			\draw[-latex, oiRed, thick] (u5) -- (v10);
+			\draw[-latex, oiBlue, thick] (s2) -- (v2);
 
 			% Edges from all u_x nodes to destination nodes
 			\draw[-latex, oiLightGrey] (u1) -- (d1);
@@ -791,58 +966,48 @@
 			\draw[-latex, oiLightGrey] (u6) -- (d1);
 			\draw[-latex, oiLightGrey] (u6) -- (d2);
 			\draw[-latex, oiLightGrey] (u7) -- (d1);
-			\draw[-latex, oiVermillion, thick] (u7) -- (d2);
+			\draw[-latex, oiBlue, thick] (u7) -- (d2);
 			\draw[-latex, oiLightGrey] (u8) -- (d1);
 			\draw[-latex, oiLightGrey] (u8) -- (d2);
 			\draw[-latex, oiLightGrey] (u9) -- (d1);
 			\draw[-latex, oiLightGrey] (u9) -- (d2);
-			\draw[-latex, oiVermillion, thick] (u10) -- (d1);
+			\draw[-latex, oiRed, thick] (u10) -- (d1);
 			\draw[-latex, oiLightGrey] (u10) -- (d2);
 
 			% Legend
-			\node at (8.6, -5) {
-				\begin{tikzpicture}[baseline=(current bounding box.center)]
-					\draw[-latex, oiBlue, thick] (0, 0) -- (0.8, 0);
-					\node[above] at (0.4, 0) {\small 1};
-
-					\draw[-latex, oiVermillion, thick] (3, 0) -- (3.8, 0);
-					\node[above] at (3.4, 0) {\small 0};
-				\end{tikzpicture}
-			};
-
-
+			%\node at (8.6, -5) {
+			%	\begin{tikzpicture}[baseline=(current bounding box.center)]
+			%		\draw[-latex, oiBlue, thick] (0, 0) -- (0.8, 0);
+			%		\node[above] at (0.4, 0) {\small 1};
+			%		\draw[-latex, oiRed, thick] (3, 0) -- (3.8, 0);
+			%		\node[above] at (3.4, 0) {\small 0};
+			%	\end{tikzpicture}
+			%};
 		\end{tikzpicture}
-		\vspace{0.2cm}
+		\vspace{0.1cm}
 		\caption{Reduction for string in \ref{fig:string_example}. The minimum weight perfect matching is highlighted.}
 	\end{figure}
 \end{frame}
 
 \begin{frame}{Reduction to Bipartite Graph Matching}
-	\begin{columns}[c]
-		\column{0.5\textwidth}
-		\textcolor{oiRed}{\textbf{Graph Construction}}
-		\begin{itemize}
-			\item \textbf{Nodes:} Correspond to string characters
-			\item \textbf{Edges:} Encode run boundary costs
-			      \begin{itemize}
-				      \item Weight represents transition cost
-			      \end{itemize}
-			\item \textbf{Complexity:} $\mathcal{O}(n^2)$ edges in current version
-		\end{itemize}
-		\column{0.5\textwidth}
-		\begin{block}{\textcolor{white}{\textbf{Optimization Objective}}}
-			\centering
-			Solving \textbf{MWPBM} yields an \textcolor{oiBlue}{\textbf{optimal partition}} minimizing the \textcolor{oiBlue}{\textbf{total number of runs}} across all subsequences.
-		\end{block}
+	\textcolor{oiRed}{\textbf{Graph Construction}}
+	\begin{itemize}
+		\item \textbf{Nodes:} Correspond to string characters
+		\item \textbf{Edges:} Encode successor relation
+		      \begin{itemize}
+			      \item Weight represents transition cost: 1 if characters differ, 0 otherwise
+		      \end{itemize}
+		\item \textbf{Complexity:} $\mathcal{O}(n^2)$ edges in current version
+		      \begin{itemize}
+			      \item Can be improved to $\mathcal{O}(np)$
+		      \end{itemize}
+	\end{itemize}
 
-		\vspace{0.3cm}
-		\textcolor{oiGreen}{\textbf{Key Benefits}}
-		\begin{itemize}
-			\item \textbf{Optimality:} Guaranteed minimum cost solution
-			\item \textbf{Generality:} Works for any string partition problem
-			\item \textbf{Efficiency:} Polynomial-time solvable
-		\end{itemize}
-	\end{columns}
+	\vspace{0.2cm}
+	\onslide<2->
+	\begin{block}{\textcolor{white}{\textbf{Optimization Objective}}}
+		Solving \textbf{MWPBM} yields an \textcolor{oiBlue}{\textbf{optimal partition}} minimizing the \textcolor{oiBlue}{\textbf{total number of runs}} across all subsequences.
+	\end{block}
 \end{frame}
 
 % === IMPLEMENTATION AND RESULTS ===
@@ -853,25 +1018,25 @@
 	\begin{itemize}
 		\item \textcolor{oiBlue}{\textbf{Implementation}:} C++ for high performance and efficiency
 		\item \textcolor{oiGreen}{\textbf{Hardware}:} Apple M4 Pro with 24 GB RAM
-		\item \textcolor{oiRed}{\textbf{Dataset}:} Synthetic tries with controlled repetitiveness
-		      \begin{itemize}
-			      \item Each trie contains approximately \textbf{100,000 nodes}
-			      \item Variable alphabet sizes and string patterns
-			      \item Designed to test scalability and compression effectiveness
-		      \end{itemize}
+		\item \textcolor{oiRed}{\textbf{Dataset}:} Synthetic tries with controlled size and repetitiveness
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Experimental Results}
+\begin{frame}{Experimental Results (1)}
 	\begin{itemize}
+		\item Each trie in the dataset contains \textcolor{oiBlue}{\textbf{100,000 nodes}}
 		\item Increasing $p$ from 1 to 2 \textcolor{oiRed}{\textbf{halves the number of states}}
-		\item Compression ratio improves rapidly, approaching the minimal number of states fo larger $p$
+		\item Compression ratio \textcolor{oiGreen}{\textbf{approaches the minimal number of states}}
 	\end{itemize}
 	\centering
 	\includegraphics[width=1\textwidth]{img/tree_compression_analysis.pdf}
 \end{frame}
 
-\begin{frame}{Experimental Results}
+\begin{frame}{Experimental Results (2)}
+	\begin{itemize}
+		\item Each trie in the datasets contains \textcolor{oiBlue}{\textbf{100,000 nodes}}
+		\item \textcolor{oiRed}{\textbf{Tries with high repetitiveness compress better}} independently of $p$
+	\end{itemize}
 	\centering
 	\includegraphics[width=1\textwidth]{img/high_low_comparison.pdf}
 \end{frame}
@@ -881,28 +1046,24 @@
 
 \section{Conclusions}
 \begin{frame}{Conclusions}
+	\begin{block}{Our Contribution}
+		Introduced a new compressed index for tries
+	\end{block}
+	\vspace{0.3cm}
+	\onslide<2->
+	\textcolor{oiBlue}{\textbf{Key Achievements}:}
 	\begin{itemize}
-		\item \textcolor{oiRed}{\textbf{Novel Contribution}:} Introduced a trie compression method based on $p$--sortable automata theory
-		\item \textcolor{oiBlue}{\textbf{Key Achievements}:}
-		      \begin{itemize}
-			      \item \textbf{Memory Efficiency}: Significant space reduction on repetitive datasets
-			      \item \textbf{Query Performance}: Maintains efficient search and traversal operations
-			      \item \textbf{Adaptability}: Tunable compression via parameter $p$
-		      \end{itemize}
-		\item \textcolor{oiOrange}{\textbf{Impact}:} Opens new research directions in:
-		      \begin{itemize}
-			      \item Compressed automata design
-			      \item String indexing and pattern matching
-			      \item Large-scale text processing applications
-		      \end{itemize}
+		\item \textbf{Memory Efficiency}: Significant space reduction on repetitive datasets
+		\item \textbf{Query Performance}: Maintains efficient sub-path queries
+		\item \textbf{Adaptability}: Tunable compression via parameter $p$
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{Future Works}
 	\begin{itemize}
-		\item \textcolor{oiRed}{\textbf{Scalability}:} Investigate improvements to the proposed reduction for the String Partitioning problem to develop more scalable and efficient solutions for large-scale applications.
-		\item \textcolor{oiBlue}{\textbf{DFA Construction}:} Explore methods to directly construct a $p$—sortable deterministic finite automaton from the pipeline, potentially by developing a pruning strategy for the output NFA.
-		\item \textcolor{oiOrange}{\textbf{DFA Minimality}:} Minimize the size of the returned automaton, potentially by providing explicit guarantees of minimality of the returned $p$—sortable DFA.
+		\item<1-> \textcolor{oiRed}{\textbf{Scalability}:} Develop more efficient solutions for large-scale applications.
+		\item<2-> \textcolor{oiBlue}{\textbf{DFA Construction}:} Always get a $p$--sortable DFA from the compression scheme.
+		\item<3-> \textcolor{oiOrange}{\textbf{DFA Minimality}:} Guarantee the minimality of the constructed $p$--sortable DFA.
 	\end{itemize}
 
 	\vspace{1cm}
@@ -956,12 +1117,12 @@
 						\node (dots_d) [below of=3d] {\vdots}; % Vertical dots
 
 						% Arrows
-						\draw[oiVermillion, ->] (1s) -- (1d);
-						\draw[oiVermillion, ->] (1s) -- (2d);
-						\draw[oiVermillion, ->] (1s) -- (3d);
-						\draw[oiVermillion, ->] (2s) -- (1d);
-						\draw[oiVermillion, ->] (2s) -- (2d);
-						\draw[oiVermillion, ->] (2s) -- (3d);
+						\draw[oiVermillion, ->, thick] (1s) -- (1d);
+						\draw[oiVermillion, ->, thick] (1s) -- (2d);
+						\draw[oiVermillion, ->, thick] (1s) -- (3d);
+						\draw[oiVermillion, ->, thick] (2s) -- (1d);
+						\draw[oiVermillion, ->, thick] (2s) -- (2d);
+						\draw[oiVermillion, ->, thick] (2s) -- (3d);
 					\end{tikzpicture}
 					\caption{}
 					\label{fig:sub1}
@@ -1000,14 +1161,14 @@
 						\node (dots_d_bottom) [below of=4d] {\vdots};
 
 						% Arrows
-						\draw[oiVermillion, ->] (3s) -- (2d);
-						\draw[oiVermillion, ->] (3s) -- (4d);
-						\draw[oiVermillion, ->] (3s) -- (3d);
+						\draw[oiVermillion, ->, thick] (3s) -- (2d);
+						\draw[oiVermillion, ->, thick] (3s) -- (4d);
+						\draw[oiVermillion, ->, thick] (3s) -- (3d);
 
-						\draw[oiGreen, ->] (4s) -- (4d);
-						\draw[oiGreen, ->] (4s) -- (3d);
+						\draw[oiGreen, ->, thick] (4s) -- (4d);
+						\draw[oiGreen, ->, thick] (4s) -- (3d);
 
-						\draw[oiGreen, ->] (5s) -- (4d);
+						\draw[oiGreen, ->, thick] (5s) -- (4d);
 					\end{tikzpicture}
 					\caption{}
 					\label{fig:sub2}
@@ -1038,18 +1199,18 @@
 						\node[left=0cm of 9d] {$\cdots$};
 
 						% Arrows
-						\draw[oiVermillion, ->] (7s) -- (6d);
-						\draw[oiGreen, ->] (7s) -- (8d);
-						\draw[oiGreen, ->] (7s) -- (9d);
-						\draw[oiGreen, ->] (9s) -- (8d);
-						\draw[oiGreen, ->] (9s) -- (9d);
+						\draw[oiVermillion, ->, thick] (7s) -- (6d);
+						\draw[oiGreen, ->, thick] (7s) -- (8d);
+						\draw[oiGreen, ->, thick] (7s) -- (9d);
+						\draw[oiGreen, ->, thick] (9s) -- (8d);
+						\draw[oiGreen, ->, thick] (9s) -- (9d);
 					\end{tikzpicture}
 					\caption{}
 					\label{fig:sub3}
 				\end{subfigure}
 			\end{minipage}
 		}% End scalebox
-		\caption{Small Example for $\mathcal{O}(n^2)$ MWPBM Reduction.}
+		\caption{Small Example for $\mathcal{O}(n^2)$ MWPBM Reduction. Green edges: 0, Red edges: 1.}
 		\label{fig:reduction_small_examples}
 	\end{figure}
 \end{frame}
@@ -1087,10 +1248,10 @@
 				\node (dots_d) [below of=3d] {\vdots}; % Vertical dots
 
 				% Arrows
-				\draw[oiVermillion, ->] (1s) -- (1d);
-				\draw[oiVermillion, ->] (1s) -- (3d);
-				\draw[oiVermillion, ->] (2s) -- (1d);
-				\draw[oiVermillion, ->] (2s) -- (3d);
+				\draw[oiVermillion, ->, thick] (1s) -- (1d);
+				\draw[oiVermillion, ->, thick] (1s) -- (3d);
+				\draw[oiVermillion, ->, thick] (2s) -- (1d);
+				\draw[oiVermillion, ->, thick] (2s) -- (3d);
 			\end{tikzpicture}
 			\caption{}
 			\label{fig:sub1}
@@ -1128,9 +1289,9 @@
 				\node (dots_d_bottom) [below of=4d] {\vdots};
 
 				% Arrows
-				\draw[oiVermillion, ->] (3s) -- (2d);
-				\draw[oiVermillion, ->] (3s) -- (4d);
-				\draw[oiGreen, ->] (3s) -- (3d);
+				\draw[oiVermillion, ->, thick] (3s) -- (2d);
+				\draw[oiVermillion, ->, thick] (3s) -- (4d);
+				\draw[oiGreen, ->, thick] (3s) -- (3d);
 			\end{tikzpicture}
 			\caption{}
 			\label{fig:sub2}
@@ -1161,18 +1322,46 @@
 				\node[left=0cm of 9d] {$\cdots$};
 
 				% Arrows
-				\draw[oiVermillion, ->] (7s) -- (6d);
-				\draw[oiGreen, ->] (7s) -- (8d);
-				\draw[oiGreen, ->] (7s) -- (9d);
-				\draw[oiGreen, ->] (9s) -- (8d);
-				\draw[oiGreen, ->] (9s) -- (9d);
+				\draw[oiVermillion, ->, thick] (7s) -- (6d);
+				\draw[oiGreen, ->, thick] (7s) -- (8d);
+				\draw[oiGreen, ->, thick] (7s) -- (9d);
+				\draw[oiGreen, ->, thick] (9s) -- (8d);
+				\draw[oiGreen, ->, thick] (9s) -- (9d);
 			\end{tikzpicture}
 			\caption{}
 			\label{fig:sub3}
 		\end{subfigure}
 		}
-		\caption{Small Example of $\mathcal{O}(np)$ MWPBM Reduction.}
+		\caption{Small Example of $\mathcal{O}(np)$ MWPBM Reduction. Green edges: 0, Red edges: 1..}
 	\end{figure}
+\end{frame}
+
+\begin{frame}{$p$--sortable Automata Index~[\cite{cotumaccio2021indexing}]}
+	\begin{columns}[c]
+		\column{0.55\textwidth}
+		\begin{block}{\textcolor{white}{\textbf{Main Result}}}
+			Let $\mathcal{A}$ be a \textcolor{oiBlue}{\textbf{$p$--sortable automaton}}. There exists a \textcolor{oiGreen}{\textbf{compressed data structure}} for $\mathcal{A}$ that supports \textcolor{oiPurple}{\textbf{subpath queries}} on a query word $\alpha$ of length $m$ in
+			\[\mathbf{O(mp^2\log\log(p|\Sigma|))}\text{ time}\]
+		\end{block}
+
+		\column{0.45\textwidth}
+		\textcolor{oiGreen}{\textbf{Space Complexity}}
+		\begin{block}{\textcolor{white}{\textbf{DFA Case}}}
+			$\mathbf{\log(|\Sigma|) + \log p + 2}$ bits per edge
+		\end{block}
+
+		\vspace{0.2cm}
+		\begin{block}{\textcolor{white}{\textbf{NFA Case}}}
+			$\mathbf{\log(|\Sigma|) + 2\log p + 2}$ bits per edge
+		\end{block}
+	\end{columns}
+	\vspace{0.3cm}
+	\textcolor{oiRed}{\textbf{Key Properties}}
+	\begin{itemize}
+		\item \textbf{Efficiency:} Efficient subpath query time
+		\item \textbf{Generality:} Works for both DFA and NFA
+		\item \textbf{Scalability:} Performance and space depend on $p$
+	\end{itemize}
 \end{frame}
 
 \end{document}

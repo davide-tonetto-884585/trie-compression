@@ -90,6 +90,9 @@ Department of Environmental Sciences, Informatics and Statistics}
 \definecolor{oiLightGrey}{HTML}{D3D3D3}
 \definecolor{oiRed}{HTML}{FF0000}
 
-
+\newenvironment{greenblock}[1]{%
+  \setbeamercolor{block title}{bg=green!40!black, fg=white}%
+  \setbeamercolor{block body}{bg=green!10!white, fg=black}%
+  \begin{block}{#1}}{\end{block}}
 
 \setbeamertemplate{caption}[numbered]
